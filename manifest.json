@@ -5,7 +5,7 @@
     { "name": "clementina-6502", "repository": "fran150/clementina-6502", "branch": "main", "commit": "df5a581c7c57c2fe0c333c60492bd8824cb0ad2c", "role": "emulator" },
     { "name": "clementina-mia", "repository": "fran150/clementina-mia", "branch": "main", "commit": "5e083c5933ef6a9ac53235ec97fa87c6b57af616", "role": "MIA firmware (Raspberry Pi Pico 2)" },
     { "name": "clementina-rom", "repository": "fran150/clementina-rom", "branch": "main", "commit": "f3d91a5069896ff17130bb3a8a1a153d03700b0e", "role": "kernel, BASIC, WozMon" },
-    { "name": "clementina-sdk", "repository": "fran150/clementina-sdk", "branch": "main", "commit": "e4fb72bb56de4a07e5726cf56d11297689e5bf3f", "role": "developer contract (specs/*.json), tools, VS Code extension" },
+    { "name": "clementina-sdk", "repository": "fran150/clementina-sdk", "branch": "main", "commit": "22f5d47d59438aea7e654a6f44e269c69d41485a", "role": "developer contract (specs/*.json), tools, VS Code extension" },
     { "name": "clementina-studio", "repository": "fran150/clementina-studio", "branch": "main", "commit": "4779564ed5031f9cc9b412af65c425bbaaaf8aad", "role": "asset authoring tool" },
     { "name": "clementina-video-client", "repository": "fran150/clementina-video-client", "branch": "main", "commit": "c0f6b717e6e6ea2bdfcfdd363dd15e52a211cf59", "role": "host display and input client" },
     { "name": "clementina-hardware", "repository": "fran150/clementina-hardware", "branch": "main", "commit": "95e4852e25e259d1704ed6bcb1e8d44f5d9603b3", "role": "KiCad schematic, board and BOM" }

@@ -23,7 +23,9 @@ pins.
 
 Reference tables (registers, commands, errors, memory maps, kernel ABI, BASIC
 keywords) are generated from `clementina-sdk/specs/*.json` at the pinned SDK
-commit, never written by hand.
+commit, never written by hand: `node tools/generate-tables.mjs` writes them to
+[tables/](tables/README.md), reading the SDK checkout next to this one (or
+`--sdk DIR`).
 
 ## Building
 
