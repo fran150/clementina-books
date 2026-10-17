@@ -49,6 +49,47 @@ export function byteNames(name, size) {
 const fieldName = (name, size) => byteNames(name, size).map(code).join(', ');
 const bitRows = (bits, prefix = '') => bits.map(b => [b.bit, code(`%${(2 ** b.bit).toString(2).padStart(8, '0')}`), code(`${prefix}${b.name}`), b.description]);
 
+/**
+ * The 256 glyphs as an inline SVG grid in the text color, row = high nibble, column = low nibble.
+ * Each glyph is its rows as hex, top first; bit 0 of a row is the leftmost pixel.
+ */
+export function glyphChart(glyphs, name) {
+  const cell = 10, left = 16, top = 8, size = 16 * cell, nibble = n => n.toString(16).toUpperCase();
+  const pixels = glyphs.flatMap((rows, tile) => [...Buffer.from(rows, 'hex')].flatMap((bits, y) => {
+    const runs = [], x0 = left + (tile % 16) * cell + 1, y0 = top + Math.floor(tile / 16) * cell + 1 + y;
+    for (let x = 0; x < 8; x++) if (bits & (1 << x)) {
+      let w = 1;
+      while (x + w < 8 && bits & (1 << (x + w))) w++;
+      runs.push(`M${x0 + x} ${y0}h${w}v1h-${w}z`);
+      x += w;
+    }
+    return runs;
+  }));
+  const grid = Array.from({length: 17}, (_, i) => `M${left + i * cell} ${top}v${size}M${left} ${top + i * cell}h${size}`).join('');
+  const label = (x, y, text, anchor) => `<text x="${x}" y="${y}" text-anchor="${anchor}">${text}</text>`;
+  const labels = Array.from({length: 16}, (_, i) => label(left + i * cell + cell / 2, top - 2, nibble(i), 'middle') + label(left - 2, top + i * cell + 7, `$${nibble(i)}_`, 'end')).join('');
+  return [`<div class="charset-chart">`,
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${left + size + 1} ${top + size + 1}" width="100%" style="max-width:36rem" role="img" aria-label="The ${name} character set: 256 glyphs, 16 to a row">`,
+    `<g font-family="monospace" font-size="5" fill="currentColor">${labels}</g>`,
+    `<path d="${grid}" stroke="currentColor" stroke-opacity="0.25" stroke-width="0.25" fill="none"/>`,
+    `<path d="${pixels.join('')}" fill="currentColor"/>`,
+    `</svg>`, `</div>`].join('\n');
+}
+
+/** The key that types `tile` in glyph `mode` of the screen editor, or null. */
+export function keyFor(tile, mode, modes) {
+  const key = (((tile - mode * modes.step) % 256) + 256) % 256;
+  return key >= modes.firstKey && key <= modes.lastKey ? key : null;
+}
+/** The lowest glyph mode that types `tile`, with its key, or null. */
+export function typedBy(tile, modes) {
+  for (let mode = 0; mode < modes.count; mode++) if (keyFor(tile, mode, modes) !== null) return {mode, key: keyFor(tile, mode, modes)};
+  return null;
+}
+/** Sorted numbers as runs of consecutive values, each [first, last]. */
+const runs = list => list.reduce((out, n) => (out.length && out.at(-1)[1] === n - 1 ? (out.at(-1)[1] = n) : out.push([n, n]), out), []);
+const keyName = key => (key === 0x20 ? 'Space' : String.fromCharCode(key).replace(/[!-\/:-@[-`{}~]/g, '\\$&'));
+
 // ---------------------------------------------------------------------------------------------
 // Tables, one file each. `sources` names the spec files a table reads.
 
@@ -105,6 +146,23 @@ export const TABLES = [
     return [`MIA's ${code(p.name)} palette, loaded into palette RAM when video starts. Color 1 of each bank is its text ink.`, '',
       table(['Bank', 'Ink', 'Ink RGB565', 'Ink as RGB', 'Colors 0-7 (RGB565)'],
         p.colors.map((bank, i) => [i, p.inks[i], code(hex(bank[1], 4)), code(rgb(bank[1])), bank.map(c => code(hex(c, 4))).join(' ')]))].join('\n');
+  }},
+
+  {file: 'charset.md', title: 'Character set', sources: ['video.json'], render: s => {
+    const cs = s['video.json'].chr.default, gm = cs.glyphModes, nibble = n => n.toString(16).toUpperCase();
+    const typing = Array.from({length: 16}, (_, row) => [code(`$${nibble(row)}_`), ...Array.from({length: 16}, (__, col) => {
+      const t = typedBy(row * 16 + col, gm);
+      return t ? `${t.mode} ${keyName(t.key)}` : '';
+    })]);
+    const tiles = cs.kernelTiles.map(k => [code(range(k.code, k.count, 2)), code(k.name), k.description]);
+    const also = Array.from({length: gm.count - 1}, (_, i) => i + 1).flatMap(mode => runs(Array.from({length: 256}, (__, c) => c).filter(c => typedBy(c, gm)?.mode < mode && keyFor(c, mode, gm) !== null))
+      .map(([first, last]) => `Mode ${mode} also types ${code(range(first, last - first + 1, 2))}, with the keys ${keyName(keyFor(first, mode, gm))} to ${keyName(keyFor(last, mode, gm))}.`));
+    return [`MIA's ${code(cs.name)} character set, bank ${cs.glyphBank} plane ${cs.plane}: tile N is the glyph for character code N. Bank ${cs.reverseBank} holds the same glyphs reversed, drawn for a cell with ${code('CHR_ALT')} set.`, '',
+      glyphChart(cs.glyphs, cs.name), '',
+      `How the screen editor types each code: the glyph mode (${code('ESC M')} steps it, ${code('ESC SPACE')} returns to 0), then the key. In mode m a key types its character code plus ${code(hex(gm.step))} times m, wrapping past ${code('$FF')}. An empty cell can't be typed.`, '',
+      table(['Code', ...Array.from({length: 16}, (_, i) => code(`_${nibble(i)}`))], typing),
+      ...(also.length ? ['', also.join(' ')] : []),
+      '', 'Tiles the kernel draws as the editor cursor:', '', table(['Codes', 'Name', 'Use'], tiles)].join('\n');
   }},
 
   {file: 'mia-video-render-control.md', title: 'Video render control page', sources: ['video.json'], render: s => {
