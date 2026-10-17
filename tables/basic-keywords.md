@@ -22,7 +22,7 @@
 | `STOP` | statement | `STOP` | Stops the program with BREAK IN line and stops background music; CONT resumes after it. Ctrl-C between statements does the same. |
 | `ON` | statement | `ON index GOTO\|GOSUB line[,line...]` | Jumps to (GOTO) or calls (GOSUB) the line at position index in the list; 0 or a position past the end continues. |
 | `WAIT` | statement | `WAIT address,mask[,invert]` | Pauses until (PEEK(address) XOR invert) AND mask is nonzero; the loop does not check Ctrl-C, so a condition that never comes true hangs the machine. |
-| `LOAD` | statement | `LOAD path` | Replaces the program with a tokenized BASIC file from the SD card and clears variables; control returns to direct mode even when run from a program. |
+| `LOAD` | statement | `LOAD path` | Replaces the program with a tokenized BASIC file from the SD card, clears variables and ends at READY, even when a program runs it. |
 | `SAVE` | statement | `SAVE path` | Writes the current program's tokenized text (TXTTAB to VARTAB, no header) to a file on the SD card, creating or truncating it. |
 | `DEF` | statement | `DEF FNname(variable)=expression` | Defines a one-argument numeric function FNname for later use in expressions; program mode only (ILLEGAL DIRECT in direct mode). |
 | `POKE` | statement | `POKE address,value` | Writes a byte to a CPU memory address. |
@@ -110,9 +110,9 @@
 | `VIDON` | statement | `VIDON` | Turns the whole video output on. |
 | `VIDOFF` | statement | `VIDOFF` | Turns the whole video output off. |
 | `BGCHAR` | statement | `BGCHAR column,row,tile,attribute` | Writes one background cell (tile and attribute) at a map position for the current BGMODE, finding the right raw table. |
-| `CHRLOAD` | statement | `CHRLOAD bank,offset,count,path` | Loads up to count bytes from an SD card file into a CHR bank, starting offset bytes into it. |
-| `PALLOAD` | statement | `PALLOAD bank,offset,count,path` | Loads up to count palette bytes from an SD card file into a palette bank, starting offset bytes into it. |
-| `OAMLOAD` | statement | `OAMLOAD index,count,path` | Loads count sprites' 5-byte OAM records from an SD card file, starting at sprite index. |
+| `CHRLOAD` | statement | `CHRLOAD path,bank[,offset]` | Loads a whole SD card file into a CHR bank, starting offset bytes into it. |
+| `PALLOAD` | statement | `PALLOAD path,bank[,offset]` | Loads a whole SD card file of RGB565 bytes into palette RAM, starting offset bytes into a palette bank. |
+| `OAMLOAD` | statement | `OAMLOAD path[,index]` | Loads a whole SD card file of 5-byte sprite records into OAM, starting at sprite index. |
 | `SPRITE` | statement | `SPRITE index,tile,x,y,palette,flags` | Sets up one sprite completely: tile, signed x and y position, palette and flag bits (hide, priority, flips). |
 | `SPRTILE` | statement | `SPRTILE index,tile` | Changes only one sprite's tile (animation frame), leaving its other settings alone. |
 | `SPRX` | statement | `SPRX index,x` | Changes only one sprite's X position (-512 to 511), leaving its other settings alone. |
@@ -124,19 +124,21 @@
 | `CLOSE` | statement | `CLOSE #handle` | Closes file number 1-16, flushing anything written to it. |
 | `BGET#` | statement | `BGET# handle,variable` | Reads one byte (0-255) from an open file into a numeric variable. |
 | `BPUT#` | statement | `BPUT# handle,value` | Writes one byte (0-255) to an open file. |
+| `BANK` | statement | `BANK bank` | Picks the bank that BLOAD, BRUN, BSAVE, PEEK, POKE and SYS use at $8000-$BFFF; each maps it only while it works there, then maps bank 0 back. |
+| `BRUN` | statement | `BRUN path[,run]` | Loads a PRG file at its header address and jumps to it, with the BANK bank mapped; it never returns to BASIC. |
 | `NTREAD` | statement | `NTREAD table,cell,count` | Copies count tile bytes from the current DATA position into a background nametable, starting at cell. |
-| `NTLOAD` | statement | `NTLOAD table,cell,count,path` | Loads up to count bytes from a file into a background nametable, starting at cell. |
-| `NTSAVE` | statement | `NTSAVE table,cell,count,path` | Saves count bytes of a background nametable, starting at cell, to a file, creating or truncating it. |
+| `NTLOAD` | statement | `NTLOAD path,table[,cell]` | Loads a whole file into a background table's nametable, starting at cell. |
+| `NTSAVE` | statement | `NTSAVE path,table[,cell[,count]]` | Saves count bytes of a background table's nametable, or the rest of the table, starting at cell, to a file. |
 | `ATRREAD` | statement | `ATRREAD table,cell,count` | Copies count attribute bytes from the current DATA position into a background table's attribute plane, starting at cell. |
-| `ATRLOAD` | statement | `ATRLOAD table,cell,count,path` | Loads up to count bytes from a file into a background table's attribute plane, starting at cell. |
-| `ATRSAVE` | statement | `ATRSAVE table,cell,count,path` | Saves count bytes of a background table's attribute plane, starting at cell, to a file. |
+| `ATRLOAD` | statement | `ATRLOAD path,table[,cell]` | Loads a whole file into a background table's attribute plane, starting at cell. |
+| `ATRSAVE` | statement | `ATRSAVE path,table[,cell[,count]]` | Saves count bytes of a background table's attribute plane, or the rest of the table, starting at cell, to a file. |
 | `CHRREAD` | statement | `CHRREAD bank,offset,count` | Copies count graphics bytes from the current DATA position into a CHR bank, starting at byte offset. |
-| `CHRSAVE` | statement | `CHRSAVE bank,offset,count,path` | Saves count bytes of a CHR bank, starting at byte offset, to a file. |
+| `CHRSAVE` | statement | `CHRSAVE path,bank[,offset[,count]]` | Saves count bytes of a CHR bank, or the rest of the bank, starting at byte offset, to a file. |
 | `PALREAD` | statement | `PALREAD bank,offset,count` | Copies count raw RGB565 palette bytes from the current DATA position into a palette bank, starting at offset. |
-| `PALSAVE` | statement | `PALSAVE bank,offset,count,path` | Saves count raw palette bytes of a palette bank, starting at offset, to a file. |
+| `PALSAVE` | statement | `PALSAVE path,bank[,offset[,count]]` | Saves count raw palette bytes, or the rest of the palette bank, starting at offset, to a file. |
 | `OAMREAD` | statement | `OAMREAD index,count` | Copies count 5-byte sprite records from the current DATA position into OAM starting at sprite index. |
-| `OAMSAVE` | statement | `OAMSAVE index,count,path` | Saves count 5-byte sprite records, starting at OAM index, to a file. |
-| `MIALOAD` | statement | `MIALOAD path,address[,length[,offset[,rows,fileStride,ramStride]]]` | Loads a file, part of a file, or a rectangle of rows straight into MIA RAM at a raw address. |
+| `OAMSAVE` | statement | `OAMSAVE path[,index[,count]]` | Saves count 5-byte sprite records, or the rest of the 256, starting at OAM index, to a file. |
+| `MIALOAD` | statement | `MIALOAD path,address` | Loads a whole file straight into MIA RAM at a raw address, stopping at the end of the file or of MIA RAM. |
 | `MIASAVE` | statement | `MIASAVE path,address,length` | Saves length bytes of MIA RAM starting at a raw address to a file. |
 | `SEEK#` | statement | `SEEK# handle,position` | Sets the read and write position of an open file to a byte offset. |
 | `KILL` | statement | `KILL path` | Deletes a file, or an empty directory, on the SD card. |
@@ -161,8 +163,8 @@
 | `MFILL` | statement | `MFILL address,length,value[,rows,stride]` | Fills a block, or a rectangle of rows, of MIA RAM with one byte value. |
 | `FLUSH` | statement | `FLUSH #handle` | Flushes an open file's pending data and metadata to the SD card without closing it. |
 | `FSTAT` | statement | `FSTAT path,size,attributes,date,time` | Reads a file's size, FAT attributes, packed date and packed time into four numeric variables. |
-| `BLOAD` | statement | `BLOAD path[,run[,address]]` | Loads a PRG-style file into CPU RAM at its header address or an override, optionally jumping to a run address. |
-| `BSAVE` | statement | `BSAVE path,address,length[,bank]` | Saves length bytes of CPU RAM from address to a file in BLOAD's format, adding a bank byte at $8000 and up. |
+| `BLOAD` | statement | `BLOAD path[,address]` | Loads a PRG file into CPU RAM at its header address or another address, then returns to BASIC. |
+| `BSAVE` | statement | `BSAVE path,address,length` | Saves length bytes of CPU RAM from address to a file in BLOAD's format, a 2-byte address header and the data. |
 | `SYS` | statement | `SYS address` | Calls a machine-code subroutine at a CPU address with JSR and continues after it returns. |
 | `TRACK` | statement | `TRACK voice,music[,address]` | Compiles a music string into a voice's background sequencer track in MIA RAM. |
 | `BAND` | statement | `BAND enabled \| voice,enabled` | Starts or stops background sequencer playback for all voices or for one voice. |
@@ -184,4 +186,4 @@
 | `FPOS` | function | `FPOS(handle)` | Returns the current byte position in an open file. |
 | `FSIZE` | function | `FSIZE(handle)` | Returns the size in bytes of an open file. |
 | `DISKFREE` | function | `DISKFREE(volume)` | Returns the free bytes on the current SD volume. |
-| `CUE` | function | `CUE(voice)` | Returns the index of the note or rest a voice's background track is playing (0 before it starts). |
+| `CUE` | function | `CUE(voice)` | Returns how many notes, ties and rests a voice's background track has played since it was loaded (0 before it starts). |

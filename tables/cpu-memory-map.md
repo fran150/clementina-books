@@ -131,11 +131,11 @@ Zero page (`$0000-$00FF`):
 | `$EE` | 1 | `YSAV` | wozmon | Saved input index, to see whether a hex value was typed. |
 | `$EF` | 1 | `MODE` | wozmon | Command mode: $00 examine, $7F store, $AE block examine. |
 | `$F0` | 2 | `KPTR` | kernel | General 16-bit pointer: PRSTR's string source, KERN_LOAD's destination override. CHROUT leaves it alone. |
-| `$F2` | 2 | `KTMP` | kernel | Scratch: the overlay offset and address CHROUT computes. KERN_LOAD takes its run address here. |
+| `$F2` | 2 | `KTMP` | kernel | Scratch: the overlay offset and address CHROUT computes. KERN_LOAD takes its run address here when it jumps; 0 means the first byte loaded. |
 | `$F4` | 2 | `KCNT` | kernel | 16-bit loop counter for screen fills. |
 | `$F6` | 1 | `KCHR` | kernel | CHROUT's copy of the byte being printed. |
 | `$F7` | 2 | `KJIFFY` | kernel | Free-running tick counter, +1 per VIA Timer 1 IRQ (PHI2 / 6250, 192 Hz at 1.2 MHz). Measures CPU work, not wall time. Read-only for programs. |
-| `$F9` | 1 | `KLOAD_BANK` | kernel | KERN_LOAD: destination bank, 0 when unbanked. |
+| `$F9` | 1 | `KLOAD_BANK` | kernel | KERN_LOAD: the bank being written at $8000-$BFFF. |
 | `$FA` | 1 | `KLOAD_CHUNKLEN` | kernel | KERN_LOAD: bytes read this round. |
 | `$FB` | 1 | `KLOAD_SCRATCH` | kernel | KERN_LOAD: header and boundary scratch. |
 | `$FC` | 4 |  | kernel | Spare. The kernel grows into these first, then into $E0-$E7. |
@@ -182,7 +182,9 @@ Kernel variables (`$0300-$03FF`):
 | `$0303` | 1 | `LAST_KEY` | kernel | Debug: last byte CHRIN returned. |
 | `$0304` | 1 | `EDITOR_PEN` | kernel | The screen editor's pen, set by ESC commands and copied into TEXT_ATTR at each line edit. |
 | `$0305` | 1 | `KLOAD_SAVED_BANK` | kernel | KERN_LOAD: the bank mapped when it started, selected again when it returns or fails. |
-| `$0306` | 3 |  | kernel | Unused since the CINV/COUTV stubs were removed (2026-10-11); the variables after them kept their addresses. |
+| `$0306` | 1 | `DATA_BANK` | kernel | The bank BASIC's BANK statement picked for BLOAD, BRUN, BSAVE, PEEK, POKE and SYS at $8000-$BFFF; 0 at cold and warm start. |
+| `$0307` | 1 | `KLOAD_RUN_BANK` | kernel | KERN_LOAD: the bank it maps at $8000-$BFFF before it jumps to the run address. |
+| `$0308` | 1 | `KLOAD_MODE` | kernel | KERN_LOAD: bit 7 set when it jumps to the run address instead of returning. |
 | `$0309` | 1 | `CURSOR_VISIBLE` | kernel | Nonzero while the software cursor is drawn. |
 | `$030A` | 1 | `CURSOR_SAVE_CHR` | kernel | Tile under the visible cursor. |
 | `$030B` | 1 | `CURSOR_SAVE_ATTR` | kernel | Attribute under the visible cursor. |

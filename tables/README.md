@@ -18,9 +18,12 @@ A chapter includes a table with mdBook, for example
 | `mia-config.md` | `mia-config.json` | Mapping |
 | `mia-indexes.md` | `mia-indexes.json` | Mapping |
 | `mia-ram-map.md` | `mia-ram-map.json` | Mapping |
+| `mia-video-ram.md` | `video.json`, `mia-ram-map.json` | Mapping, Hardware |
+| `mia-video-palette.md` | `video.json` | Mapping, Programmer's Reference, User's Manual |
 | `mia-video-render-control.md` | `video.json` | Mapping, Programmer's Reference |
 | `mia-storage.md` | `storage.json` | Mapping, Programmer's Reference |
 | `mia-audio.md` | `audio.json`, `mia-ram-map.json` | Mapping, Programmer's Reference |
 | `kernel-abi.md` | `kernel-abi.json` | Programmer's Reference, Mapping |
 | `cpu-memory-map.md` | `cpu-memory-map.json` | Mapping |
 | `basic-keywords.md` | `basic.json` | User's Manual, Programmer's Reference |
+| `basic-errors.md` | `basic.json` | User's Manual, Programmer's Reference |

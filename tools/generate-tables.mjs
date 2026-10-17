@@ -93,6 +93,20 @@ export const TABLES = [
     ['Range', 'Size', 'Block', 'Owner', 'Description'],
     s['mia-ram-map.json'].blocks.map(b => [code(b.range), bytes(b.size), code(b.name), b.owner, b.description]))},
 
+  {file: 'mia-video-ram.md', title: 'Video block', sources: ['video.json', 'mia-ram-map.json'], render: s => {
+    const block = s['mia-ram-map.json'].blocks.find(b => b.name === 'VIDEO');
+    return table(['Range', 'Size', 'Region', 'Sent to the client', 'Description'],
+      s['video.json'].regions.map(r => [code(range(block.start + r.start, r.size, 5)), bytes(r.size), code(r.name), r.syncable ? 'yes' : 'no', r.description]));
+  }},
+
+  {file: 'mia-video-palette.md', title: 'Default palette', sources: ['video.json'], render: s => {
+    const p = s['video.json'].palettes.default;
+    const rgb = v => `#${[[11, 31], [5, 63], [0, 31]].map(([shift, max]) => Math.round((((v >> shift) & max) * 255) / max).toString(16).padStart(2, '0')).join('').toUpperCase()}`;
+    return [`MIA's ${code(p.name)} palette, loaded into palette RAM when video starts. Color 1 of each bank is its text ink.`, '',
+      table(['Bank', 'Ink', 'Ink RGB565', 'Ink as RGB', 'Colors 0-7 (RGB565)'],
+        p.colors.map((bank, i) => [i, p.inks[i], code(hex(bank[1], 4)), code(rgb(bank[1])), bank.map(c => code(hex(c, 4))).join(' ')]))].join('\n');
+  }},
+
   {file: 'mia-video-render-control.md', title: 'Video render control page', sources: ['video.json'], render: s => {
     const rc = s['video.json'].renderControl;
     return [table(['Address', 'Size', 'Field', 'Description'],
@@ -149,6 +163,12 @@ export const TABLES = [
   {file: 'basic-keywords.md', title: 'BASIC keywords', sources: ['basic.json'], render: s => table(
     ['Keyword', 'Kind', 'Syntax', 'Summary'],
     s['basic.json'].keywords.entries.map(k => [code(k.keyword), k.kind, code(k.syntax), k.summary]))},
+
+  {file: 'basic-errors.md', title: 'BASIC error messages', sources: ['basic.json'], render: s => {
+    const e = s['basic.json'].errors, f = e.format;
+    return [table(['Code', 'Name', 'Message', 'Raised when'], e.entries.map(x => [code(hex(x.code)), code(x.name), code(`${f.prefix}${x.message}${f.suffix}`), x.trigger])),
+      '', 'Other messages:', '', table(['Message', 'Printed when'], e.messages.map(m => [code(m.text), m.trigger]))].join('\n');
+  }},
 ];
 
 // ---------------------------------------------------------------------------------------------
