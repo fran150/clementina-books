@@ -5,7 +5,7 @@
 | Address | Entry | Description |
 | --- | --- | --- |
 | `$0400` | `KERN_COLDSTART` | Reset entry (MIA points RESET here): sets up the machine and the console, prints the banner and starts BASIC. |
-| `$0403` | `KERN_WARMSTART` | Re-enters BASIC at READY, keeping the program and variables; resets the stack, IRQ_VEC and bank 0 first. |
+| `$0403` | `KERN_WARMSTART` | Re-enters BASIC at READY, keeping the program and variables; resets the stack, IRQ_VEC, bank 0 and the VIA (every interrupt source off but Timer 1, which restarts at 6250) first. |
 | `$0406` | `KERN_CHROUT` | Writes the character in A to the console at the cursor, handling control codes; A, X and Y are preserved. |
 | `$0409` | `KERN_CHRIN` | Waits for one key from MIA's input FIFO and returns it in A, showing the cursor meanwhile. |
 | `$040C` | `KERN_GETKEY_NB` | Returns C=1 and the next key in A if one is waiting, else C=0, without waiting. |

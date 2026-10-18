@@ -40,7 +40,7 @@ VIA registers (repeating every 16 bytes in slot 0):
 | `$C00B` | `VIA_ACR` | Auxiliary control. The kernel owns bits 7-6 (Timer 1 free-running, PB7 output off) and keeps bits 5-0 as it finds them. |
 | `$C00C` | `VIA_PCR` | Peripheral control (CA1/CA2, CB1/CB2). Free. |
 | `$C00D` | `VIA_IFR` | Interrupt flags. The kernel's IRQ handler checks bit 6 (Timer 1); other sources are free. |
-| `$C00E` | `VIA_IER` | Interrupt enable. The kernel enables only Timer 1. |
+| `$C00E` | `VIA_IER` | Interrupt enable. The kernel enables only Timer 1, at reset and at warm start, which turn every other source off. |
 | `$C00F` | `VIA_ORA_NH` | Port A data without handshake. Same pins as ORA, so PA0-PA4 still select the bank. |
 
 Zero page (`$0000-$00FF`):
