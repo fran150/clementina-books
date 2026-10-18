@@ -200,9 +200,11 @@ export const TABLES = [
       '', 'Sequencer opcodes:', '', table(['Opcode', 'Name', 'Payload', 'Effect'], a.sequencer.opcodes.map(o => [code(hex(o.id)), code(`MIA_SEQ_OP_${o.name}`), o.payload.join(', '), o.effect]))].join('\n');
   }},
 
-  {file: 'kernel-abi.md', title: 'Kernel jump table', sources: ['kernel-abi.json'], render: s => table(
-    ['Address', 'Entry'],
-    s['kernel-abi.json'].entries.map(e => [code(e.hex), code(e.symbol)]))},
+  {file: 'kernel-abi.md', title: 'Kernel jump table', sources: ['kernel-abi.json'], render: s => {
+    const abi = s['kernel-abi.json'];
+    return [table(['Address', 'Entry', 'Description'], abi.entries.map(e => [code(e.hex), code(e.symbol), e.description])),
+      '', `The ${code('BAS_')} entries jump to BASIC's own routines (${abi.entries.filter(e => e.target).map(e => code(e.target)).join(', ')}), so they work only while BASIC is in memory.`].join('\n');
+  }},
 
   {file: 'cpu-memory-map.md', title: 'CPU memory map', sources: ['cpu-memory-map.json'], render: s => {
     const m = s['cpu-memory-map.json'];
