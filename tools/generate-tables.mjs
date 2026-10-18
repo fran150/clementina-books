@@ -270,6 +270,16 @@ export const TABLES = [
     ['Keyword', 'Kind', 'Syntax', 'Summary'],
     s['basic.json'].keywords.entries.map(k => [code(k.keyword), k.kind, code(k.syntax), k.summary]))},
 
+  {file: 'basic-tokens.md', title: 'BASIC tokens', sources: ['basic.json'], render: s => {
+    const t = s['basic.json'].tokens;
+    const rows = [
+      ...t.primary.map((k, i) => [code(k), hex(t.primaryStart + i), String(t.primaryStart + i)]),
+      ...Object.entries(t.special).map(([k, v]) => [code(k), hex(v), String(v)]),
+      ...[[t.extension, t.extensionPrefix], [t.extension2, t.extension2Prefix], [t.extensionFunction, t.extensionFunctionPrefix]]
+        .flatMap(([list, prefix]) => list.map((k, i) => [code(k), `${hex(prefix)} ${hex(t.extensionSubtokenStart + i)}`, `${prefix} ${t.extensionSubtokenStart + i}`])),
+    ];
+    return table(['Keyword', 'Token', 'Decimal'], rows);
+  }},
   {file: 'basic-errors.md', title: 'BASIC error messages', sources: ['basic.json'], render: s => {
     const e = s['basic.json'].errors, f = e.format;
     return [table(['Code', 'Name', 'Message', 'Raised when'], e.entries.map(x => [code(hex(x.code)), code(x.name), code(`${f.prefix}${x.message}${f.suffix}`), x.trigger])),
@@ -285,12 +295,11 @@ export function renderTable(t, specs) {
     `### ${t.title}`, '', t.render(specs), ''].join('\n');
 }
 
-function readSpecs(sdkDir, commit) {
+export function readSpecs(sdkDir, commit, names = [...new Set(TABLES.flatMap(t => t.sources))]) {
   const git = args => execFileSync('git', ['-C', sdkDir, ...args], {encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], maxBuffer: 1 << 26});
   try { git(['cat-file', '-e', `${commit}^{commit}`]); } catch {
     throw Error(`clementina-sdk at ${sdkDir} does not have the pinned commit ${commit.slice(0, 7)}; fetch it first.`);
   }
-  const names = [...new Set(TABLES.flatMap(t => t.sources))];
   return Object.fromEntries(names.map(name => {
     try { return [name, JSON.parse(git(['show', `${commit}:specs/${name}`]))]; } catch (error) {
       throw Error(`specs/${name} at ${commit.slice(0, 7)}: ${error.stderr?.toString().trim() || error.message}`);
