@@ -105,7 +105,7 @@
 | `SPRCOUNT` | statement | `SPRCOUNT lastIndex` | Sets the highest sprite (OAM) index, 0-255, that the renderer scans each frame. |
 | `SPRBANK` | statement | `SPRBANK bank` | Selects the CHR bank (0-7) that sprites draw their tiles from. |
 | `CHRMODE` | statement | `CHRMODE bank,is1bpp` | Marks a CHR bank (0-7) as 1bpp two-color graphics (non-zero) or 3bpp eight-color graphics (0). |
-| `CHRPLANE` | statement | `CHRPLANE background,sprites,overlay` | Chooses which plane of a 1bpp CHR bank the background, sprite and overlay layers each decode (0-3). |
+| `CHRPLANE` | statement | `CHRPLANE background,sprites,overlay` | Chooses which plane of a 1bpp CHR bank the background, sprite and overlay layers each decode (0-2). |
 | `PALETTE` | statement | `PALETTE bank,index,red,green,blue` | Writes one palette color: bank 0-15, color index 0-7, as RGB565 with red 0-31, green 0-63 and blue 0-31. |
 | `VIDON` | statement | `VIDON` | Turns the whole video output on. |
 | `VIDOFF` | statement | `VIDOFF` | Turns the whole video output off. |
