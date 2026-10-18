@@ -200,6 +200,24 @@ export const TABLES = [
       '', 'Sequencer opcodes:', '', table(['Opcode', 'Name', 'Payload', 'Effect'], a.sequencer.opcodes.map(o => [code(hex(o.id)), code(`MIA_SEQ_OP_${o.name}`), o.payload.join(', '), o.effect]))].join('\n');
   }},
 
+  {file: 'mia-input.md', title: 'Input block', sources: ['input.json'], render: s => {
+    const i = s['input.json'];
+    return [table(['Range', 'Size', 'Region', 'Description'], i.regions.map(r => [code(range(r.start, r.size, 5)), r.size, code(r.name),
+      r.hidUsagePage !== undefined ? `HID usage page ${code(hex(r.hidUsagePage, 4))} bitmap: usage N is bit N & 7 of byte N >> 3.` : ''])),
+    '', `Gamepad record (${i.gamepads.recordBytes} bytes, ${i.gamepads.count} slots):`, '',
+    table(['Offset', 'Field', 'Description'], i.gamepads.fields.map(f => [code(hex(f.offset)), code(f.name),
+      f.description ?? (f.directionBits ? `D-pad: ${Object.entries(f.directionBits).map(([k, v]) => `bit ${v} ${k}`).join(', ')}; bit ${f.connectedBit} connected.` : f.type)])),
+    '', `${code(i.status.register)} bits (${code('$FFF2')}):`, '', table(['Bit', 'Mask', 'Name', 'Description'], bitRows(i.status.bits))].join('\n');
+  }},
+
+  {file: 'mia-video-attributes.md', title: 'Video attribute bits', sources: ['video.json'], render: s => {
+    const a = s['video.json'].attributes, bits = ([lo, hi]) => (lo === hi ? `${lo}` : `${lo}-${hi}`);
+    const rows = o => Object.entries(o).map(([k, v]) => [Array.isArray(v) ? bits(v) : v, code(k.replace(/Bits?$/, ''))]).sort((x, y) => parseInt(x[0]) - parseInt(y[0]));
+    return ['Background and overlay attribute byte:', '', table(['Bits', 'Field'], rows(a.backgroundOverlay)),
+      '', 'Sprite `ATTR` byte (OAM byte 3):', '', table(['Bits', 'Field'], rows(a.spriteAttr)),
+      '', 'Sprite `EXT` byte (OAM byte 4):', '', table(['Bits', 'Field'], rows(a.spriteExt))].join('\n');
+  }},
+
   {file: 'kernel-abi.md', title: 'Kernel jump table', sources: ['kernel-abi.json'], render: s => {
     const abi = s['kernel-abi.json'];
     return [table(['Address', 'Entry', 'Description'], abi.entries.map(e => [code(e.hex), code(e.symbol), e.description])),
@@ -208,16 +226,44 @@ export const TABLES = [
 
   {file: 'cpu-memory-map.md', title: 'CPU memory map', sources: ['cpu-memory-map.json'], render: s => {
     const m = s['cpu-memory-map.json'];
-    const out = [table(['Range', 'Size', 'Region', 'Description'], m.regions.map(r => [code(r.range), bytes(r.size), code(r.name), r.description])),
-      '', 'I/O slots:', '', table(['Range', 'Select', 'Device', 'Description'], m.io.slots.map(x => [code(x.range), code(x.select), x.device ?? 'free', x.description])),
-      '', 'VIA registers (repeating every 16 bytes in slot 0):', '', table(['Address', 'Name', 'Description'], m.via.registers.map(r => [code(r.hex), code(r.name), r.description]))];
+    // Each part sits between mdBook anchors, so a chapter can include only its own part:
+    // {{#include ../../tables/cpu-memory-map.md:zero-page}}.
+    const part = (anchor, lines) => [`<!-- ANCHOR: ${anchor} -->`, ...lines, `<!-- ANCHOR_END: ${anchor} -->`];
+    const out = [...part('regions', [table(['Range', 'Size', 'Region', 'Description'], m.regions.map(r => [code(r.range), bytes(r.size), code(r.name), r.description]))]),
+      '', ...part('io-slots', ['I/O slots:', '', table(['Range', 'Select', 'Device', 'Description'], m.io.slots.map(x => [code(x.range), code(x.select), x.device ?? 'free', x.description]))]),
+      '', ...part('via', ['VIA registers (repeating every 16 bytes in slot 0):', '', table(['Address', 'Name', 'Description'], m.via.registers.map(r => [code(r.hex), code(r.name), r.description]))])];
     for (const page of m.pages) {
-      out.push('', `${page.name.replace(/_/g, ' ').toLowerCase().replace(/^./, c => c.toUpperCase())} (${code(range(page.start, page.size, 4))}):`, '',
-        table(['Range', 'Block', 'Owner', 'Description'], page.blocks.map(b => [code(b.range), code(b.name), b.owner, b.description])));
-      if (page.locations?.length) out.push('', table(['Address', 'Size', 'Name', 'Owner', 'Description'],
+      const lines = [`${page.name.replace(/_/g, ' ').toLowerCase().replace(/^./, c => c.toUpperCase())} (${code(range(page.start, page.size, 4))}):`, '',
+        table(['Range', 'Block', 'Owner', 'Description'], page.blocks.map(b => [code(b.range), code(b.name), b.owner, b.description]))];
+      if (page.locations?.length) lines.push('', table(['Address', 'Size', 'Name', 'Owner', 'Description'],
         page.locations.map(l => [code(l.hex), l.size, [l, ...(l.aliases ?? [])].filter(n => n.name).map(n => code(n.name)).join(', '), l.owner, l.description])));
+      out.push('', ...part(page.name.toLowerCase().replace(/_/g, '-'), lines));
     }
     return out.join('\n');
+  }},
+
+  {file: 'labels.md', title: 'Labels by name', sources: ['cpu-memory-map.json', 'kernel-abi.json', 'mia-registers.json', 'mia-config.json', 'mia-indexes.json', 'mia-commands.json', 'mia-ram-map.json', 'video.json', 'input.json', 'storage.json', 'audio.json'], render: s => {
+    const rows = [], add = (name, value, space) => rows.push([name, value, space]);
+    const m = s['cpu-memory-map.json'];
+    for (const page of m.pages) for (const l of page.locations ?? []) for (const n of [l, ...(l.aliases ?? [])]) if (n.name) add(n.name, hex(n.address ?? l.address, 2 + 2 * ((n.address ?? l.address) > 0xFF)), 'CPU');
+    for (const r of m.via.registers) add(r.name, r.hex, 'CPU');
+    for (const e of s['kernel-abi.json'].entries) add(e.symbol, e.hex, 'CPU');
+    for (const r of s['mia-registers.json'].registers) if (!r.name.startsWith('RESERVED')) add(r.name, r.hex, 'CPU');
+    for (const f of s['mia-config.json'].fields) add(`CFG_${f.name}`, f.hex, 'CFG field');
+    for (const e of s['mia-indexes.json'].ids) if (e.name) add(e.name, range(e.id, e.count ?? 1, 2), 'Index id');
+    for (const c of s['mia-commands.json'].commands) add(`MIA_CMD_${c.name}`, c.hex, 'Command');
+    for (const b of s['mia-ram-map.json'].blocks) if (b.owner !== 'firmware') add(b.name, range(b.start, b.size, 5), 'MIA RAM');
+    for (const r of s['video.json'].regions) add(r.name, range(r.start, r.size, 5), 'MIA RAM');
+    for (const f of s['video.json'].renderControl.fields) add(`MIA_VIDEO_${f.name.replace(/^VIDEO_/, '')}_OFFSET`, hex(f.address, 5), 'MIA RAM');
+    for (const r of s['input.json'].regions) add(r.name, range(r.start, r.size, 5), 'MIA RAM');
+    const st = s['storage.json'], control = st.regions.find(r => r.name === 'CONTROL');
+    for (const f of st.controlFields) add(`MIA_SD_CONTROL_${f.name}`, range(control.start + f.offset, f.size, 5), 'MIA RAM');
+    const audio = s['mia-ram-map.json'].blocks.find(b => b.name === 'AUDIO');
+    for (const [k, v] of Object.entries(s['audio.json'].headerOffsets)) add(`MIA_AUDIO_HEADER_${k}`, hex(audio.start + v, 5), 'MIA RAM');
+    const seen = new Set(), unique = rows.filter(r => !seen.has(r.join()) && seen.add(r.join()));
+    unique.sort((a, b) => a[0].localeCompare(b[0], 'en') || a[1].localeCompare(b[1]));
+    return [`Every name the specs give an address, id or offset, in alphabetical order. CPU addresses are in the 6502's 64 KiB, MIA RAM addresses in MIA's 256 KiB, and the other spaces are numbered separately.`, '',
+      table(['Name', 'Value', 'Space'], unique.map(([n, v, sp]) => [code(n), code(v), sp]))].join('\n');
   }},
 
   {file: 'basic-keywords.md', title: 'BASIC keywords', sources: ['basic.json'], render: s => table(

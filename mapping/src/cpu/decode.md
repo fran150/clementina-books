@@ -75,8 +75,8 @@ region. Those extra addresses are **mirrors**.
 other five come from the VIA's Port A, PA0-PA4, so the bank number written
 there picks which 16 KiB of the 512 KiB shows at `$8000-$BFFF`. Byte `$8000+n`
 of bank `b` is byte `b × $4000 + n` of the chip. Reset and warm start map
-bank 0, and BASIC needs bank 0 mapped while it runs. The chapters on extended
-RAM and on the VIA show how to switch banks.
+bank 0, and BASIC needs bank 0 mapped while it runs. [Extended RAM](extended-ram.md)
+shows how to switch banks.
 
 **The VIA** has sixteen registers on A0-A3, so its block repeats every 16
 bytes through slot 0: `$C010` is the same register as `$C000`. Use
@@ -99,12 +99,12 @@ a write goes nowhere and a read returns no defined value.
 
 | Range | Decimal | Size | Region | Chapter |
 | --- | --- | --- | --- | --- |
-| `$0000-$7FFF` | 0-32767 | 32 KiB | Base RAM | Zero page to BASIC's workspace |
-| `$8000-$BFFF` | 32768-49151 | 16 KiB | Extended RAM window | Extended RAM |
-| `$C000-$C3FF` | 49152-50175 | 1 KiB | Slot 0: the VIA | I/O and the VIA |
-| `$C400-$DFFF` | 50176-57343 | 7 KiB | Slots 1-7: expansion | I/O and the VIA |
-| `$E000-$FFDF` | 57344-65503 | 8 KiB less 32 bytes | MIA mirrors, never used | The MIA registers |
-| `$FFE0-$FFFF` | 65504-65535 | 32 bytes | MIA registers and vectors | The MIA registers |
+| `$0000-$7FFF` | 0-32767 | 32 KiB | Base RAM | [Zero page](zero-page.md) to [BASIC's workspace](basic-workspace.md) |
+| `$8000-$BFFF` | 32768-49151 | 16 KiB | Extended RAM window | [Extended RAM](extended-ram.md) |
+| `$C000-$C3FF` | 49152-50175 | 1 KiB | Slot 0: the VIA | [I/O and the VIA](io.md) |
+| `$C400-$DFFF` | 50176-57343 | 7 KiB | Slots 1-7: expansion | [I/O and the VIA](io.md) |
+| `$E000-$FFDF` | 57344-65503 | 8 KiB less 32 bytes | MIA mirrors, never used | [The MIA registers](mia-registers.md) |
+| `$FFE0-$FFFF` | 65504-65535 | 32 bytes | MIA registers and vectors | [The MIA registers](mia-registers.md) |
 
 Base RAM is RAM all the way through, but the system claims most of it. Its
 own chapters, in address order, say who owns each part: zero page and the
@@ -118,8 +118,9 @@ At power-on MIA holds the CPU and the VIA in reset. It places a small loader
 program in its own register block and points the reset vector at it, then
 lets the CPU run. The loader copies the system image, which holds the
 kernel, WozMon and BASIC, into base RAM from `$0400` up. When the copy is
-done, MIA switches its registers to their normal meaning and points the reset
-vector at the kernel's cold start, `$0400`.
+done, MIA switches its registers to their normal meaning and points the
+reset, NMI and IRQ vectors at `$0400`, the kernel's cold start. [The resident
+image](image.md) follows the boot step by step.
 
 Two things follow for the map. Everything below `$C000` is RAM a program can
 overwrite, the system included, so the map's rules say what is safe to

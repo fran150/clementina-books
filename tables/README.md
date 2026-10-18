@@ -7,6 +7,9 @@ fails when a table is stale.
 
 A chapter includes a table with mdBook, for example
 `{{#include ../../tables/mia-commands.md}}` (the path is relative to the chapter).
+`cpu-memory-map.md` marks each part with an mdBook anchor (`regions`,
+`io-slots`, `via`, `zero-page`, `stack`, `input-page`, `kernel-variables`), so a
+chapter can include one part: `{{#include ../../tables/cpu-memory-map.md:via}}`.
 
 | Table | Spec | Used by |
 | --- | --- | --- |
@@ -18,6 +21,8 @@ A chapter includes a table with mdBook, for example
 | `mia-config.md` | `mia-config.json` | Mapping |
 | `mia-indexes.md` | `mia-indexes.json` | Mapping |
 | `mia-ram-map.md` | `mia-ram-map.json` | Mapping |
+| `mia-input.md` | `input.json` | Mapping, Programmer's Reference |
+| `mia-video-attributes.md` | `video.json` | Mapping, Programmer's Reference |
 | `mia-video-ram.md` | `video.json`, `mia-ram-map.json` | Mapping, Hardware |
 | `mia-video-palette.md` | `video.json` | Mapping, Programmer's Reference, User's Manual |
 | `charset.md` | `video.json` | Mapping, Programmer's Reference, User's Manual |
@@ -25,6 +30,7 @@ A chapter includes a table with mdBook, for example
 | `mia-storage.md` | `storage.json` | Mapping, Programmer's Reference |
 | `mia-audio.md` | `audio.json`, `mia-ram-map.json` | Mapping, Programmer's Reference |
 | `kernel-abi.md` | `kernel-abi.json` | Programmer's Reference, Mapping |
+| `labels.md` | most specs | Mapping |
 | `cpu-memory-map.md` | `cpu-memory-map.json` | Mapping |
 | `basic-keywords.md` | `basic.json` | User's Manual, Programmer's Reference |
 | `basic-errors.md` | `basic.json` | User's Manual, Programmer's Reference |

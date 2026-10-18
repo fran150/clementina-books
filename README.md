@@ -34,12 +34,11 @@ same sources render as a website and as a printable PDF.
 
 | Book | Folder | State |
 | --- | --- | --- |
-| Mapping Clementina | [mapping/](mapping/src/SUMMARY.md) | Part I being drafted |
+| Mapping Clementina | [mapping/](mapping/src/SUMMARY.md) | First draft |
 
 With [mdBook](https://rust-lang.github.io/mdBook/guide/installation.html)
 installed, `mdbook build mapping` writes the website to `mapping/book/`, and
-`mdbook serve mapping` previews it while you edit. Chapters not written yet
-show in the table of contents without a link.
+`mdbook serve mapping` previews it while you edit.
 
 ## License
 
