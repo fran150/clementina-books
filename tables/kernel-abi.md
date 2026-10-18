@@ -2,23 +2,33 @@
 
 ### Kernel jump table
 
-| Address | Entry |
-| --- | --- |
-| `$0400` | `KERN_COLDSTART` |
-| `$0403` | `KERN_WARMSTART` |
-| `$0406` | `KERN_CHROUT` |
-| `$0409` | `KERN_CHRIN` |
-| `$040C` | `KERN_GETKEY_NB` |
-| `$040F` | `KERN_CLRSCR` |
-| `$0412` | `KERN_PRHEX` |
-| `$0415` | `KERN_PRBYTE` |
-| `$0418` | `KERN_PRSTR` |
-| `$041B` | `KERN_LOAD` |
-| `$041E` | `KERN_EDITKEY` |
-| `$0421` | `KERN_CHROUT_GLYPH` |
-| `$0424` | `KERN_WOZMON` |
-| `$0427` | `KERN_SET_BACKDROP` |
-| `$042A` | `KERN_IRQ` |
-| `$042D` | `KERN_PLOT` |
-| `$0430` | `KERN_RDTIM` |
-| `$0433` | `KERN_SETTIM` |
+| Address | Entry | Description |
+| --- | --- | --- |
+| `$0400` | `KERN_COLDSTART` | Reset entry (MIA points RESET here): sets up the machine and the console, prints the banner and starts BASIC. |
+| `$0403` | `KERN_WARMSTART` | Re-enters BASIC at READY, keeping the program and variables; resets the stack, IRQ_VEC and bank 0 first. |
+| `$0406` | `KERN_CHROUT` | Writes the character in A to the console at the cursor, handling control codes; A, X and Y are preserved. |
+| `$0409` | `KERN_CHRIN` | Waits for one key from MIA's input FIFO and returns it in A, showing the cursor meanwhile. |
+| `$040C` | `KERN_GETKEY_NB` | Returns C=1 and the next key in A if one is waiting, else C=0, without waiting. |
+| `$040F` | `KERN_CLRSCR` | Clears the overlay text screen and homes the cursor. |
+| `$0412` | `KERN_PRHEX` | Prints the low nibble of A as one hex digit. |
+| `$0415` | `KERN_PRBYTE` | Prints A as two hex digits. |
+| `$0418` | `KERN_PRSTR` | Prints the zero-terminated string KPTR points at, up to 255 bytes. |
+| `$041B` | `KERN_LOAD` | Streams a PRG file into CPU RAM. A is the bank for $8000-$BFFF and KPTR a destination override or 0; C=1 jumps to KTMP (0 for the first byte) instead of returning. |
+| `$041E` | `KERN_EDITKEY` | Screen editor: returns the next character of the line edited on screen, ending with CR; BASIC reads its input lines through it. |
+| `$0421` | `KERN_CHROUT_GLYPH` | Draws A as a raw glyph at the cursor, never as a control code; A, X and Y are preserved. |
+| `$0424` | `KERN_WOZMON` | Enters the WozMon monitor; its Q command returns to BASIC through KERN_WARMSTART. |
+| `$0427` | `KERN_SET_BACKDROP` | Sets the screen backdrop color selector to A. |
+| `$042A` | `KERN_IRQ` | The kernel's IRQ handler: a program's own handler restores A, X and Y and ends with JMP KERN_IRQ. |
+| `$042D` | `KERN_PLOT` | C=1 reads the cursor into X (row) and Y (column); C=0 moves it there and returns C=1 if that is off the screen. |
+| `$0430` | `KERN_RDTIM` | Copies MIA's clock into CLOCK_SNAPSHOT ($02F8-$02FF); returns C=1 if the firmware has a clock. |
+| `$0433` | `KERN_SETTIM` | Sets MIA's 60 Hz count, BASIC's TI, from A, X and Y, low byte first. |
+| `$0436` | `BAS_CHKCOM` | Skips the comma at TXTPTR, else raises SYNTAX ERROR; A is the next character. |
+| `$0439` | `BAS_FRMNUM` | Evaluates the numeric expression at TXTPTR into FAC; a string raises TYPE MISMATCH. |
+| `$043C` | `BAS_FRMEVL` | Evaluates any expression at TXTPTR into FAC; VALTYP is $FF for a string, whose descriptor address is then in FAC+3 and FAC+4. |
+| `$043F` | `BAS_GETADR` | Converts FAC to a 16-bit value in LINNUM, A (high) and Y (low); outside 0-65535 raises ILLEGAL QUANTITY. |
+| `$0442` | `BAS_GETBYT` | Evaluates the numeric expression at TXTPTR into X; outside 0-255 raises ILLEGAL QUANTITY. |
+| `$0445` | `BAS_PTRGET` | Finds or creates the variable named at TXTPTR and returns its value's address in VARPNT, A (low) and Y (high). |
+| `$0448` | `BAS_ERROR` | Raises the BASIC error whose code is in X (basic.json errors): maps bank 0, prints it and returns to READY. |
+| `$044B` | `BAS_LINPRT` | Prints A (high) and X (low) as an unsigned decimal, with PRINT's leading space. |
+
+The `BAS_` entries jump to BASIC's own routines (`CHKCOM`, `FRMNUM`, `FRMEVL`, `GETADR`, `GETBYT`, `PTRGET`, `ERROR`, `LINPRT`), so they work only while BASIC is in memory.
