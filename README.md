@@ -35,10 +35,22 @@ same sources render as a website and as a printable PDF.
 | Book | Folder | State |
 | --- | --- | --- |
 | Mapping Clementina | [mapping/](mapping/src/SUMMARY.md) | First draft |
+| Programmer's Reference Guide | [programmers-reference/](programmers-reference/src/SUMMARY.md) | First draft |
 
 With [mdBook](https://rust-lang.github.io/mdBook/guide/installation.html)
 installed, `mdbook build mapping` writes the website to `mapping/book/`, and
 `mdbook serve mapping` previews it while you edit.
+
+## Checking the books
+
+- `node tools/generate-tables.mjs --check` checks the generated tables against
+  the SDK.
+- `node tools/check-dictionary.mjs` checks that the Programmer's Reference
+  dictionary has an entry for every BASIC keyword, with the spec's syntax.
+- `tools/run-examples.py programmers-reference/src` runs every example in the
+  book in the emulator (a `clementina-6502` checkout next to this one, Go,
+  and cc65 for the assembly examples) and checks the output printed in the
+  book.
 
 ## License
 
