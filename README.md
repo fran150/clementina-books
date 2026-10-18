@@ -32,6 +32,15 @@ commit, never written by hand: `node tools/generate-tables.mjs` writes them to
 Each book is an [mdBook](https://rust-lang.github.io/mdBook/) project; the
 same sources render as a website and as a printable PDF.
 
+| Book | Folder | State |
+| --- | --- | --- |
+| Mapping Clementina | [mapping/](mapping/src/SUMMARY.md) | Part I being drafted |
+
+With [mdBook](https://rust-lang.github.io/mdBook/guide/installation.html)
+installed, `mdbook build mapping` writes the website to `mapping/book/`, and
+`mdbook serve mapping` previews it while you edit. Chapters not written yet
+show in the table of contents without a link.
+
 ## License
 
 The books are licensed under

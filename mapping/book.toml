@@ -1,0 +1,6 @@
+[book]
+title = "Mapping Clementina"
+language = "en"
+src = "src"
+
+[output.html]
