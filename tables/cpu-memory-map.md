@@ -2,13 +2,16 @@
 
 ### CPU memory map
 
+<!-- ANCHOR: regions -->
 | Range | Size | Region | Description |
 | --- | --- | --- | --- |
 | `$00-$7FFF` | 32,768 | `BASE_RAM` | 32 KiB of RAM, always present: zero page, stack, system pages, the kernel image and the start of BASIC's workspace. |
 | `$8000-$BFFF` | 16,384 | `EXTENDED_RAM_WINDOW` | 16 KiB window into 512 KiB of banked RAM; VIA Port A PA0-PA4 select one of 32 banks. |
 | `$C000-$DFFF` | 8,192 | `IO` | Eight 1 KiB device slots. |
 | `$E000-$FFFF` | 8,192 | `MIA` | MIA is selected for the whole region but sees only A0-A4: its 32 registers at $FFE0-$FFFF repeat every 32 bytes below. A mirror is the same register, side effects included; programs use $FFE0-$FFFF only. |
+<!-- ANCHOR_END: regions -->
 
+<!-- ANCHOR: io-slots -->
 I/O slots:
 
 | Range | Select | Device | Description |
@@ -21,7 +24,9 @@ I/O slots:
 | `$D400-$D7FF` | `IOCS5` | free | Free slot on the expansion headers; a card claims it by jumpering this select line. |
 | `$D800-$DBFF` | `IOCS6` | free | Free slot on the expansion headers; a card claims it by jumpering this select line. |
 | `$DC00-$DFFF` | `IOCS7` | free | Free slot on the expansion headers; a card claims it by jumpering this select line. |
+<!-- ANCHOR_END: io-slots -->
 
+<!-- ANCHOR: via -->
 VIA registers (repeating every 16 bytes in slot 0):
 
 | Address | Name | Description |
@@ -42,7 +47,9 @@ VIA registers (repeating every 16 bytes in slot 0):
 | `$C00D` | `VIA_IFR` | Interrupt flags. The kernel's IRQ handler checks bit 6 (Timer 1); other sources are free. |
 | `$C00E` | `VIA_IER` | Interrupt enable. The kernel enables only Timer 1, at reset and at warm start, which turn every other source off. |
 | `$C00F` | `VIA_ORA_NH` | Port A data without handshake. Same pins as ORA, so PA0-PA4 still select the bank. |
+<!-- ANCHOR_END: via -->
 
+<!-- ANCHOR: zero-page -->
 Zero page (`$0000-$00FF`):
 
 | Range | Block | Owner | Description |
@@ -139,7 +146,9 @@ Zero page (`$0000-$00FF`):
 | `$FA` | 1 | `KLOAD_CHUNKLEN` | kernel | KERN_LOAD: bytes read this round. |
 | `$FB` | 1 | `KLOAD_SCRATCH` | kernel | KERN_LOAD: header and boundary scratch. |
 | `$FC` | 4 |  | kernel | Spare. The kernel grows into these first, then into $E0-$E7. |
+<!-- ANCHOR_END: zero-page -->
 
+<!-- ANCHOR: stack -->
 Stack (`$0100-$01FF`):
 
 | Range | Block | Owner | Description |
@@ -151,7 +160,9 @@ Stack (`$0100-$01FF`):
 | --- | --- | --- | --- | --- |
 | `$01FC` | 2 |  | basic | Staged link of a numbered line (INPUTBUFFER-4). The high byte is set to $01 before the copy; the low byte is a don't-care, and BASIC's deepest push lands on it. |
 | `$01FE` | 2 |  | basic | Staged line number (INPUTBUFFER-2), copied from LINNUM. INPUT stores its leading comma at $01FF. |
+<!-- ANCHOR_END: stack -->
 
+<!-- ANCHOR: input-page -->
 Input page (`$0200-$02FF`):
 
 | Range | Block | Owner | Description |
@@ -167,7 +178,9 @@ Input page (`$0200-$02FF`):
 | `$02F8` | 4 | `CLOCK_MS` | kernel | Milliseconds since MIA reset, little-endian, wraps at 2^32 (about 49.7 days). |
 | `$02FC` | 3 | `CLOCK_60HZ` | kernel | MIA's 60 Hz count, little-endian, wraps at 5,184,000 (24 hours). BASIC's TI reads it; KERN_SETTIM sets it. |
 | `$02FF` | 1 | `CLOCK_VERSION` | kernel | 1 when MIA filled the snapshot. |
+<!-- ANCHOR_END: input-page -->
 
+<!-- ANCHOR: kernel-variables -->
 Kernel variables (`$0300-$03FF`):
 
 | Range | Block | Owner | Description |
@@ -209,3 +222,4 @@ Kernel variables (`$0300-$03FF`):
 | `$03FD` | 1 | `BASIC_DEFAULT_ATTR` | basic | Default output attribute set by COLOR, FLIPX, FLIPY and ALT. |
 | `$03FE` | 1 | `BASIC_STYLE_MASK` | basic | Style override mask set by STYLE n, in overlay-attribute bit form. |
 | `$03FF` | 1 | `STYLE_BASE_LEN` | basic | Tokenizer scratch: the line's length before its style sidecar. |
+<!-- ANCHOR_END: kernel-variables -->

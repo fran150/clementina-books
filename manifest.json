@@ -1,13 +1,13 @@
 {
   "purpose": "Reference commit per repository: the last commit of each repo's main branch that the books were reviewed against. A regeneration reviews git log and diff from each commit to main, updates the books, then advances the commit.",
-  "reviewedAt": "2026-10-11",
+  "reviewedAt": "2026-10-18",
   "repositories": [
-    { "name": "clementina-6502", "repository": "fran150/clementina-6502", "branch": "main", "commit": "df5a581c7c57c2fe0c333c60492bd8824cb0ad2c", "role": "emulator" },
-    { "name": "clementina-mia", "repository": "fran150/clementina-mia", "branch": "main", "commit": "5e083c5933ef6a9ac53235ec97fa87c6b57af616", "role": "MIA firmware (Raspberry Pi Pico 2)" },
-    { "name": "clementina-rom", "repository": "fran150/clementina-rom", "branch": "main", "commit": "f3d91a5069896ff17130bb3a8a1a153d03700b0e", "role": "kernel, BASIC, WozMon" },
-    { "name": "clementina-sdk", "repository": "fran150/clementina-sdk", "branch": "main", "commit": "cb1429d604521bb2e3bceafb191517911dd595dc", "role": "developer contract (specs/*.json), tools, VS Code extension" },
-    { "name": "clementina-studio", "repository": "fran150/clementina-studio", "branch": "main", "commit": "4779564ed5031f9cc9b412af65c425bbaaaf8aad", "role": "asset authoring tool" },
-    { "name": "clementina-video-client", "repository": "fran150/clementina-video-client", "branch": "main", "commit": "c0f6b717e6e6ea2bdfcfdd363dd15e52a211cf59", "role": "host display and input client" },
+    { "name": "clementina-6502", "repository": "fran150/clementina-6502", "branch": "main", "commit": "7dfccea2e7772f3791e9f0842abe1719408290c9", "role": "emulator" },
+    { "name": "clementina-mia", "repository": "fran150/clementina-mia", "branch": "main", "commit": "5854e8ac298bff7818ab06b995f141863cdb45c9", "role": "MIA firmware (Raspberry Pi Pico 2)" },
+    { "name": "clementina-rom", "repository": "fran150/clementina-rom", "branch": "main", "commit": "9f52c33fafc7bf56b48dde2188af22520eaa9161", "role": "kernel, BASIC, WozMon" },
+    { "name": "clementina-sdk", "repository": "fran150/clementina-sdk", "branch": "main", "commit": "7e4eba7d03aef4cdaa02251dfb415bb302ca2c56", "role": "developer contract (specs/*.json), tools, VS Code extension" },
+    { "name": "clementina-studio", "repository": "fran150/clementina-studio", "branch": "main", "commit": "4afcc94b15e78d1b42e13c3eb90e42ea8ecabc4d", "role": "asset authoring tool" },
+    { "name": "clementina-video-client", "repository": "fran150/clementina-video-client", "branch": "main", "commit": "d3ebde6b09a5ba0598b57f9ab7de86f65647e8a7", "role": "host display and input client" },
     { "name": "clementina-hardware", "repository": "fran150/clementina-hardware", "branch": "main", "commit": "95e4852e25e259d1704ed6bcb1e8d44f5d9603b3", "role": "KiCad schematic, board and BOM" }
   ]
 }
