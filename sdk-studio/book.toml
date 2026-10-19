@@ -1,0 +1,6 @@
+[book]
+title = "Clementina SDK & Studio Guide"
+language = "en"
+src = "src"
+
+[output.html]
