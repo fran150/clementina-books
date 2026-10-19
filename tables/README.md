@@ -10,6 +10,9 @@ A chapter includes a table with mdBook, for example
 `cpu-memory-map.md` marks each part with an mdBook anchor (`regions`,
 `io-slots`, `via`, `zero-page`, `stack`, `input-page`, `kernel-variables`), so a
 chapter can include one part: `{{#include ../../tables/cpu-memory-map.md:via}}`.
+`sdk-schemas.md` does the same with one anchor per file format (`project`,
+`palette`, `palette-config`, `tileset`, `background`, `overlay`, `shape`,
+`animation`, `instrument`, `sound`, `song`, `load-plan`).
 
 | Table | Spec | Used by |
 | --- | --- | --- |
@@ -32,6 +35,9 @@ chapter can include one part: `{{#include ../../tables/cpu-memory-map.md:via}}`.
 | `kernel-abi.md` | `kernel-abi.json` | Programmer's Reference, Mapping |
 | `labels.md` | most specs | Mapping |
 | `cpu-memory-map.md` | `cpu-memory-map.json` | Mapping |
+| `sdk-schemas.md` | `schema/*.schema.json` | SDK & Studio Guide |
+| `sdk-asset-limits.md` | `assets.json` | SDK & Studio Guide |
+| `sdk-automation.md` | `emulator-automation.json` | SDK & Studio Guide |
 | `basic-keywords.md` | `basic.json` | User's Manual, Programmer's Reference |
 | `basic-errors.md` | `basic.json` | User's Manual, Programmer's Reference |
 | `basic-tokens.md` | `basic.json` | Programmer's Reference |

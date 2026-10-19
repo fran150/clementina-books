@@ -91,6 +91,108 @@ const runs = list => list.reduce((out, n) => (out.length && out.at(-1)[1] === n 
 const keyName = key => (key === 0x20 ? 'Space' : String.fromCharCode(key).replace(/[!-\/:-@[-`{}~]/g, '\\$&'));
 
 // ---------------------------------------------------------------------------------------------
+// SDK file formats (specs/schema/*.json) and asset limits (specs/assets.json)
+
+/** The schemas the SDK & Studio Guide documents, in the book's order: [anchor, file]. */
+export const SCHEMAS = [
+  ['project', 'project.schema.json'], ['palette', 'palette.schema.json'],
+  ['palette-config', 'palette-config.schema.json'], ['tileset', 'tileset.schema.json'],
+  ['background', 'background.schema.json'], ['overlay', 'overlay.schema.json'],
+  ['shape', 'shape.schema.json'], ['animation', 'animation.schema.json'],
+  ['instrument', 'instrument.schema.json'], ['sound', 'sound.schema.json'],
+  ['song', 'song.schema.json'], ['load-plan', 'load-plan.schema.json'],
+];
+
+/** A schema node's type, as words: `string`, `integer or null`, `array of object`. */
+function schemaType(node) {
+  if ('const' in node) return typeof node.const === 'number' ? 'integer' : typeof node.const;
+  if (node.enum) return [...new Set(node.enum.map(v => (typeof v === 'number' ? 'integer' : typeof v)))].join(' or ');
+  const alts = node.anyOf ?? node.oneOf;
+  if (alts && !node.type) return [...new Set(alts.map(schemaType))].join(' or ');
+  if (node.type === 'array') return node.items ? `array of ${schemaType(node.items)}` : 'array';
+  return Array.isArray(node.type) ? node.type.join(' or ') : node.type ?? 'any';
+}
+
+/** A schema node's own rules: fixed value, choices, pattern, range, length, item count. */
+function schemaRule(node) {
+  // Hex only where a range reaches into addresses ($8000 up), as in a load address or a MIA RAM offset.
+  const wide = node.minimum >= 0 && node.maximum >= 0x8000, out = [], num = n => (wide && n >= 0x100 ? `${n} (${hex(n)})` : `${n}`);
+  if ('const' in node) out.push(`always ${code(JSON.stringify(node.const))}`);
+  if (node.enum) out.push(`one of ${node.enum.map(v => code(JSON.stringify(v))).join(', ')}`);
+  if (node.pattern) out.push(`matches ${code(node.pattern)}`);
+  if (node.minimum !== undefined && node.maximum !== undefined) out.push(`${num(node.minimum)} to ${num(node.maximum)}`);
+  else if (node.minimum !== undefined) out.push(`at least ${num(node.minimum)}`);
+  else if (node.maximum !== undefined) out.push(`at most ${num(node.maximum)}`);
+  const len = (lo, hi, unit) => (lo === 1 && hi === undefined ? 'not empty' : lo !== undefined && hi !== undefined ? (lo === hi ? `exactly ${lo} ${unit}` : `${lo} to ${hi} ${unit}`)
+    : lo !== undefined ? `at least ${lo} ${unit}` : hi !== undefined ? `at most ${hi} ${unit}` : null);
+  const chars = len(node.minLength, node.maxLength, 'characters'), items = len(node.minItems, node.maxItems, 'items');
+  if (chars) out.push(chars);
+  if (items) out.push(items);
+  if (node.uniqueItems) out.push('no duplicates');
+  if (node.type === 'array' && node.items && node.items.type !== 'object' && node.items.type !== 'array') { const r = schemaRule(node.items); if (r) out.push(`each ${r}`); }
+  const alts = node.anyOf ?? node.oneOf;
+  if (alts && !node.type && alts.every(a => !a.properties)) for (const a of alts) { const r = schemaRule(a); if (r) out.push(`${schemaType(a)}: ${r}`); }
+  if (node.propertyNames?.pattern) out.push(`names match ${code(node.propertyNames.pattern)}`);
+  return out.join('; ');
+}
+
+/** Every field of a schema as rows [path, type, required, rule]; nested objects and arrays use `a.b`, `a[]`. */
+export function schemaRows(node, prefix = '', required = true) {
+  const rows = [];
+  if (prefix) rows.push([code(prefix), schemaType(node), required ? 'yes' : '', schemaRule(node)]);
+  const object = node.type === 'object' || node.properties;
+  if (object) {
+    const req = new Set(node.required ?? []);
+    for (const [name, child] of Object.entries(node.properties ?? {})) rows.push(...schemaRows(child, prefix ? `${prefix}.${name}` : name, req.has(name)));
+    const extra = node.additionalProperties;
+    if (extra && typeof extra === 'object') rows.push(...schemaRows(extra, `${prefix}.<name>`, false));
+    const choice = node.anyOf?.filter(a => a.required);
+    if (choice?.length) rows.push([code(prefix || '(top level)'), '', '', `needs at least one of ${choice.flatMap(a => a.required).map(code).join(', ')}`]);
+  }
+  if (node.type === 'array' && node.items) {
+    const item = node.items, branches = item.oneOf ?? item.anyOf;
+    if (branches?.some(b => b.properties)) {
+      for (const b of branches) {
+        const kind = b.properties?.kind?.const;
+        rows.push(...schemaRows({...b, required: b.required}, `${prefix}[${kind ? `kind=${kind}` : ''}]`, true).slice(1));
+      }
+    } else if (item.type === 'object' || item.type === 'array') rows.push(...schemaRows(item, `${prefix}[]`, true).slice(1));
+  }
+  return rows;
+}
+
+/** What each `specs/assets.json` constraint means; a constraint missing here fails generation. */
+export const ASSET_LIMITS = {
+  paletteColors: 'Colors in a palette',
+  paletteBanks: 'Palette banks in palette RAM (and in a palette config)',
+  tilesetBytes: 'Bytes in one tileset (one CHR bank)',
+  tilesPerTileset: 'Tiles in a tileset (per plane at 1bpp)',
+  tilesetBpp: 'Bits per pixel a tileset may use',
+  maxSpritesPerShape: 'Sprites in one shape',
+  maxShapesPerProject: 'Shapes in a project',
+  maxAnimationsPerProject: 'Animations in a project',
+  animationTickHz: 'Animation ticks per second',
+  maxFramesPerAnimation: 'Frames in one animation',
+  maxBackgroundsPerProject: 'Backgrounds in a project',
+  maxBackgroundDimension: 'Cells across or down a background',
+  maxBackgroundCells: 'Cells in one background',
+  maxOverlaysPerProject: 'Overlays in a project',
+  overlayColumns: 'Overlay columns',
+  overlayRows: 'Overlay rows',
+  overlayCells: 'Overlay cells',
+  maxInstrumentsPerProject: 'Instruments in a project',
+  maxSoundsPerProject: 'Sound effects in a project',
+  maxSongsPerProject: 'Songs in a project',
+  maxSoundFrames: 'Frames in one sound effect',
+  soundFrameHz: 'Sound effect frames per second',
+  maxSongSteps: 'Steps in one song',
+  songVoices: 'Voices in a song',
+  songStepsPerBeat: 'Steps per beat a song may use',
+  songBpm: 'Song tempo, beats per minute (lowest, highest)',
+  audioTickHz: 'MIA audio sample rate (Hz)',
+};
+
+// ---------------------------------------------------------------------------------------------
 // Tables, one file each. `sources` names the spec files a table reads.
 
 export const TABLES = [
@@ -284,6 +386,32 @@ export const TABLES = [
     const e = s['basic.json'].errors, f = e.format;
     return [table(['Code', 'Name', 'Message', 'Raised when'], e.entries.map(x => [code(hex(x.code)), code(x.name), code(`${f.prefix}${x.message}${f.suffix}`), x.trigger])),
       '', 'Other messages:', '', table(['Message', 'Printed when'], e.messages.map(m => [code(m.text), m.trigger]))].join('\n');
+  }},
+
+  {file: 'sdk-schemas.md', title: 'Project and asset file fields', sources: SCHEMAS.map(([, f]) => `schema/${f}`), render: s =>
+    SCHEMAS.flatMap(([anchor, f]) => {
+      const schema = s[`schema/${f}`];
+      return [`<!-- ANCHOR: ${anchor} -->`, `#### ${schema.title}`, '', `\`${f}\`${schema.properties?.format?.const ? `, format ${code(schema.properties.format.const)}` : ''}`, '',
+        table(['Field', 'Type', 'Required', 'Rule'], schemaRows(schema)), `<!-- ANCHOR_END: ${anchor} -->`, ''];
+    }).join('\n').trimEnd()},
+
+  {file: 'sdk-asset-limits.md', title: 'Asset limits', sources: ['assets.json'], render: s => {
+    const a = s['assets.json'], value = v => (Array.isArray(v) ? v.join(', ') : bytes(v));
+    const unknown = Object.keys(a.constraints).filter(k => !ASSET_LIMITS[k]);
+    if (unknown.length) throw Error(`assets.json constraints without a label in ASSET_LIMITS: ${unknown.join(', ')}`);
+    return [table(['Limit', 'Value', 'Spec name'], Object.entries(a.constraints).map(([k, v]) => [ASSET_LIMITS[k], value(v), code(k)])),
+      '', `Asset file formats (portable format version ${a.portableFormatVersion}):`, '',
+      table(['Asset', '`format`'], Object.entries(a.formats).map(([k, v]) => [k, code(v)]))].join('\n');
+  }},
+
+  {file: 'sdk-automation.md', title: 'Emulator automation methods', sources: ['emulator-automation.json'], render: s => {
+    const x = s['emulator-automation.json'], t = x.transport, lim = x.policyLimits;
+    return [`Transport: ${t.protocol} ${t.method} to ${code(t.path)} on ${code(t.bind)}; the port is chosen at start (${code('--port 0')} picks a free one).`,
+      `Every request carries ${x.request.required.map(code).join(' and ')}; optional fields are ${x.request.optional.map(code).join(', ')}; unknown fields are rejected.`,
+      '', table(['Method', 'Parameters', 'Result', 'Behavior'],
+        Object.entries(x.methods).map(([n, m]) => [code(n), (m.params ?? []).map(code).join(', '), m.result, m.behavior ?? ''])),
+      '', 'Limits:', '', table(['Limit', 'Value'], Object.entries(lim).map(([k, v]) => [code(k), bytes(v)])),
+      '', `Stop reasons: ${x.execution.stopReasons.map(code).join(', ')}.`].join('\n');
   }},
 ];
 

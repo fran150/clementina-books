@@ -36,6 +36,7 @@ same sources render as a website and as a printable PDF.
 | --- | --- | --- |
 | Mapping Clementina | [mapping/](mapping/src/SUMMARY.md) | First draft |
 | Programmer's Reference Guide | [programmers-reference/](programmers-reference/src/SUMMARY.md) | First draft |
+| Clementina SDK & Studio Guide | [sdk-studio/](sdk-studio/src/SUMMARY.md) | First draft |
 
 With [mdBook](https://rust-lang.github.io/mdBook/guide/installation.html)
 installed, `mdbook build mapping` writes the website to `mapping/book/`, and
