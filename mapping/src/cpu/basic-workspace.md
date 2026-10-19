@@ -147,3 +147,26 @@ doesn't protect any region, and choosing a safe place is the programmer's job.
 starts somewhere in about `$39FE-$3AC0`. The cause is not found yet. `TXTTAB`
 is far above that range today, so it only matters if the image ever shrinks
 that much.
+
+## Address entries for this build
+
+The content of the workspace moves as BASIC lines and variables change.
+These range boundaries identify where the workspace sits, not fixed
+addresses for individual variables. The zero-page pointers above locate
+its parts at any moment.
+
+### 25504–32767　　$63A0–$7FFF　　BASIC workspace in base RAM
+
+The workspace starts immediately after the resident image in this build.
+Program lines grow upward from its first byte. Variables and arrays follow
+the program; free space and strings occupy the higher addresses. A larger
+image would move this starting address, so read `TXTTAB` at `$33-$34` if
+software needs the actual beginning.
+
+### 32768–49151　　$8000–$BFFF　　BASIC workspace in extended RAM bank 0
+
+The same workspace continues through the banked window while bank 0 is
+selected. Strings begin near its upper end and grow downward. BASIC depends
+on bank 0 being present whenever it runs; a program can reserve part of
+this range by lowering `MEMSIZ` and calling `CLEAR` before putting its own
+code or data there.

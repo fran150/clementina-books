@@ -13,11 +13,6 @@ registers repeat every 32 bytes below `$FFE0`. A mirror is the same
 register, side effects included, so `$E000-$FFDF` is never used
 ([The address decode](decode.md#what-each-chip-sees)).
 
-{{#include ../../../tables/mia-registers.md}}
-
-Access: `rw` read and write; `r` read only; `w` write only; `r-pop` reading
-takes the next value from a queue; `r-clear` reading clears the register.
-
 ## The index windows: `$FFE0-$FFE1`, `$FFE4-$FFE5`
 
 MIA's RAM is not in the CPU's address space. The CPU reaches it through two
@@ -153,3 +148,202 @@ A program that takes over interrupts writes its handler's address to
 `KERN_IRQ` back before returning to BASIC ([the jump
 table](jump-table.md#taking-over-the-irq)). Warm start restores the IRQ
 vector.
+
+## Address entries
+
+Decimal addresses come first, followed by hexadecimal and the register
+name. Each register repeats every 32 bytes below `$FFE0`; the addresses
+here are the canonical copies at the top of CPU memory.
+
+### 65504　　$FFE0　　IDXA_PORT
+
+Data window A into MIA RAM. Its selected index descriptor determines which
+MIA RAM byte the port reaches. A read returns that byte; a write changes
+it. Depending on the descriptor's flags, either access can advance the
+descriptor's address, so repeated reads or writes can stream through a
+block without changing the CPU address used by the program.
+
+### 65505　　$FFE1　　IDXA_SELECT
+
+Selects one of MIA's 256 index descriptors for window A. Write an index id
+here before using `$FFE0`; MIA then loads the port from that descriptor's
+current address. Selecting an id does not reset its address, so a program
+can keep several descriptors positioned and switch between them.
+
+### 65506　　$FFE2　　CFG_SELECT
+
+Selects a configuration field for the data port at `$FFE3`. Fields
+`$00-$1B` describe the indexes currently bound to windows A and B; fields
+`$20-$22` control CPU speed. Selecting a field loads its current value
+into `CFG_PORT`. An interrupt handler using configuration fields must save
+and restore the selection with `MIA_CTX`.
+
+### 65507　　$FFE3　　CFG_PORT
+
+Reads or writes the configuration field named by `CFG_SELECT`. For an
+index's address, the fields are separate low, middle and high bytes.
+Changing a current-address byte reloads that window's data port, so the
+next read of its index port begins at the new address. Configuration
+fields and their meanings are listed in [Part III](../spaces/config.md).
+
+### 65508　　$FFE4　　IDXB_PORT
+
+Data window B into MIA RAM. It works like window A but has its own selected
+descriptor and data port. A program can therefore read through one window
+while writing through the other, for example to transform a stream of
+bytes. Its descriptor may advance after each access according to its flags.
+
+### 65509　　$FFE5　　IDXB_SELECT
+
+Selects the index descriptor bound to window B at `$FFE4`. The selection
+loads the byte at that descriptor's current address into the port without
+resetting the descriptor. Kernel calls may rebind a window, so code that
+depends on a particular B selection should select it again after a call.
+
+### 65510　　$FFE6　　CMD_PARAM1
+
+First parameter byte for a MIA command. Its meaning depends on the command:
+it may be an index id, a voice mask, or part of an address. Set all needed
+parameter bytes before writing the command id to `CMD_TRIGGER`. An
+interrupt handler that uses commands should preserve the parameter state
+with `MIA_CTX`.
+
+### 65511　　$FFE7　　CMD_PARAM2
+
+Second command parameter byte. Copy commands, for example, use the
+parameter registers to name their source and destination indexes. This
+register by itself starts no action; the command begins only when the id
+is written to `$FFE9`.
+
+### 65512　　$FFE8　　CMD_PARAM3
+
+Third command parameter byte. Some commands use all three bytes for a
+24-bit MIA RAM address or a count; others ignore it. Consult the command's
+entry in [Part III](../spaces/commands.md) before assigning a value.
+
+### 65513　　$FFE9　　CMD_TRIGGER
+
+Writing a command id here queues the operation described by the current
+parameter registers. The CPU can continue while MIA processes it. Read
+status or completion IRQ flags before assuming a long file, copy or audio
+operation has finished; writing a new id is a request, not a synchronous
+subroutine call.
+
+### 65514　　$FFEA　　STATUS_L
+
+Low byte of MIA's current status flags. Bits report states such as a
+running command, a copy in progress or a video update. Reading it does not
+consume a result. [Status codes](../spaces/codes.md) names each bit, and a
+program should test the particular bit it needs rather than comparing the
+whole byte to one fixed value.
+
+### 65515　　$FFEB　　STATUS_H
+
+High byte of MIA's status flags, extending the low byte at `$FFEA`.
+Together they expose more than eight independent conditions. Some flags
+can change while the CPU reads the pair, so software should use the
+command's documented completion condition rather than treating a pair of
+reads as a frozen snapshot.
+
+### 65516　　$FFEC　　ERROR_L
+
+Reading this register removes the oldest code from MIA's error queue.
+When the queue is empty it returns `$00`. Because the read consumes the
+code, a debugger or polling loop can change what a later reader sees;
+store the value if it must be reported after inspection. [Error
+codes](../spaces/codes.md#errors-ffec) explain each nonzero value.
+
+### 65517　　$FFED　　ERROR_H
+
+The high error register is currently unused. It is read-only and does not
+pop the error queue; active error codes come from `ERROR_L` at `$FFEC`.
+Programs should not use it as storage or infer future behavior from its
+current value.
+
+### 65518　　$FFEE　　IRQ_MASK_L
+
+Low byte of the interrupt-enable mask for MIA events. Setting a bit lets
+the corresponding pending event pull the CPU's IRQ line; clearing it
+prevents that source from doing so. The bit positions match the event list
+in [Status, IRQ and error codes](../spaces/codes.md).
+
+### 65519　　$FFEF　　IRQ_MASK_H
+
+High byte of the MIA IRQ mask. It enables or disables event bits 8-15 in
+the same way as `$FFEE` handles bits 0-7. A masked event can still have
+status; masking controls whether it requests an interrupt, not whether
+the underlying event occurred.
+
+### 65520　　$FFF0　　IRQ_STATUS_L
+
+Shows the low pending IRQ bits, then clears MIA's top-level pending status
+when read. That read also releases MIA's IRQ request. If a handler needs
+both bytes, it must read `IRQ_STATUS_H` at `$FFF1` first, then this byte,
+and save both values before chaining to the kernel's handler.
+
+### 65521　　$FFF1　　IRQ_STATUS_H
+
+Shows the high pending IRQ bits without clearing them. Bit 15 indicates
+that at least one enabled MIA event is requesting the CPU's IRQ line.
+Read this byte before `$FFF0` when the same interrupt needs both halves;
+reading the low byte first would clear the pending report.
+
+### 65522　　$FFF2　　INPUT_STATUS
+
+Summarizes the current input devices and held controls. It reports state,
+whereas `INPUT_CHAR` at `$FFF3` provides a queue of typed characters.
+Use the status bits when a program needs to know whether a control is down
+or which source is active, not merely which text byte arrived next.
+
+### 65523　　$FFF3　　INPUT_CHAR
+
+Reading pops the next byte from MIA's text input queue. It returns `$00`
+when no character is waiting. A program polling the queue consumes input
+that BASIC or the kernel might otherwise receive, so cooperate with the
+foreground input path when sharing the console.
+
+### 65524　　$FFF4　　INPUT_CHAR_COUNT
+
+The number of bytes currently waiting in the text input queue, up to 64.
+Reading the count does not remove a character. It can change immediately
+as input arrives, so code should still handle `$00` from `INPUT_CHAR`
+instead of assuming a count read guarantees a later byte.
+
+### 65525　　$FFF5　　MIA_CTX
+
+Write `$01` to push the current window selections, their bound descriptor
+state, configuration selection and command parameters onto MIA's context
+stack. Write `$02` to restore the last pushed state and reload the ports.
+The stack is four deep; overflow and underflow queue errors. Interrupt
+handlers use this around MIA operations so the interrupted program finds
+its windows as it left them. Reading returns the last value written, not
+the stack depth.
+
+### 65526–65529　　$FFF6–$FFF9　　Reserved
+
+These four registers are unassigned. Reads return zero and writes are
+ignored. Their addresses still mirror through `$E000-$FFDF` like every
+other MIA register, so the mirrored copies are not extra RAM.
+
+### 65530–65531　　$FFFA–$FFFB　　NMI_VEC_L / NMI_VEC_H
+
+The 65C02 fetches this two-byte address when a non-maskable interrupt
+arrives. MIA exposes the bytes as writable registers; the kernel normally
+points them at its bare `RTI` handler. A program taking over NMI must
+install a valid handler and preserve any state it interrupts.
+
+### 65532–65533　　$FFFC–$FFFD　　RESET_VEC_L / RESET_VEC_H
+
+The CPU reads this address after reset. During the boot copy MIA points it
+at a small loader in its register block; afterward it points at
+`KERN_COLDSTART` at `$0400`. Changing it affects the next reset rather
+than jumping there immediately, and an invalid value could prevent the
+machine from starting normally.
+
+### 65534–65535　　$FFFE–$FFFF　　IRQ_VEC_L / IRQ_VEC_H
+
+The 65C02 fetches this two-byte address for an IRQ or `BRK`. The kernel
+normally points it at `KERN_IRQ`. A program may install its own handler,
+but it must write both bytes while interrupts are masked so the CPU cannot
+fetch a half-updated address. Restore the kernel vector before returning
+to BASIC unless warm start will do it for you.
