@@ -1,0 +1,6 @@
+[book]
+title = "Clementina Programmer's Reference Guide"
+language = "en"
+src = "src"
+
+[output.html]

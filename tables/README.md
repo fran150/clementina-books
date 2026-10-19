@@ -34,3 +34,4 @@ chapter can include one part: `{{#include ../../tables/cpu-memory-map.md:via}}`.
 | `cpu-memory-map.md` | `cpu-memory-map.json` | Mapping |
 | `basic-keywords.md` | `basic.json` | User's Manual, Programmer's Reference |
 | `basic-errors.md` | `basic.json` | User's Manual, Programmer's Reference |
+| `basic-tokens.md` | `basic.json` | Programmer's Reference |
