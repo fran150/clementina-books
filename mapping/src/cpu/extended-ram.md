@@ -80,3 +80,14 @@ Two things to know:
   need for `SEI` around a bank switch.
 
 Reset sets `DDRA` to `%00011111`, making PA0-PA4 outputs, and maps bank 0.
+
+## Address entry
+
+### 32768–49151　　$8000–$BFFF　　Extended RAM window
+
+These CPU addresses refer to one 16 KiB bank at a time, selected by the
+low five bits of VIA Port A at `$C001`. Bank 0 holds the upper part of
+BASIC's workspace; banks 1–31 are available to programs. The same CPU
+address therefore names different physical bytes after a bank change.
+Restore bank 0 before returning to BASIC, or it will see the wrong program
+and variable data.

@@ -6,8 +6,6 @@ The I/O area is eight slots of 1 KiB, each with its own chip select line
 from the decoder ([The address decode](decode.md)). Slot 0 is the board's
 65C22 VIA; slots 1-7 go to the two expansion headers.
 
-{{#include ../../../tables/cpu-memory-map.md:io-slots}}
-
 ## Expansion slots 1-7: `$C400-$DFFF`
 
 The expansion headers J1 and J2 carry A0-A9, the data bus, PHI2, R/W, the
@@ -25,8 +23,6 @@ and RDY. The pin-out is in clementina-hardware's README.
 
 The W65C22S has 16 registers on A0-A3, so they repeat every 16 bytes through
 the slot. Use `$C000-$C00F` (49152-49167).
-
-{{#include ../../../tables/cpu-memory-map.md:via}}
 
 What the system uses, part by part:
 
@@ -141,3 +137,170 @@ through a diode against a 4.7 kΩ pull-up, so none can fight another. The
 CPU only sees that someone wants attention; a handler finds out who by
 checking each source: the VIA's `IFR`, MIA's `IRQ_STATUS`
 ([The MIA registers](mia-registers.md)), and any card's own status.
+
+## Address entries
+
+Decimal addresses come first, followed by hexadecimal and the register or
+slot name. The VIA's sixteen registers repeat every 16 bytes in slot 0;
+use the first copy at `$C000-$C00F`.
+
+### 49152　　$C000　　VIA_ORB
+
+Data register for VIA Port B. Its eight PB pins reach the user port, and
+the kernel leaves them available to programs. Set the matching direction
+bits in `VIA_DDRB` at `$C002` before driving outputs. Reading a pin
+configured as input samples its external level.
+
+### 49153　　$C001　　VIA_ORA
+
+Data register for VIA Port A. Bits 0-4 drive the five high address lines
+of extended RAM, selecting one of 32 banks at `$8000-$BFFF`. A program may
+write a bank number here temporarily, but must map bank 0 before returning
+to BASIC. Bits 5-7 are not connected to the bank chip.
+
+### 49154　　$C002　　VIA_DDRB
+
+Direction register for Port B: a bit set to 1 makes that PB pin an output,
+and 0 makes it an input. The kernel does not use Port B, so a program can
+configure its pins for devices on the user port. The matching data values
+are read or written through `VIA_ORB` at `$C000`.
+
+### 49155　　$C003　　VIA_DDRA
+
+Direction register for Port A. The kernel sets bits 0-4 to outputs so the
+bank number in `VIA_ORA` reaches extended RAM. Changing those bits to
+inputs would make the bank selection unreliable. The upper three bits are
+not used by the system.
+
+### 49156　　$C004　　VIA_T1CL
+
+Low byte of Timer 1's current count. The kernel uses Timer 1 for its
+regular interrupt; reading this register also clears Timer 1's interrupt
+flag. A program inspecting it must account for that side effect, because
+clearing the flag can suppress a tick the kernel was about to service.
+
+### 49157　　$C005　　VIA_T1CH
+
+High byte of Timer 1's current count. Writing it starts the timer using
+the current latch value. The kernel owns Timer 1, so changing this byte
+affects its tick counter and cursor blink as well as the next interrupt.
+
+### 49158　　$C006　　VIA_T1LL
+
+Low byte of Timer 1's reload latch. The kernel normally loads 6,250
+cycles, giving 192 interrupts per second at a 1.2 MHz CPU clock. Changing
+the latch changes the future interrupt rate; see the example in the
+[jump-table chapter](jump-table.md#taking-over-the-irq).
+
+### 49159　　$C007　　VIA_T1LH
+
+High byte of Timer 1's reload latch, paired with `$C006`. Together the
+two bytes form the timer period used in free-running mode. A program that
+alters them changes how often `KJIFFY` advances; MIA's independent `TI`
+clock is unaffected.
+
+### 49160　　$C008　　VIA_T2CL
+
+Low byte of Timer 2's count. Unlike Timer 1, Timer 2 is not used by the
+kernel, so an application can use it for its own timing or user-port work.
+It still shares the VIA's interrupt line; enable and service its interrupt
+properly if the application uses one.
+
+### 49161　　$C009　　VIA_T2CH
+
+High byte of Timer 2's count. Together with `$C008`, it is Timer 2's
+16-bit counter interface. The kernel leaves the timer free, but warm start
+disables non-Timer-1 VIA interrupts, so a returning application must not
+expect its Timer 2 interrupt setup to persist.
+
+### 49162　　$C00A　　VIA_SR
+
+The VIA's shift register. The kernel does not use it, and it is available
+to an application connected through the user port. Its timing and pin
+behavior are controlled by the shift-register bits in `VIA_ACR` at `$C00B`.
+
+### 49163　　$C00B　　VIA_ACR
+
+Auxiliary control register. The kernel owns bits 6-7 for Timer 1's
+free-running mode and its PB7 output setting; it preserves bits 0-5 when
+it initializes the VIA. Programs using Timer 2 or the shift register can
+change those lower bits without changing the kernel's timer mode.
+
+### 49164　　$C00C　　VIA_PCR
+
+Peripheral control register for the CA1, CA2, CB1 and CB2 user-port pins.
+It selects their edge and handshake behavior. The kernel leaves these
+lines to applications, but an application using their interrupts must
+clear its flags before chaining to the kernel's handler.
+
+### 49165　　$C00D　　VIA_IFR
+
+Interrupt flag register. Each source sets its bit here; bit 6 is Timer 1,
+which the kernel services. A program using another source checks its bit
+and clears it before returning from the handler. Timer 1's flag also
+clears when `VIA_T1CL` is read.
+
+### 49166　　$C00E　　VIA_IER
+
+Interrupt enable register. Writing with bit 7 set enables the sources
+named by the other bits; writing with bit 7 clear disables them. The
+kernel enables only Timer 1 at reset and warm start. An application should
+disable its own sources before returning to BASIC if no handler will
+remain to service them.
+
+### 49167　　$C00F　　VIA_ORA_NH
+
+An alternate way to access Port A without the ordinary handshake action.
+It reaches the same PA pins as `VIA_ORA`, including PA0-PA4 that select the
+extended-RAM bank. It is not a second bank register; a write here changes
+the bank visible at `$8000-$BFFF` just as a write to `$C001` does.
+
+### 49168–50175　　$C010–$C3FF　　VIA mirrors
+
+The VIA sees only address lines A0-A3, so its sixteen registers appear
+again every 16 bytes through the rest of slot 0. For example, `$C010`
+acts exactly like `$C000`, including any read or write side effects. Use
+the first copy when documenting or sharing software so addresses stay
+unambiguous.
+
+### 50176–51199　　$C400–$C7FF　　IOCS1
+
+Expansion slot 1 is selected by `~IOCS1`. No device on the base board
+answers here. An expansion card can claim the slot and define its own
+registers; without one, reads have no defined value and writes do nothing.
+
+### 51200–52223　　$C800–$CBFF　　IOCS2
+
+Expansion slot 2 is selected by `~IOCS2`. Its 1 KiB is available to a card
+on the expansion headers. The card decides which of the ten low address
+lines it decodes, so it may mirror a smaller register set within the slot.
+
+### 52224–53247　　$CC00–$CFFF　　IOCS3
+
+Expansion slot 3 is selected by `~IOCS3`. It has no base-board device and
+therefore no fixed register meanings in this book. Software should access
+it only when a card's own documentation assigns addresses there.
+
+### 53248–54271　　$D000–$D3FF　　IOCS4
+
+Expansion slot 4 is selected by `~IOCS4`. A card can use it for up to
+1 KiB of I/O registers or mirror fewer registers through the range.
+With no card installed, a read is undefined and a write has no target.
+
+### 54272–55295　　$D400–$D7FF　　IOCS5
+
+Expansion slot 5 is selected by `~IOCS5`. It is part of the same shared
+expansion bus as the other free slots, with data lines, control strobes
+and interrupt lines on the headers. No Clementina system component owns it.
+
+### 55296–56319　　$D800–$DBFF　　IOCS6
+
+Expansion slot 6 is selected by `~IOCS6`. A card that claims this select
+line may place its registers here. Programs should use the card's register
+map rather than assuming this range behaves like RAM.
+
+### 56320–57343　　$DC00–$DFFF　　IOCS7
+
+Expansion slot 7 is selected by `~IOCS7`, the last 1 KiB before MIA's
+mirrored register block begins at `$E000`. It is empty on the base board.
+A card may claim it; otherwise reads are undefined and writes go nowhere.

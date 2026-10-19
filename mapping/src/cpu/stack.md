@@ -40,4 +40,34 @@ need to keep.
 A program that replaces BASIC owns the whole page. It sets `S` itself
 (`LDX #$FF`, `TXS`) and may use all of it.
 
-{{#include ../../../tables/cpu-memory-map.md:stack}}
+## Address entries
+
+The decimal address comes first, followed by hexadecimal and the region's
+name. The stack grows toward lower addresses as the CPU pushes bytes.
+
+### 256–507　　$0100–$01FB　　CPU stack
+
+The 65C02 uses this area for return addresses, saved registers and interrupt
+state. The stack pointer holds only the low byte of the next stack address;
+the high byte is always `$01`. A `JSR`, interrupt or push instruction moves
+the pointer down, and a return or pull moves it up. BASIC also leaves its
+`FOR` and `GOSUB` bookkeeping here. The contents depend on the exact path
+through the program, so an ordinary program cannot reserve a fixed slice
+of this area while BASIC is running.
+
+### 508–509　　$01FC–$01FD　　Staged line link
+
+When BASIC stores a numbered line, it builds the line's two-byte link just
+below the input buffer at `$0200`. That link will eventually point to the
+next line in program memory. BASIC writes `$01` into the high byte before
+copying the line; the low byte is temporary and may be touched by the
+deepest stack push. These bytes remain part of the hardware stack at other
+times, so a program should never keep data here.
+
+### 510–511　　$01FE–$01FF　　Staged line number
+
+BASIC places the number of a line being entered here, low byte first, before
+copying the line into its program area. `INPUT` can also place a leading
+comma at `$01FF`. The CPU's cold-start stack begins at the top of page 1,
+so these bytes may be used by early pushes as well. Their role as line
+staging is temporary, not a claim that the top of the stack is free.

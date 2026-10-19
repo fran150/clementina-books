@@ -12,8 +12,6 @@ The table is the first thing in the loaded image, so it always starts at
 `$0400`. It has 26 entries: 18 kernel calls (`KERN_`) and, at the end, 8
 entries into BASIC (`BAS_`).
 
-{{#include ../../../tables/kernel-abi.md}}
-
 ## How the table grows
 
 New calls are added at the end, never in between, and existing entries are
@@ -112,3 +110,196 @@ reuses. Reset and warm start (`KERN_WARMSTART`, WozMon's `Q`) put it back
 for you, and they also restart Timer 1 at 6250 with only its interrupt
 enabled. [I/O and the VIA](io.md#using-another-via-interrupt) has a complete
 example that chains a handler for the VIA's CA1 input.
+
+## Address entries
+
+Each address is the first byte of a three-byte `JMP` instruction in the
+fixed table. Call an entry with `JSR` unless its description says it takes
+over control. Decimal addresses come first, then hexadecimal and the entry
+name.
+
+### 1024　　$0400　　KERN_COLDSTART
+
+The CPU's reset vector points here after MIA has loaded the resident image.
+Cold start initializes the stack, VIA, console and video, prints the banner,
+then starts BASIC. Calling it deliberately restarts the machine's software
+state; it is not a way to return to a running BASIC program.
+
+### 1027　　$0403　　KERN_WARMSTART
+
+This returns to BASIC's `READY` prompt while keeping the stored program and
+variables. Before doing so it resets the stack, IRQ vector, bank selection
+and VIA interrupt setup. WozMon's `Q` uses this path. A program that jumps
+here does not come back to its caller.
+
+### 1030　　$0406　　KERN_CHROUT
+
+Put a character in `A` and call this entry to print it at the current text
+cursor. The routine interprets control characters as cursor or display
+commands; it preserves `A`, `X` and `Y`. Use `KERN_CHROUT_GLYPH` at `$0421`
+when a byte must be drawn as a tile rather than interpreted as a command.
+
+### 1033　　$0409　　KERN_CHRIN
+
+Waits until MIA's text input queue supplies a character, then returns it in
+`A`. The kernel shows and blinks the software cursor while waiting. This is
+the input path BASIC uses for typed lines; a program that cannot pause
+should use `KERN_GETKEY_NB` instead.
+
+### 1036　　$040C　　KERN_GETKEY_NB
+
+Checks MIA's text queue without waiting. Carry set means a character was
+available and `A` contains it; carry clear means the queue was empty.
+Polling this entry lets a program keep running its own loop while still
+accepting typed input.
+
+### 1039　　$040F　　KERN_CLRSCR
+
+Clears the overlay text screen and returns the console cursor home. The
+overlay is the fixed 40-by-25 text layer in MIA RAM, so this does not erase
+the background tile maps or sprite records. Subsequent `KERN_CHROUT` calls
+begin at the top-left cell.
+
+### 1042　　$0412　　KERN_PRHEX
+
+Prints the low four bits of `A` as one hexadecimal digit. It is useful for
+displaying a nibble from a status register without writing a conversion
+routine. The upper four bits of `A` do not appear in the output.
+
+### 1045　　$0415　　KERN_PRBYTE
+
+Prints all eight bits of `A` as two hexadecimal digits. For example, a
+value of 255 appears as `FF`. This is convenient in monitor-like code that
+shows memory bytes or device status.
+
+### 1048　　$0418　　KERN_PRSTR
+
+Prints bytes starting at the address in the zero-page pointer `KPTR`
+(`$F0-$F1`). It stops at a zero byte or after 255 bytes, so the source must
+be a zero-terminated string in readable CPU memory. The routine consumes
+the pointer as an input; it does not discover a BASIC string descriptor for
+you.
+
+### 1051　　$041B　　KERN_LOAD
+
+Loads a PRG file into CPU RAM. `A` selects the extended-RAM bank at
+`$8000-$BFFF`, and `KPTR` can override the file's destination address.
+With carry clear the routine returns after loading; with carry set it jumps
+to the run address in `KTMP` (or the first loaded byte if `KTMP` is zero).
+It may continue across bank boundaries, so a program must choose a
+destination that does not overwrite the kernel.
+
+### 1054　　$041E　　KERN_EDITKEY
+
+Returns the next character of a logical line collected by the screen
+editor, ending with carriage return. The editor can recover text from the
+cursor's screen row, including a wrapped line, rather than only taking
+fresh keystrokes. BASIC uses repeated calls here to obtain its input line.
+
+### 1057　　$0421　　KERN_CHROUT_GLYPH
+
+Draws the value in `A` as a raw tile at the current cursor and advances the
+cursor. Unlike `KERN_CHROUT`, it never interprets the byte as a control
+character. It preserves `A`, `X` and `Y`, which makes it useful when a
+program wants to display a glyph whose code would otherwise control the
+console.
+
+### 1060　　$0424　　KERN_WOZMON
+
+Enters the WozMon memory monitor. Its commands can examine and change CPU
+memory; `Q` returns through `KERN_WARMSTART` to BASIC's prompt without
+discarding the stored program. This call takes over the console rather
+than returning directly to the instruction after `JSR`.
+
+### 1063　　$0427　　KERN_SET_BACKDROP
+
+Sets the backdrop color selector from `A`. The backdrop is the color drawn
+behind all background, sprite and overlay pixels. It does not change the
+contents of a palette or any individual screen cell.
+
+### 1066　　$042A　　KERN_IRQ
+
+The kernel's interrupt handler services the VIA's Timer 1 tick, cursor
+blink and MIA interrupt status. A custom IRQ handler that wants those
+services to continue can restore `A`, `X` and `Y`, then `JMP` here so the
+kernel performs its work and finishes with `RTI`. It is not a routine to
+call from ordinary foreground code.
+
+### 1069　　$042D　　KERN_PLOT
+
+With carry set, reads the cursor position into `X` (row) and `Y` (column).
+With carry clear, attempts to move the cursor to those coordinates and
+returns carry set if they are outside the screen. It maintains the
+software cursor state, which is why callers should use it instead of
+writing `$0300-$0301` directly.
+
+### 1072　　$0430　　KERN_RDTIM
+
+Asks MIA for a clock snapshot and copies it into `$02F8-$02FF`. Carry set
+means the firmware supplied a clock; carry clear means it did not. The
+snapshot includes milliseconds and a 60 Hz time-of-day count. Call it from
+foreground code, then read the bytes before another clock call replaces
+them.
+
+### 1075　　$0433　　KERN_SETTIM
+
+Sets MIA's 60 Hz time-of-day count, the value BASIC exposes as `TI`.
+Supply the three bytes in `A`, `X` and `Y`, low byte first. This changes
+the clock's time-of-day value, not the millisecond counter that measures
+time since MIA started.
+
+### 1078　　$0436　　BAS_CHKCOM
+
+Checks for the comma expected before another argument after a machine-code
+call from BASIC. If present it advances BASIC's text pointer and leaves the
+next character in `A`; if absent it raises `SYNTAX ERROR`. This entry works
+only while BASIC's interpreter is still resident.
+
+### 1081　　$0439　　BAS_FRMNUM
+
+Evaluates a numeric expression at BASIC's current text pointer and places
+the result in its floating-point accumulator, `FAC`. A string expression
+raises `TYPE MISMATCH`. Machine code called by `SYS` can use this entry to
+accept expressions rather than only literal numbers.
+
+### 1084　　$043C　　BAS_FRMEVL
+
+Evaluates an expression of either type at BASIC's current text pointer.
+`VALTYP` at `$17` tells whether the result is numeric or a string. For a
+string, `FAC+3` and `FAC+4` contain the address of its descriptor; a caller
+must check the type before interpreting those bytes.
+
+### 1087　　$043F　　BAS_GETADR
+
+Converts the number currently in `FAC` to an unsigned 16-bit address. It
+returns the value in `LINNUM`, with its low byte in `Y` and high byte in
+`A`. Values outside 0-65535 raise `ILLEGAL QUANTITY`, so callers do not
+need to implement that range check themselves.
+
+### 1090　　$0442　　BAS_GETBYT
+
+Evaluates the numeric expression at BASIC's text pointer and returns an
+8-bit result in `X`. A value outside 0-255 raises `ILLEGAL QUANTITY`.
+Use it for arguments such as a color, register value or bank number when
+the syntax allows a full BASIC expression.
+
+### 1093　　$0445　　BAS_PTRGET
+
+Finds or creates the variable named at BASIC's current text pointer. It
+returns the address of that variable's value in `VARPNT`, with low byte in
+`A` and high byte in `Y`. The caller still has to interpret the bytes
+according to the variable's type.
+
+### 1096　　$0448　　BAS_ERROR
+
+Raises the BASIC error whose code is in `X`. BASIC maps extended-RAM bank 0,
+prints the message and returns to its prompt; this call does not return to
+the machine-code caller. It is useful when a routine finds an invalid
+argument and wants BASIC's normal error handling.
+
+### 1099　　$044B　　BAS_LINPRT
+
+Prints the unsigned 16-bit value whose high byte is in `A` and low byte in
+`X` as decimal text. It uses the leading space BASIC's `PRINT` uses before
+a positive number. This lets machine code display a number without its
+own decimal conversion routine.
