@@ -19,10 +19,10 @@
 
 ---
 
-- [A. BASIC keywords](appendix/keywords.md)
-- [B. Error messages](appendix/errors.md)
-- [C. The character set](appendix/charset.md)
-- [D. Key codes](appendix/keys.md)
-- [E. Colors and the default palette](appendix/colors.md)
-- [F. Connectors at a glance](appendix/connectors.md)
-- [G. WIFI.CFG and the USB console](appendix/wifi-console.md)
+[A. BASIC keywords](appendix/keywords.md)
+[B. Error messages](appendix/errors.md)
+[C. The character set](appendix/charset.md)
+[D. Key codes](appendix/keys.md)
+[E. Colors and the default palette](appendix/colors.md)
+[F. Connectors at a glance](appendix/connectors.md)
+[G. WIFI.CFG and the USB console](appendix/wifi-console.md)
