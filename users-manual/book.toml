@@ -1,0 +1,6 @@
+[book]
+title = "Clementina User's Manual"
+language = "en"
+src = "src"
+
+[output.html]
