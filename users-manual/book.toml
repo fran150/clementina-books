@@ -4,3 +4,4 @@ language = "en"
 src = "src"
 
 [output.html]
+site-url = "/clementina-books/users-manual/"

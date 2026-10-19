@@ -3,6 +3,8 @@
 Books documenting the Clementina 6502 computer, in the spirit of the
 Commodore 64 manuals:
 
+Read the current drafts at **[fran150.github.io/clementina-books](https://fran150.github.io/clementina-books/)**.
+
 1. **Clementina User's Manual**: setting up the machine and the video client,
    first steps in BASIC.
 2. **Clementina Programmer's Reference Guide**: BASIC, 65C02 machine language
@@ -42,6 +44,10 @@ same sources render as a website and as a printable PDF.
 With [mdBook](https://rust-lang.github.io/mdBook/guide/installation.html)
 installed, `mdbook build mapping` writes the website to `mapping/book/`, and
 `mdbook serve mapping` previews it while you edit.
+
+`bash tools/build-site.sh` builds all four books and the landing page into
+`_site/`. The [GitHub Pages workflow](.github/workflows/pages.yml) publishes
+that directory whenever `main` changes.
 
 ## Checking the books
 
