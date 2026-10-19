@@ -18,10 +18,13 @@ Clementina has two memories, and the book maps both:
 
 ## Conventions
 
-- Addresses and values are hexadecimal, written with `$`, unless they are
-  marked as decimal. BASIC takes decimal, so the first address of a region
-  also appears in decimal where you are likely to `PEEK` or `POKE` it:
-  `$C000` (49152).
+- Each mapped entry begins with its decimal address, hexadecimal address,
+  and symbol or descriptive name. A range in the heading includes both
+  endpoints. The paragraphs below it explain what the bytes hold, how the
+  machine uses them, and what a program can safely do with them.
+- Other addresses and values are hexadecimal, written with `$`, unless they
+  are marked as decimal. BASIC uses decimal addresses, so an entry such as
+  `49152  $C000  VIA_ORB` gives both forms for `PEEK` and `POKE`.
 - A 6502 address has four hex digits (`$FFE0`); a MIA RAM address has five
   (`$14000`).
 - A range includes both ends: `$8000-$BFFF` is 16,384 bytes.

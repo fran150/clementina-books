@@ -111,3 +111,51 @@ and MIA memory added. Its code is followed directly by its workspace.
 
 The load address `$0400` is fixed in MIA's firmware and in the emulator; the
 image's size never enters into it.
+
+## Address entries for this build
+
+Only the jump table at `$0400` is a stable calling interface. The other
+boundaries below describe the image size in this build and can move when
+the kernel or BASIC is rebuilt.
+
+### 1024–1101　　$0400–$044D　　JUMPTAB
+
+The kernel's fixed entry points. Each three-byte slot jumps to a service
+routine elsewhere in the image, so programs call the slot rather than an
+internal address that may change after a rebuild. The [jump table](jump-table.md)
+gives every entry and its calling convention.
+
+### 1102–1141　　$044E–$0475　　DIR_NAME_BUF
+
+A 40-byte scratch area used while BASIC's `DIR` prints file names. Its
+contents have no meaning between directory operations. This location is
+specific to the current jump-table size; the buffer moves if more entry
+points are added.
+
+### 1142–5247　　$0476–$147F　　KERNCODE
+
+The resident kernel code, including console I/O, the screen editor,
+interrupt handling, MIA helpers and the file loader. It is RAM, but
+overwriting it while BASIC or `KERN_LOAD` is in use can stop the system.
+Call its jump-table slots instead of branching to a current internal
+address.
+
+### 5248–5320　　$1480–$14C8　　RODATA
+
+Read-only data in the image, including the startup banner. It is stored in
+RAM because Clementina has no ROM, but the kernel expects its contents to
+remain intact. Its exact range follows the kernel code size.
+
+### 5321–5566　　$14C9–$15BE　　WOZCODE
+
+WozMon's machine code. BASIC's `MON` enters the monitor through the
+kernel interface; the monitor shares the line buffer at `$0200` and uses
+its own zero-page bytes. This code may move in another build.
+
+### 5567–25503　　$15BF–$639F　　BASIC image
+
+The interpreter and its tables, followed by BASIC's cold-start code and
+Clementina-specific statements. BASIC's program text does not live here;
+the mutable program and variables begin at the workspace address after
+the image. Programs that replace BASIC may load from `$1600` up while
+preserving the kernel below it.

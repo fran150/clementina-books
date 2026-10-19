@@ -80,4 +80,54 @@ interrupt handlers. MIA latches the same eight bytes into its own RAM at
 `$11078` ([Input state](../mia/input.md)), where a program can also read them
 through an index.
 
-{{#include ../../../tables/cpu-memory-map.md:input-page}}
+## Address entries
+
+Each entry gives decimal addresses, hexadecimal addresses and a name. BASIC
+and WozMon share the line buffer because only one runs at a time.
+
+### 512–594　　$0200–$0252　　INPUTBUFFER / IN
+
+BASIC receives an edited line at `$0200`. Its longest logical line has 80
+characters at `$0200-$024F`, followed by a zero terminator at `$0250`; the
+tokenizer may use the next two bytes while it turns the line into program
+tokens. `GET` uses the first two bytes for its own short input. WozMon names
+the same starting address `IN` and can fill all 128 bytes through `$027F`.
+Reading this area after a prompt shows recent input, but the next line can
+overwrite it at any time.
+
+### 595–639　　$0253–$027F　　WozMon line buffer remainder
+
+These bytes complete WozMon's 128-byte input buffer. BASIC's normal
+80-character line and tokenizer do not reach them, but they are still part
+of the shared input area. They are not suitable for persistent machine code
+or data if the monitor may be entered.
+
+### 640–759　　$0280–$02F7　　Program work area
+
+The system does not use these 120 bytes at cold start or while BASIC and
+WozMon run. They are a convenient home for a short machine-language routine
+that BASIC calls with `SYS` or `USR`, or for data that must survive `RUN`,
+`NEW` and `CLEAR`. The BASIC example above loads six instruction bytes at
+640 and stores a result at 647, both inside this area.
+
+### 760–763　　$02F8–$02FB　　CLOCK_MS
+
+`KERN_RDTIM` copies MIA's millisecond counter here, least significant byte
+first. The four bytes represent a snapshot, not a live counter: they stay
+unchanged until another clock read. They wrap after about 49.7 days. Read
+all four immediately after your own `KERN_RDTIM` call if you need the
+snapshot that call produced.
+
+### 764–766　　$02FC–$02FE　　CLOCK_60HZ
+
+The same clock call copies MIA's 60 Hz time-of-day count into these three
+bytes, low byte first. It runs from zero to 5,183,999 and then wraps at 24
+hours. BASIC's `TI` uses this count, and `KERN_SETTIM` or `TI=` can change
+it. Like `CLOCK_MS`, these CPU bytes are only the most recent snapshot.
+
+### 767　　$02FF　　CLOCK_VERSION
+
+MIA places a layout version here when it fills the snapshot; version `1`
+means the clock fields above use the layout described on this page. A
+program reading the snapshot can check this byte before interpreting its
+time values. Without a fresh clock read, it may describe an older snapshot.
