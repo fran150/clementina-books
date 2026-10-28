@@ -8,6 +8,7 @@ Run without a command, or with `--help`, it prints this list.
 
 | Command | Does |
 | --- | --- |
+| `project import SESSION FOLDER [--name NAME]` | Writes a new assembly project from a Studio `.cstudio` session: its assets, its Builder settings as `build.assets`, and a starter `src/main.s` and `link.cfg`. Refuses to overwrite any file. |
 | `project validate [folder]` | Validates the manifest, every asset it lists, the references between them, and that the program's sources exist. The folder defaults to the current one. |
 | `asset validate FILE` | Validates one asset file of any kind against its format and its own rules. References to other assets aren't checked: use `project validate`. |
 | `sprite validate FILE` | Validates a shape file. |

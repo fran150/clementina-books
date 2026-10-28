@@ -92,6 +92,10 @@ setup.
 | `SongPosition` | 213 |
 | `StopSong` | 252 |
 | `RuntimeSave` / `RuntimeRestore` | 505 / 639 |
+| `WaitTick`, when MIA's count has already moved on | 236 |
+| `ReadPad`, players 1-3: the gamepad | 269 |
+| `ReadPad`, player 0: the gamepad and the keyboard | 989 |
+| `KeyHeld` | 209 |
 
 From MIA RAM, drawing costs the same whatever the size, because MIA's DMA
 copies. From a bank the CPU copies every byte.
@@ -104,13 +108,13 @@ moves on to a new frame and the jump sound plays spends roughly:
 
 | Work | Cycles |
 | --- | ---: |
-| `KERN_RDTIM`, in `wait_tick` | 804 |
+| `WaitTick`, its last look at the clock | 236 |
 | `TickAnimation`, new frame, 1 sprite | 3,316 |
 | `TickSound` | about 1,400 |
-| `KERN_GETKEY_NB` | 26 |
+| `ReadPad #0` and `KeyHeld` | 1,198 |
 | `MoveAnimation`, 1 sprite | 2,896 |
 | The timer interrupt | about 200 |
-| **Total** | **about 8,600** |
+| **Total** | **about 9,200** |
 
 Under half of the tick, leaving room for enemies, a scrolling edge and game
 logic. Most ticks cost far less: the animation frame changes only every few

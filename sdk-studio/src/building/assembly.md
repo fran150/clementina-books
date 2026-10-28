@@ -212,6 +212,9 @@ wait_tick:
         rts
 ```
 
+A game that uses the asset runtime can call `WaitTick` instead, which also
+says how many ticks went by ([Timing and input](runtime.md#timing-and-input)).
+
 ## Code that returns to BASIC
 
 A machine-code routine for a BASIC program (called with `SYS` or `USR`) is

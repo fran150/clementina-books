@@ -97,6 +97,14 @@ counts are bytes.
 | `SetScroll x, y` | word, word | |
 | `SetViewport mode, set` | byte 0-5, byte 0-1 | |
 
+## Timing and input
+
+| Macro | Arguments | Returns |
+| --- | --- | --- |
+| `WaitTick` | | A = the ticks since the last `WaitTick` (1-255); the first returns at once with 1 |
+| `ReadPad player` | byte 0-3 | A = the `RT_PAD_*` bits held; player 0 adds the keyboard |
+| `KeyHeld usage` | byte: a Keyboard/Keypad usage | A = nonzero while that key is held |
+
 ## Interrupt handlers
 
 | Macro | Does |
@@ -121,6 +129,9 @@ after `RuntimeRestore`.
 | `RT_ERR_ARGUMENT` | 6 | An argument is out of range. |
 | `RT_ANIM_SIZE` | 12 | Bytes in an animation instance. |
 | `RT_STATE_SIZE` | 42 | Zero-page bytes `RuntimeSave` keeps. |
+| `RT_PAD_UP`, `RT_PAD_DOWN`, `RT_PAD_LEFT`, `RT_PAD_RIGHT` | `$01`, `$02`, `$04`, `$08` | `ReadPad`: the d-pad or the left stick. |
+| `RT_PAD_A`, `RT_PAD_B` | `$10`, `$20` | `ReadPad`: buttons A and B. |
+| `RT_PAD_SELECT`, `RT_PAD_START` | `$40`, `$80` | `ReadPad`: Select and Start. |
 
 ## Descriptor fields
 

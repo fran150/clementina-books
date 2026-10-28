@@ -137,9 +137,14 @@ The extension is not on the Marketplace yet. With the SDK built:
 
 ```text
 $ cd clementina-sdk/packages/vscode-extension
-$ npx vsce package
+$ npm run package
 $ code --install-extension clementina-*.vsix
 ```
+
+`npm run package` bundles the extension with the SDK's debug adapter and
+BASIC language server, so it needs nothing else from the SDK; debugging still
+needs the emulator. Package it again after pulling new SDK commits, and add
+`--force` to `code --install-extension` to replace the one installed.
 
 To work on the extension itself instead, open `packages/vscode-extension` in
 VS Code and press `F5`, which starts a second VS Code window with the

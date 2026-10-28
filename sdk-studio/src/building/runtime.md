@@ -52,12 +52,13 @@ without waiting for it.
 
 Walker loads its assets, draws the level, starts the player's animation and
 the music, and then loops once per 60 Hz tick: it advances the animation,
-plays the jump sound if one is running, and reads a key. A and D walk, Space
-jumps (only the sound), Q stops the music.
+plays the jump sound if one is running, and reads the controls. Left and
+right walk (A and D, the arrow keys or a gamepad), A jumps (Space, Z or the
+gamepad's A button; only the sound), Q stops the music.
 
 ```asm
 ; Walker: a level, a walking player, background music and a jump sound.
-; A and D walk, Space jumps (just the sound), Q stops the music.
+; Left and right walk, A jumps (just the sound), Q stops the music.
 .setcpu "65C02"
 .include "clementina.inc"
 .include "assets.inc"
@@ -79,7 +80,7 @@ ptr:        .res 2
 .segment "BSS"
 player:     .res RT_ANIM_SIZE
 px:         .res 2
-last_tick:  .res 1
+held:       .res 1              ; the controls held on the last tick
 sfx_on:     .res 1
 
 .segment "CODE"
@@ -115,22 +116,27 @@ game_start:
         PlaySong SONG_THEME
         Ok
 
-loop:   jsr wait_tick
+loop:   WaitTick                ; once per 60 Hz tick
         TickAnimation player
         lda sfx_on
-        beq keys
+        beq pad
         TickSound #SFX_VOICE
         sta sfx_on
-keys:   jsr KERN_GETKEY_NB
-        bcc loop
-        cmp #'A'
-        beq left
-        cmp #'D'
-        beq right
-        cmp #' '
-        beq jump
-        cmp #'Q'
-        bne loop
+pad:    ReadPad #0              ; gamepad 0 and the keyboard
+        tay                     ; Y = held now
+        eor held                ; the controls that changed...
+        sty held
+        and held                ; ...and are held now: just pressed
+        and #RT_PAD_A
+        bne jump
+        tya
+        and #RT_PAD_LEFT
+        bne left
+        tya
+        and #RT_PAD_RIGHT
+        bne right
+        KeyHeld #$14            ; Q
+        beq loop
         StopSong SONG_THEME
         bra loop
 
@@ -148,19 +154,11 @@ move:   MoveAnimation player, px, #150
 jump:   PlaySound SFX_JUMP, #SFX_VOICE
         lda #1
         sta sfx_on
-        bra loop
+        jmp loop                ; too far for bra
 
 fail:   lda rt_error
         jsr KERN_PRBYTE
 :       bra :-
-
-wait_tick:
-        jsr KERN_RDTIM
-        lda CLOCK_60HZ
-        cmp last_tick
-        beq wait_tick
-        sta last_tick
-        rts
 
 clear_bss:
         lda #<__BSS_RUN__
@@ -193,9 +191,14 @@ What to notice:
   `SetViewport` picks the 40×25 plane and table set 0, and `SetLayers`
   turns on the background (bit 0) and sprites (bit 2), but not the overlay
   (bit 1), which still holds the console's text.
-- **Timing from MIA's clock.** `wait_tick` waits for MIA's 60 Hz count to
+- **Timing from MIA's clock.** `WaitTick` waits for MIA's 60 Hz count to
   move on, so the animation and the sound advance 60 times a second whatever
   the CPU's speed: the speed Studio previews them at.
+- **Held controls.** `ReadPad #0` reads gamepad 0 and the keyboard as one
+  set of bits. Walking tests what is held, so the player walks for as long as
+  the key is down. Jumping tests what was just pressed, held now but not on
+  the last tick (`held`), so holding Space jumps once. `KeyHeld #$14` reads
+  Q, which isn't one of the pad's keys.
 - **Sound effects on a free voice.** `SONG_THEME_VOICES` is `%0011`: the
   song uses voices 0 and 1. The jump plays on voice 3.
 
@@ -410,11 +413,48 @@ it back after the last frame.
 *Mapping Clementina*'s [Video](../../../mapping/src/mia/video.md) chapter
 has the tables, the planes and the registers behind them.
 
+## Timing and input
+
+| Macro | Does |
+| --- | --- |
+| `WaitTick` | Waits for MIA's 60 Hz count to move on. A = the ticks since the last `WaitTick`, normally 1; the first returns at once. |
+| `ReadPad player` | A = the controls held on gamepad `player` (0-3), a bit each. Player 0 adds the keyboard. |
+| `KeyHeld usage` | A = nonzero while that key is held. |
+
+`WaitTick` reads the count with MIA's `CLOCK_SNAPSHOT` command, so it keeps
+time at any CPU speed. A count above 1 means the loop took longer than a
+tick. It remembers the last tick in BSS, so call it from one place.
+
+`ReadPad`'s bits, and the keys that set them for player 0:
+
+| Bit | Constant | Gamepad | Keyboard |
+| ---: | --- | --- | --- |
+| `$01` | `RT_PAD_UP` | d-pad or left stick up | W, up arrow |
+| `$02` | `RT_PAD_DOWN` | d-pad or left stick down | S, down arrow |
+| `$04` | `RT_PAD_LEFT` | d-pad or left stick left | A, left arrow |
+| `$08` | `RT_PAD_RIGHT` | d-pad or left stick right | D, right arrow |
+| `$10` | `RT_PAD_A` | A (Cross) | Z, Space |
+| `$20` | `RT_PAD_B` | B (Circle) | X |
+| `$40` | `RT_PAD_SELECT` | Select (Back) | Tab |
+| `$80` | `RT_PAD_START` | Start (Menu) | Enter |
+
+A gamepad that isn't connected reads as 0. The other buttons, the right
+stick and the analog values aren't in the bits. The keyboard's keys are the
+runtime's choice; for any other key, `KeyHeld` takes its USB HID usage:
+`$04`-`$1D` A to Z, `$28` Enter, `$2C` Space, `$4F`-`$52` the right, left,
+down and up arrows. *Mapping Clementina*'s [Input
+state](../../../mapping/src/mia/input.md) chapter has the key bitmap and
+the gamepad records behind them.
+
+Both read what is held now, not typed text: `KERN_GETKEY_NB` still returns
+the characters typed, and neither affects the other.
+
 ## Interrupts
 
 The simplest pattern is the one Walker uses: everything in the main loop,
-paced by MIA's clock. A game may instead use an interrupt to keep time, and
-have the handler only count ticks while the main loop does the work.
+paced by MIA's clock with `WaitTick`. A game may instead use an interrupt to
+keep time, and have the handler only count ticks while the main loop does
+the work.
 
 A handler may also call the runtime's drawing, animation, sound and copy
 routines, if it protects what the main loop was in the middle of:

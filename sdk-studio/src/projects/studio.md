@@ -45,6 +45,17 @@ Two things to know about saving:
 being connected to the folder. **New Project** starts an empty `.cstudio`
 project.
 
+To turn a `.cstudio` sketch into a project folder, import it with the SDK:
+
+```text
+$ clementina project import sketch.cstudio my-game --name "My Game"
+```
+
+This writes a new assembly project: each asset in its own file under
+`assets/`, the session's Builder settings as `build.assets`, and a starter
+`src/main.s` and `link.cfg`. It never overwrites a file. The name defaults to
+the session file's name. Open the new `clementina.yaml` in Studio as above.
+
 If Studio quits without saving, it keeps a recovery snapshot, and offers to
 recover the unsaved work the next time it starts.
 

@@ -127,7 +127,7 @@ $ node -e 'process.stdout.write(JSON.stringify([...require("fs").readFileSync(pr
 
 ```text
 $ node agents/workflows/debug-game.mjs ~/games/walker --line 61 --memory 640:4
-Breakpoint at runtime.inc:116; report: .../build/inspection/debug-report.json
+Breakpoint at runtime.inc:127; report: .../build/inspection/debug-report.json
 ```
 
 Line 61 of `src/main.s` is `TickAnimation player`. The script builds, sets
