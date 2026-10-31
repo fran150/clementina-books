@@ -8,7 +8,7 @@ mkdir -p _site
 cp site/index.html _site/index.html
 touch _site/.nojekyll
 
-for book in users-manual programmers-reference mapping sdk-studio; do
+for book in users-manual programmers-reference mapping sdk-studio build-guide; do
   mdbook build "$book"
   mkdir -p "_site/$book"
   cp -R "$book/book/." "_site/$book/"
