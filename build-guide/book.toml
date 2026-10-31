@@ -1,0 +1,8 @@
+[book]
+title = "Building Clementina"
+language = "en"
+src = "src"
+
+[output.html]
+site-url = "/clementina-books/build-guide/"
+no-section-label = true

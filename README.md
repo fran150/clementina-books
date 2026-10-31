@@ -14,6 +14,8 @@ Read the current drafts at **[fran150.github.io/clementina-books](https://fran15
 4. **Clementina SDK & Studio Guide**: the SDK, Studio and the emulator.
 5. **Clementina Hardware & MIA Technical Reference**: the board, the bus and
    the MIA firmware.
+6. **Building Clementina**: building the rev 1 machine on breadboards, one
+   checked stage at a time.
 
 ## Sources
 
@@ -40,12 +42,13 @@ same sources render as a website and as a printable PDF.
 | Programmer's Reference Guide | [programmers-reference/](programmers-reference/src/SUMMARY.md) | First draft |
 | Clementina SDK & Studio Guide | [sdk-studio/](sdk-studio/src/SUMMARY.md) | First draft |
 | Clementina User's Manual | [users-manual/](users-manual/src/SUMMARY.md) | First draft |
+| Building Clementina | [build-guide/](build-guide/src/SUMMARY.md) | First draft |
 
 With [mdBook](https://rust-lang.github.io/mdBook/guide/installation.html)
 installed, `mdbook build mapping` writes the website to `mapping/book/`, and
 `mdbook serve mapping` previews it while you edit.
 
-`bash tools/build-site.sh` builds all four books and the landing page into
+`bash tools/build-site.sh` builds all five books and the landing page into
 `_site/`. The [GitHub Pages workflow](.github/workflows/pages.yml) publishes
 that directory whenever `main` changes.
 
@@ -59,6 +62,12 @@ that directory whenever `main` changes.
   book in the emulator (a `clementina-6502` checkout next to this one, Go,
   and cc65 for the assembly examples) and checks the output printed in the
   book.
+- `node tools/check-wiring.mjs --check` checks every wiring table in
+  Building Clementina against the rev 1 netlist (a `clementina-hardware`
+  checkout next to this one, at the commit `manifest.json` pins), checks that
+  the book wires every net completely, and checks that the generated pin
+  tables in `build-guide/generated/` are current. Without `--check` it
+  rewrites them.
 
 ## License
 

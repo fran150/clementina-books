@@ -39,6 +39,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import textwrap
 
 BLOCK = re.compile(r"```(\w*)\n(.*?)```", re.S)
 OPTION = re.compile(r"<!--\s*example:\s*(.*?)\s*-->$", re.S)
@@ -96,7 +97,7 @@ def examples_in(path, sdk):
         before = text[: block.start()].rstrip()
         option = OPTION.match(before[before.rfind("<!--") :]) if before.endswith("-->") else None
         options = parse_options(option.group(1)) if option else {}
-        lines = [line for line in block.group(2).splitlines() if line.strip()]
+        lines = [line for line in textwrap.dedent(block.group(2)).splitlines() if line.strip()]
         program = block.group(1) == "basic" and all(LINE_NUMBER.match(line) for line in lines)
         if block.group(1) == "asm":
             if "org" not in options or options.get("skip"):
@@ -111,7 +112,7 @@ def examples_in(path, sdk):
         if i + 1 < len(blocks) and blocks[i + 1].group(1) == "text":
             gap = text[block.end() : blocks[i + 1].start()]
             if gap.strip() == "":
-                expected = blocks[i + 1].group(2).rstrip("\n").splitlines()
+                expected = textwrap.dedent(blocks[i + 1].group(2)).rstrip("\n").splitlines()
         line_no = text[: block.start()].count("\n") + 1
         typed = list(lines)
         if options.get("with") == "previous" and previous_program:
