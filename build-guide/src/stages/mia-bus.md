@@ -16,9 +16,9 @@ the console tells you.
 3. Take out the jumper from Pico 9 to GND.
 4. Wire MIA's chip select and its interrupt diode:
 
-| From | To | Signal | Notes |
-| --- | --- | --- | --- |
-| U9.8 | Pico 9 (GP6) | MIACS | High while the CPU is in `$E000-$FFFF` |
+| From | To | Signal | Wire | Notes |
+| --- | --- | --- | --- | --- |
+| U9.8 | Pico 9 (GP6) | MIACS | green | High while the CPU is in `$E000-$FFFF` |
 
 | Part | Value | First leg (band) | Second leg | Notes |
 | --- | --- | --- | --- | --- |

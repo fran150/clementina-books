@@ -10,36 +10,36 @@ The base RAM (U4) on board 2, next to the CPU, with its 100 nF capacitor.
 Run each address and data line as a chain from chip to chip: the VIA and the
 extended RAM tap the same chains later.
 
-| U4 pin | Signal | Connects to | Notes |
-| --- | --- | --- | --- |
-| 1 | A14 | U1.24 | |
-| 2 | A12 | U1.22 | |
-| 3 | A7 | U1.16 | |
-| 4 | A6 | U1.15 | |
-| 5 | A5 | U1.14 | |
-| 6 | A4 | U1.13 | |
-| 7 | A3 | U1.12 | |
-| 8 | A2 | U1.11 | |
-| 9 | A1 | U1.10 | |
-| 10 | A0 | U1.9 | |
-| 11 | D0 | U1.33 | `DQ0` |
-| 12 | D1 | U1.32 | `DQ1` |
-| 13 | D2 | U1.31 | `DQ2` |
-| 14 | GND | GND | |
-| 15 | D3 | U1.30 | `DQ3` |
-| 16 | D4 | U1.29 | `DQ4` |
-| 17 | D5 | U1.28 | `DQ5` |
-| 18 | D6 | U1.27 | `DQ6` |
-| 19 | D7 | U1.26 | `DQ7` |
-| 20 | A15 | U1.25 | `~CE`: the RAM is selected whenever A15 is low |
-| 21 | A10 | U1.19 | |
-| 22 | ~OE | U9.3 | |
-| 23 | A11 | U1.20 | |
-| 24 | A9 | U1.18 | |
-| 25 | A8 | U1.17 | |
-| 26 | A13 | U1.23 | |
-| 27 | ~WE | U9.6 | |
-| 28 | 3.3 V | 3.3 V | `VCC` |
+| U4 pin | Signal | Connects to | Wire | Notes |
+| --- | --- | --- | --- | --- |
+| 1 | A14 | U1.24 | yellow | |
+| 2 | A12 | U1.22 | yellow | |
+| 3 | A7 | U1.16 | yellow | |
+| 4 | A6 | U1.15 | yellow | |
+| 5 | A5 | U1.14 | yellow | |
+| 6 | A4 | U1.13 | yellow | |
+| 7 | A3 | U1.12 | yellow | |
+| 8 | A2 | U1.11 | yellow | |
+| 9 | A1 | U1.10 | yellow | |
+| 10 | A0 | U1.9 | yellow | |
+| 11 | D0 | U1.33 | blue | `DQ0` |
+| 12 | D1 | U1.32 | blue | `DQ1` |
+| 13 | D2 | U1.31 | blue | `DQ2` |
+| 14 | GND | GND | black | |
+| 15 | D3 | U1.30 | blue | `DQ3` |
+| 16 | D4 | U1.29 | blue | `DQ4` |
+| 17 | D5 | U1.28 | blue | `DQ5` |
+| 18 | D6 | U1.27 | blue | `DQ6` |
+| 19 | D7 | U1.26 | blue | `DQ7` |
+| 20 | A15 | U1.25 | yellow | `~CE`: the RAM is selected whenever A15 is low |
+| 21 | A10 | U1.19 | yellow | |
+| 22 | ~OE | U9.3 | green | |
+| 23 | A11 | U1.20 | yellow | |
+| 24 | A9 | U1.18 | yellow | |
+| 25 | A8 | U1.17 | yellow | |
+| 26 | A13 | U1.23 | yellow | |
+| 27 | ~WE | U9.6 | green | |
+| 28 | 3.3 V | 3.3 V | red | `VCC` |
 
 The address pins are scattered: A0-A7 run down one side in reverse order,
 and A8-A14 are split between both sides. Tick each row off as you wire it.

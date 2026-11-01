@@ -15,9 +15,32 @@ These hold for every stage:
   PCB); the wiring tables don't list them one by one.
 - **Mark pin 1 on every chip** before it goes in (a dot of paint, or a
   printed pin label stuck on top), so a chip never goes in backwards.
-- **Keep wires short and flat**, and give each group of signals its own
-  colour. One suggestion: red for 3.3 V, black for GND, yellow for address,
-  blue for data, green for control, white for the clock.
+- **Keep wires short and flat**, and use the colour the wiring table gives
+  each wire (see [Wire colours](#wire-colours)).
+
+## Wire colours
+
+The whole guide uses six colours, the ones a basic box of hookup wire comes
+with. Every wiring table has a **Wire** column with the colour of each wire,
+so you never have to choose one:
+
+| Colour | For |
+| --- | --- |
+| Red | 3.3 V |
+| Black | GND |
+| Yellow | The address bus, A0-A15 |
+| Blue | The data bus, D0-D7 |
+| White | The clock, PHI2, alone so you can find it when probing |
+| Green | Everything else: RWB, reset, interrupts, chip selects, the VIA's ports, SD and audio |
+
+A "-" in the Wire column means that pin needs no wire in that step: it stays
+unconnected, its wire comes in a later stage, or a part's leg goes straight
+into its row. When a resistor or capacitor leg can't reach, extend it with a
+wire of the colour of the signal it goes to (red when it goes to 3.3 V).
+
+The wires you add only for a check, such as the jumpers that hold the glue
+logic's inputs high or low in stage 3 and the LEDs' links, can be any
+colour: they come out again once the check is done.
 
 ## Reading a chip's pins
 

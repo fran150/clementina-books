@@ -12,8 +12,8 @@
 //
 // The checker reads every Markdown table in build-guide/src whose header is one of:
 //
-//   | From | To | Signal | ...                 a wire per row
-//   | U4 pin | Signal | Connects to | ...      one pin of one chip per row (also "Pico pin")
+//   | From | To | Signal | Wire | ...          a wire per row
+//   | U4 pin | Signal | Connects to | Wire | ... one pin of one chip per row (also "Pico pin")
 //   | Part | Value | First leg | Second leg |  a two-legged part per row; for an electrolytic
 //                                              capacitor or a diode the first leg is + or the band
 //
@@ -22,7 +22,9 @@
 // audio jack's `jack tip`, `jack ring` or `jack sleeve`, a part `R7` or one of its legs `R4.2`,
 // or a rail `3.3 V` or `GND`. Anything else is a note and is ignored, unless it names a pin.
 // Every endpoint in a row must be on one net, and the Signal cell, when it is not "-", must be
-// that net's name. Finally every net must be fully wired by the book: each pin of each part on
+// that net's name. The Wire cell must be the colour the guide's convention gives that net (see
+// wireColour), or "-" in a chip row that needs no wire (nothing to connect, or only a part's
+// leg). Finally every net must be fully wired by the book: each pin of each part on
 // the breadboard (not the J1-J3 headers or the 100 nF decoupling capacitors, which the guide
 // places by rule) must be reachable from the others through the rows.
 import {execFileSync} from 'node:child_process';
@@ -60,6 +62,16 @@ const ALIASES = {
 // decoupling capacitors, which go across each chip's power pins by rule.
 const OFF_BOARD = /^(J1|J2|J3|H\d+|C(6|7|8|9|10|11|12|13))$/;
 const POLARIZED = /^(CP_|D_)/;
+
+// The wire colour convention in breadboard.md: six colours, the ones a basic wire kit comes with.
+export function wireColour(signal) {
+  if (signal === '3.3 V') return 'red';
+  if (signal === 'GND') return 'black';
+  if (/^A\d+$/.test(signal)) return 'yellow';
+  if (/^D\d+$/.test(signal)) return 'blue';
+  if (signal === 'PHI2') return 'white';
+  return 'green';
+}
 
 // ---------------------------------------------------------------------------------------------
 // Netlist
@@ -201,6 +213,8 @@ export function checkBook(board, files) {
         : chip && h[1] === 'signal' && h[2] === 'connects to' ? 'chip'
         : h[0] === 'part' && h[1] === 'value' && h[2]?.startsWith('first leg') && h[3]?.startsWith('second leg') ? 'part' : null;
       if (!kind) continue;
+      const hasWire = kind !== 'part' && h[3] === 'wire';
+      if (kind !== 'part' && !hasWire) errors.push(`${rel}:${t.line}: wiring table has no Wire column after "${t.header[2]}"`);
       for (const row of t.rows) {
         rows++;
         const err = msg => errors.push(`${rel}:${row.line}: ${msg}`);
@@ -226,12 +240,14 @@ export function checkBook(board, files) {
           }));
           continue;
         }
-        let eps;
+        let eps, wired = true;
         if (kind === 'wire') eps = [...parseCell(c[0], err), ...parseCell(c[1], err)];
         else {
           const ref = chip[1] === 'pico' ? 'A1' : chip[1].toUpperCase();
           if (!/^\d+$/.test(c[0])) { err(`"${c[0]}" is not one pin number`); continue; }
-          eps = [`${ref}.${c[0]}`, ...parseCell(c[2], err)];
+          const others = parseCell(c[2], err);
+          wired = others.some(ep => !ep.startsWith('part:'));
+          eps = [`${ref}.${c[0]}`, ...others];
         }
         const sig = kind === 'wire' ? c[2] : c[1];
         const res = eps.map(ep => resolve(ep, err)).filter(Boolean);
@@ -245,6 +261,10 @@ export function checkBook(board, files) {
         const accepted = [signalName(net), ...(ALIASES[net] ?? [])].map(s => s.toLowerCase());
         const given = sig.replace(/`/g, '').replace(/\s*\(.*\)$/, '').trim();
         if (given && given !== '-' && !accepted.includes(given.toLowerCase())) err(`signal "${sig}" but the netlist calls it ${signalName(net)}`);
+        if (hasWire) {
+          const want = wired && net ? wireColour(signalName(net)) : '-';
+          if ((c[3] ?? '').toLowerCase() !== want) err(`wire "${c[3] ?? ''}" but ${signalName(net)} ${want === '-' ? 'needs no wire here' : `takes ${want}`}`);
+        }
         const nodes = res.filter(r => r.node).map(r => r.node);
         for (let k = 1; k < nodes.length; k++) links.push([nodes[0], nodes[k]]);
         for (const r of res.filter(r => r.part)) links.push([nodes[0], `part:${r.part}@${net}`]);

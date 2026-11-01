@@ -54,9 +54,9 @@ meet at a single row, the filter node; the tables call the left one
 | C5 | 47 µF | R9, R10, C4 | jack ring | Electrolytic: the + leg on `filter R` |
 | R11 | 1.8 kΩ | jack ring | GND | |
 
-| From | To | Signal | Notes |
-| --- | --- | --- | --- |
-| jack sleeve | GND | GND | |
+| From | To | Signal | Wire | Notes |
+| --- | --- | --- | --- | --- |
+| jack sleeve | GND | GND | black | |
 
 On a stereo jack the tip is left, the ring right and the sleeve ground. If
 yours is on a breakout board, its pins are usually marked T, R and S (or L,
