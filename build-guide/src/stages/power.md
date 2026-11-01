@@ -82,9 +82,14 @@ Leave these Pico pins unconnected, as on the PCB: 30 (RUN), 34 (GP28),
 
 ## Flash the firmware
 
-1. Before plugging in, beep the + rail against the GND rail: silent.
+1. Before plugging in, run the
+   [power-up checks](../breadboard.md#before-you-power-up). On this first
+   power-up, checks 1 and 2 matter most: + must not beep to GND, and Pico 39
+   and 40 must not beep to +.
 2. Hold down the Pico's **BOOTSEL** button, plug the USB cable into your
-   computer, and let go. A drive called `RP2350` appears.
+   computer, and let go. A drive called `RP2350` appears. Measure + against
+   GND right away: 3.2-3.4 V. Unplug at once if it's much lower or the Pico
+   gets warm.
 3. Copy `build/mia.uf2` onto it. The Pico restarts with MIA's firmware.
 4. Open the Pico's serial port in your terminal: `/dev/ttyACM0` on Linux,
    `/dev/tty.usbmodem…` on macOS, a `COM` port on Windows. For example,

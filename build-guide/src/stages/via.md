@@ -71,6 +71,10 @@ of the schematic.
 
 ## Check
 
+**Before you plug in**, run the
+[power-up checks](../breadboard.md#before-you-power-up) on what you just
+added.
+
 1. Plug in, start the video client, and press RESET. The banner and
    `READY.` come up as in stage 6, and **the cursor now blinks**, about
    once every 0.8 s. The blink comes from the VIA's Timer 1 interrupt, so it

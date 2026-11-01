@@ -44,6 +44,10 @@ Leave SD 7, 8 and 9 (DAT1, DAT2, card detect) unconnected.
 
 ## Check
 
+**Before you plug in**, run the
+[power-up checks](../breadboard.md#before-you-power-up) on what you just
+added.
+
 1. Before plugging in, beep SD 1 against GND: silent.
 2. Put the SD card in and plug in the USB cable. MIA reads `WIFI.CFG` and
    joins the network only at power-on, so the card must be in first.

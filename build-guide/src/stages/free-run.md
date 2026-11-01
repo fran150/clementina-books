@@ -99,6 +99,10 @@ These come off again in stage 5.
 
 ## Check
 
+**Before you plug in**, run the
+[power-up checks](../breadboard.md#before-you-power-up) on what you just
+added.
+
 The check watches the address lines count. MIA's `speed` command slows the
 clock until you can read the count on the LEDs.
 

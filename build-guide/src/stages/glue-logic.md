@@ -113,6 +113,10 @@ gate delay on the selects the VIA and the expansion cards need early.
 
 ## Check
 
+**Before you plug in**, run the
+[power-up checks](../breadboard.md#before-you-power-up) on what you just
+added.
+
 Plug the USB cable in: the glue logic needs power, and MIA can run as it is
 (MIA's pins aren't wired to the CPU's rows yet).
 

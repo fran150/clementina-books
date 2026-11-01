@@ -50,6 +50,10 @@ takes about 0.27 s at 1.2 MHz.
 
 ## Check
 
+**Before you plug in**, run the
+[power-up checks](../breadboard.md#before-you-power-up) on what you just
+added.
+
 1. Plug in the USB cable and open the console. Type `status`. The second
    line, `Mode:`, says `Normal`, and the `Status:` line includes `NORMAL`:
    the CPU ran the whole loader after power-on.
