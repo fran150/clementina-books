@@ -6,6 +6,9 @@ These hold for every stage:
 
 - **Unplug the USB cable before you add or move any wire.** The Pico's USB
   is the only power source, so unplugged means off.
+- **Run the [power-up checks](#before-you-power-up) before you plug in**,
+  every time you have added or moved something. A minute with the meter
+  catches the short that would otherwise burn a chip.
 - **3.3 V only.** The Pico's pin 39 (VSYS) and pin 40 (VBUS, the USB's 5 V)
   stay unconnected for the whole build. Put tape over the free holes in
   their rows so nothing lands there by accident.
@@ -41,6 +44,41 @@ wire of the colour of the signal it goes to (red when it goes to 3.3 V).
 The wires you add only for a check, such as the jumpers that hold the glue
 logic's inputs high or low in stage 3 and the LEDs' links, can be any
 colour: they come out again once the check is done.
+
+## Before you power up
+
+A short between 3.3 V and GND, 5 V reaching the 3.3 V rail, or a chip in
+backwards are the mistakes that damage parts, and the multimeter finds all
+of them before any power is on. With the USB cable unplugged and the meter
+on its continuity (beep) setting:
+
+1. **+ against GND, on every board: silent.** This is the most important
+   check. The Pico joins all its GND pins inside it, so even one GND wire
+   pushed into a + rail by mistake connects the two rails and makes the
+   meter beep. A capacitor across the rails can give a short chirp as it
+   charges; that's fine. A steady beep is a short: find it before you go on.
+2. **Pico 39 (VSYS) and Pico 40 (VBUS) against the + rail: silent.** These
+   carry the USB's 5 V. If either reaches the 3.3 V rail, every chip on the
+   board gets 5 V.
+3. **Every chip you just added: its power pin beeps to +, its ground pin to
+   GND.** A chip in backwards puts its power pins on the wrong rails and
+   heats up as soon as power comes on. The power pins are the rows whose
+   signal is 3.3 V or GND in the chip's wiring table.
+4. **Every wire you just added, end to end: beeps.** Touch the two rows it
+   joins. This finds a wire end that isn't pushed fully in, or that landed
+   one hole off.
+5. **Neighbouring rows: silent.** Touch the row of each new pin against the
+   rows on either side. This finds a bent leg or a stray strand bridging two
+   rows.
+6. **Look over the board** for clipped legs or bits of wire lying on it.
+
+Then plug in, and watch the first few seconds:
+
+- Measure DC volts between + and GND: 3.2-3.4 V.
+- If the reading is much lower, anything gets warm, or the computer warns
+  about the USB port, **unplug at once**. The USB port and the Pico's
+  regulator both limit the current, so a short caught within a few seconds
+  rarely damages anything.
 
 ## Reading a chip's pins
 

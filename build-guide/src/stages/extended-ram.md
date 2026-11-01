@@ -56,6 +56,10 @@ loader only writes below `$8000`, so they need no pull-downs.
 
 ## Check
 
+**Before you plug in**, run the
+[power-up checks](../breadboard.md#before-you-power-up) on what you just
+added.
+
 ### BASIC
 
 1. Plug in, start the video client, and press RESET. `23647 BYTES FREE` is

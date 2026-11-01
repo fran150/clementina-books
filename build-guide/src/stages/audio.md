@@ -64,6 +64,10 @@ R and G).
 
 ## Check
 
+**Before you plug in**, run the
+[power-up checks](../breadboard.md#before-you-power-up) on what you just
+added.
+
 The sound doesn't need the CPU: MIA can play its built-in test tune from the
 console.
 

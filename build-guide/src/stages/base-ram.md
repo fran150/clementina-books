@@ -46,6 +46,10 @@ and A8-A14 are split between both sides. Tick each row off as you wire it.
 
 ## Check
 
+**Before you plug in**, run the
+[power-up checks](../breadboard.md#before-you-power-up) on what you just
+added.
+
 ### READY.
 
 1. Plug in the USB cable (with the SD card in, so MIA joins Wi-Fi).
