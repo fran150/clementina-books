@@ -136,10 +136,60 @@ add a fourth board and give the VIA its own.
 
 ### Power rails
 
-Bring 3.3 V from the Pico's pin 36 and GND to board 1's rails (stage 1 does
-this). Then link the rails of every board, on both sides, with short wires,
-and join the GND rails of neighbouring boards in at least two places. Many
-breadboards split each rail in the middle: stage 0 finds and bridges those
-splits.
+Each breadboard has two rails down each long side, a + rail and a GND rail.
+The aim is to make all six + rails one 3.3 V net and all six GND rails one
+GND net, so every chip can take power from the rail beside it. You make the
+links in stage 0, before any chip goes in, and stage 1 feeds them from the
+Pico's pin 36 (3.3 V) and its GND pins.
+
+<div class="diagram">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 380" width="100%" style="max-width:720px" role="img" aria-label="Three breadboards side by side, each with a + rail and a GND rail down both long sides. On every board a red wire joins the two + rails across the top end and a black wire joins the two GND rails across the bottom end. Between each pair of neighbouring boards a red wire joins + to +, and two black wires join GND to GND, one near the top and one near the bottom. Where a rail is split in the middle, a short wire of the same colour bridges the split.">
+<g fill="none" stroke="currentColor" stroke-width="1.5"><rect x="20" y="40" width="160" height="290" rx="6"/><rect x="220" y="40" width="160" height="290" rx="6"/><rect x="420" y="40" width="160" height="290" rx="6"/></g>
+<g fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 4" opacity="0.5"><path d="M100 60v250"/><path d="M300 60v250"/><path d="M500 60v250"/></g>
+<g fill="none" stroke="#d0312d" stroke-width="4" opacity="0.4"><path d="M32 56V160M32 210V314"/><path d="M168 56V160M168 210V314"/><path d="M232 56V160M232 210V314"/><path d="M368 56V160M368 210V314"/><path d="M432 56V160M432 210V314"/><path d="M568 56V160M568 210V314"/></g>
+<g fill="none" stroke="currentColor" stroke-width="4" opacity="0.4"><path d="M46 56V160M46 210V314"/><path d="M154 56V160M154 210V314"/><path d="M246 56V160M246 210V314"/><path d="M354 56V160M354 210V314"/><path d="M446 56V160M446 210V314"/><path d="M554 56V160M554 210V314"/></g>
+<g fill="none" stroke="#d0312d" stroke-width="2.5"><path d="M32 58V28H168V58"/><path d="M32 156c10 8 10 50 0 58"/><path d="M168 156c10 8 10 50 0 58"/><path d="M232 58V28H368V58"/><path d="M232 156c10 8 10 50 0 58"/><path d="M368 156c10 8 10 50 0 58"/><path d="M432 58V28H568V58"/><path d="M432 156c10 8 10 50 0 58"/><path d="M568 156c10 8 10 50 0 58"/><path d="M168 90H232"/><path d="M368 90H432"/></g>
+<g fill="none" stroke="currentColor" stroke-width="2.5"><path d="M46 312V346H154V312"/><path d="M46 156c10 8 10 50 0 58"/><path d="M154 156c10 8 10 50 0 58"/><path d="M246 312V346H354V312"/><path d="M246 156c10 8 10 50 0 58"/><path d="M354 156c10 8 10 50 0 58"/><path d="M446 312V346H554V312"/><path d="M446 156c10 8 10 50 0 58"/><path d="M554 156c10 8 10 50 0 58"/><path d="M154 118H246M154 280H246"/><path d="M354 118H446M354 280H446"/></g>
+<g fill="#d0312d"><circle cx="32" cy="58" r="3"/><circle cx="232" cy="58" r="3"/><circle cx="432" cy="58" r="3"/><circle cx="168" cy="58" r="3"/><circle cx="368" cy="58" r="3"/><circle cx="568" cy="58" r="3"/><circle cx="168" cy="90" r="3"/><circle cx="368" cy="90" r="3"/><circle cx="232" cy="90" r="3"/><circle cx="432" cy="90" r="3"/></g>
+<g fill="currentColor"><circle cx="46" cy="312" r="3"/><circle cx="246" cy="312" r="3"/><circle cx="446" cy="312" r="3"/><circle cx="154" cy="312" r="3"/><circle cx="354" cy="312" r="3"/><circle cx="554" cy="312" r="3"/><circle cx="154" cy="118" r="3"/><circle cx="154" cy="280" r="3"/><circle cx="354" cy="118" r="3"/><circle cx="354" cy="280" r="3"/><circle cx="246" cy="118" r="3"/><circle cx="246" cy="280" r="3"/><circle cx="446" cy="118" r="3"/><circle cx="446" cy="280" r="3"/></g>
+<g fill="currentColor" font-family="sans-serif" font-size="12" text-anchor="middle">
+<text x="100" y="14">Board 1: MIA</text>
+<text x="300" y="14">Board 2: CPU and memory</text>
+<text x="500" y="14">Board 3: glue logic and VIA</text>
+<text x="32" y="189" font-size="10">+</text>
+<text x="46" y="189" font-size="10">G</text>
+<text x="154" y="189" font-size="10">G</text>
+<text x="168" y="189" font-size="10">+</text>
+<text x="100" y="185" font-size="10" opacity="0.7">chips</text>
+<text x="232" y="189" font-size="10">+</text>
+<text x="246" y="189" font-size="10">G</text>
+<text x="354" y="189" font-size="10">G</text>
+<text x="368" y="189" font-size="10">+</text>
+<text x="300" y="185" font-size="10" opacity="0.7">chips</text>
+<text x="432" y="189" font-size="10">+</text>
+<text x="446" y="189" font-size="10">G</text>
+<text x="554" y="189" font-size="10">G</text>
+<text x="568" y="189" font-size="10">+</text>
+<text x="500" y="185" font-size="10" opacity="0.7">chips</text>
+<text x="300" y="372" font-size="11">red: + to + · black: GND to GND (G) · the short loops bridge split rails</text>
+</g>
+</svg>
+</div>
+
+1. **Across each board.** A red wire joins the board's two + rails at one
+   end, and a black wire joins its two GND rails at the other end.
+2. **Between neighbours.** Where two boards meet, a red wire joins the + rail
+   on one side of the seam to the + rail on the other, and a black wire does
+   the same for GND.
+3. **A second GND link** between each pair of neighbours, at the other end
+   of the seam. Every signal returns through GND, and two short paths keep
+   the ground the same on every board once the clock is fast.
+4. **Split rails.** Many breadboards cut each rail in the middle (the line
+   printed along the rail has a gap there). Bridge each cut with a short wire
+   of the rail's colour. Stage 0 has you find them with the meter.
+
+Which rail is + depends on your board: follow its printed red (+) and blue
+(GND) lines rather than the order in the drawing. A wire may cross over the
+other rail; that's fine, wires are insulated.
 
 In the wiring tables, `3.3 V` and `GND` mean the nearest rail.
