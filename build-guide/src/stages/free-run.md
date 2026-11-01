@@ -17,48 +17,48 @@ capacitor and its three pull-up resistors, and its links to MIA.
 
 ### U1, the CPU
 
-| U1 pin | Signal | Connects to | Notes |
-| --- | --- | --- | --- |
-| 1 | unconnected | | `VPB` |
-| 2 | RDY | R1 | Pulled up (below) |
-| 3 | unconnected | | `PHI1O` |
-| 4 | ~IRQB | R2 | Pulled up (below) |
-| 5 | unconnected | | `~ML` |
-| 6 | ~NMI | R5 | Pulled up (below) |
-| 7 | unconnected | | `SYNC` |
-| 8 | 3.3 V | 3.3 V | `VDD` |
-| 9 | A0 | Pico 21 (GP16) | |
-| 10 | A1 | Pico 22 (GP17) | |
-| 11 | A2 | Pico 24 (GP18) | |
-| 12 | A3 | Pico 25 (GP19) | |
-| 13 | A4 | Pico 26 (GP20) | MIA sees only A0-A4 |
-| 14 | A5 | | The RAM chips, from stage 6 |
-| 15 | A6 | | |
-| 16 | A7 | | |
-| 17 | A8 | | |
-| 18 | A9 | | |
-| 19 | A10 | U6.1 | From stage 3 |
-| 20 | A11 | U6.2 | From stage 3 |
-| 21 | GND | GND | `VSS` |
-| 22 | A12 | U6.3 | From stage 3 |
-| 23 | A13 | U6.4, U8.1 | From stage 3 |
-| 24 | A14 | U6.6, U8.2 | From stage 3 |
-| 25 | A15 | U8.6, U9.12 | From stage 3 |
-| 26 | D7 | Pico 20 (GP15) | |
-| 27 | D6 | Pico 19 (GP14) | |
-| 28 | D5 | Pico 17 (GP13) | |
-| 29 | D4 | Pico 16 (GP12) | |
-| 30 | D3 | Pico 15 (GP11) | |
-| 31 | D2 | Pico 14 (GP10) | |
-| 32 | D1 | Pico 12 (GP9) | |
-| 33 | D0 | Pico 11 (GP8) | |
-| 34 | RWB | U9.1, Pico 10 (GP7) | |
-| 35 | unconnected | | `NC` |
-| 36 | 3.3 V | 3.3 V | `BE`: the CPU drives the buses |
-| 37 | PHI2 | U9.5, Pico 27 (GP21) | MIA's clock |
-| 38 | 3.3 V | 3.3 V | `~SO`: unused |
-| 39 | unconnected | | `PHI2O` |
-| 40 | ~RESB | Pico 31 (GP26) | MIA's reset |
+| U1 pin | Signal | Connects to | Wire | Notes |
+| --- | --- | --- | --- | --- |
+| 1 | unconnected | | - | `VPB` |
+| 2 | RDY | R1 | - | Pulled up (below) |
+| 3 | unconnected | | - | `PHI1O` |
+| 4 | ~IRQB | R2 | - | Pulled up (below) |
+| 5 | unconnected | | - | `~ML` |
+| 6 | ~NMI | R5 | - | Pulled up (below) |
+| 7 | unconnected | | - | `SYNC` |
+| 8 | 3.3 V | 3.3 V | red | `VDD` |
+| 9 | A0 | Pico 21 (GP16) | yellow | |
+| 10 | A1 | Pico 22 (GP17) | yellow | |
+| 11 | A2 | Pico 24 (GP18) | yellow | |
+| 12 | A3 | Pico 25 (GP19) | yellow | |
+| 13 | A4 | Pico 26 (GP20) | yellow | MIA sees only A0-A4 |
+| 14 | A5 | | - | The RAM chips, from stage 6 |
+| 15 | A6 | | - | |
+| 16 | A7 | | - | |
+| 17 | A8 | | - | |
+| 18 | A9 | | - | |
+| 19 | A10 | U6.1 | yellow | From stage 3 |
+| 20 | A11 | U6.2 | yellow | From stage 3 |
+| 21 | GND | GND | black | `VSS` |
+| 22 | A12 | U6.3 | yellow | From stage 3 |
+| 23 | A13 | U6.4, U8.1 | yellow | From stage 3 |
+| 24 | A14 | U6.6, U8.2 | yellow | From stage 3 |
+| 25 | A15 | U8.6, U9.12 | yellow | From stage 3 |
+| 26 | D7 | Pico 20 (GP15) | blue | |
+| 27 | D6 | Pico 19 (GP14) | blue | |
+| 28 | D5 | Pico 17 (GP13) | blue | |
+| 29 | D4 | Pico 16 (GP12) | blue | |
+| 30 | D3 | Pico 15 (GP11) | blue | |
+| 31 | D2 | Pico 14 (GP10) | blue | |
+| 32 | D1 | Pico 12 (GP9) | blue | |
+| 33 | D0 | Pico 11 (GP8) | blue | |
+| 34 | RWB | U9.1, Pico 10 (GP7) | green | |
+| 35 | unconnected | | - | `NC` |
+| 36 | 3.3 V | 3.3 V | red | `BE`: the CPU drives the buses |
+| 37 | PHI2 | U9.5, Pico 27 (GP21) | white | MIA's clock |
+| 38 | 3.3 V | 3.3 V | red | `~SO`: unused |
+| 39 | unconnected | | - | `PHI2O` |
+| 40 | ~RESB | Pico 31 (GP26) | green | MIA's reset |
 
 The D lines run in the opposite order to the pin numbers: D0 is pin 33 and
 D7 pin 26. On the Pico they run in order, GP8 to GP15, skipping the GND

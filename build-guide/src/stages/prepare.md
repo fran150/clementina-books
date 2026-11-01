@@ -7,11 +7,12 @@ the software is ready on your computer.
 
 1. On each breadboard, beep every power rail from one end to the other with
    the multimeter's continuity setting. Many boards split each rail in the
-   middle; where yours does, bridge the gap with a short wire.
+   middle; where yours does, bridge the gap with a short wire (red
+   on a + rail, black on a GND rail).
 2. Beep each + rail against its GND rail. It must stay silent.
 3. Place the boards side by side in the order of the
-   [layout](../breadboard.md#the-layout), and link their rails: + to + and GND
-   to GND, on both sides, with at least two GND links between neighbouring
+   [layout](../breadboard.md#the-layout), and link their rails: + to + (red wire)
+   and GND to GND (black wire), on both sides, with at least two GND links between neighbouring
    boards.
 4. Mark pin 1 on every chip.
 

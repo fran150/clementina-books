@@ -31,14 +31,14 @@ The Adafruit 4682 has its own pull-ups and capacitors. Its pins, left to
 right with the card slot facing you, are 3V, GND, CLK, SO, SI, CS, DAT1,
 DAT2 and DET; the tables call them `SD 1` to `SD 9`.
 
-| From | To | Signal | Notes |
-| --- | --- | --- | --- |
-| SD 1 | 3.3 V | 3.3 V | `3V` |
-| SD 2 | GND | GND | |
-| SD 3 | Pico 4 (GP2) | SD_SCK | `CLK` |
-| SD 4 | Pico 1 (GP0) | SD_MISO | `SO` |
-| SD 5 | Pico 5 (GP3) | SD_MOSI | `SI` |
-| SD 6 | Pico 2 (GP1) | SD_CS | `CS` |
+| From | To | Signal | Wire | Notes |
+| --- | --- | --- | --- | --- |
+| SD 1 | 3.3 V | 3.3 V | red | `3V` |
+| SD 2 | GND | GND | black | |
+| SD 3 | Pico 4 (GP2) | SD_SCK | green | `CLK` |
+| SD 4 | Pico 1 (GP0) | SD_MISO | green | `SO` |
+| SD 5 | Pico 5 (GP3) | SD_MOSI | green | `SI` |
+| SD 6 | Pico 2 (GP1) | SD_CS | green | `CS` |
 
 Leave SD 7, 8 and 9 (DAT1, DAT2, card detect) unconnected.
 

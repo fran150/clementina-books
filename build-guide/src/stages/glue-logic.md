@@ -25,91 +25,91 @@ What the four chips do:
 
 ### U8, the memory decoder
 
-| U8 pin | Signal | Connects to | Notes |
-| --- | --- | --- | --- |
-| 1 | A13 | U1.23 | Input A0 |
-| 2 | A14 | U1.24 | Input A1 |
-| 3 | GND | GND | Input A2 |
-| 4 | GND | GND | `~E1` |
-| 5 | GND | GND | `~E2` |
-| 6 | A15 | U1.25 | `E3`: U8 only works while A15 is high |
-| 7 | unconnected | | `~Y7` |
-| 8 | GND | GND | |
-| 9 | unconnected | | `~Y6` |
-| 10 | unconnected | | `~Y5` |
-| 11 | unconnected | | `~Y4` |
-| 12 | ~Y3 | U9.9, U9.10 | Low for `$E000-$FFFF` |
-| 13 | unconnected | | `~Y2` (`$C000-$DFFF` is U6's job) |
-| 14 | ~Y1 | U7.2 | Low for `$A000-$BFFF` |
-| 15 | ~Y0 | U7.1 | Low for `$8000-$9FFF` |
-| 16 | 3.3 V | 3.3 V | |
+| U8 pin | Signal | Connects to | Wire | Notes |
+| --- | --- | --- | --- | --- |
+| 1 | A13 | U1.23 | yellow | Input A0 |
+| 2 | A14 | U1.24 | yellow | Input A1 |
+| 3 | GND | GND | black | Input A2 |
+| 4 | GND | GND | black | `~E1` |
+| 5 | GND | GND | black | `~E2` |
+| 6 | A15 | U1.25 | yellow | `E3`: U8 only works while A15 is high |
+| 7 | unconnected | | - | `~Y7` |
+| 8 | GND | GND | black | |
+| 9 | unconnected | | - | `~Y6` |
+| 10 | unconnected | | - | `~Y5` |
+| 11 | unconnected | | - | `~Y4` |
+| 12 | ~Y3 | U9.9, U9.10 | green | Low for `$E000-$FFFF` |
+| 13 | unconnected | | - | `~Y2` (`$C000-$DFFF` is U6's job) |
+| 14 | ~Y1 | U7.2 | green | Low for `$A000-$BFFF` |
+| 15 | ~Y0 | U7.1 | green | Low for `$8000-$9FFF` |
+| 16 | 3.3 V | 3.3 V | red | |
 
 ### U7, the AND gates
 
 Only one gate is used. Tie the unused gates' inputs to GND so they don't
 float, and leave their outputs open.
 
-| U7 pin | Signal | Connects to | Notes |
-| --- | --- | --- | --- |
-| 1 | ~Y0 | U8.15 | |
-| 2 | ~Y1 | U8.14 | |
-| 3 | ~EXRAMCS | | Goes to U2.22 in stage 8: leave a free hole |
-| 4 | GND | GND | Unused input |
-| 5 | GND | GND | Unused input |
-| 6 | unconnected | | Unused output |
-| 7 | GND | GND | |
-| 8 | unconnected | | Unused output |
-| 9 | GND | GND | Unused input |
-| 10 | GND | GND | Unused input |
-| 11 | unconnected | | Unused output |
-| 12 | GND | GND | Unused input |
-| 13 | GND | GND | Unused input |
-| 14 | 3.3 V | 3.3 V | |
+| U7 pin | Signal | Connects to | Wire | Notes |
+| --- | --- | --- | --- | --- |
+| 1 | ~Y0 | U8.15 | green | |
+| 2 | ~Y1 | U8.14 | green | |
+| 3 | ~EXRAMCS | | - | Goes to U2.22 in stage 8: leave a free hole |
+| 4 | GND | GND | black | Unused input |
+| 5 | GND | GND | black | Unused input |
+| 6 | unconnected | | - | Unused output |
+| 7 | GND | GND | black | |
+| 8 | unconnected | | - | Unused output |
+| 9 | GND | GND | black | Unused input |
+| 10 | GND | GND | black | Unused input |
+| 11 | unconnected | | - | Unused output |
+| 12 | GND | GND | black | Unused input |
+| 13 | GND | GND | black | Unused input |
+| 14 | 3.3 V | 3.3 V | red | |
 
 ### U9, the NAND gates
 
 All four gates are used. A NAND with both inputs joined is an inverter.
 
-| U9 pin | Signal | Connects to | Notes |
-| --- | --- | --- | --- |
-| 1 | RWB | U1.34 | Gate 1: `~OE` is RWB inverted |
-| 2 | RWB | U9.1 | |
-| 3 | ~OE | U9.4 | Low while the CPU reads; goes to both RAMs later |
-| 4 | ~OE | U9.3 | Gate 2: `~WE` = NAND(PHI2, `~OE`) |
-| 5 | PHI2 | U1.37 | |
-| 6 | ~WE | | Low while the CPU writes and PHI2 is high; goes to both RAMs later |
-| 7 | GND | GND | |
-| 8 | MIACS | | Gate 3 output, active high. Goes to Pico 9 (GP6) in stage 5, not before |
-| 9 | ~Y3 | U8.12 | Gate 3: `MIACS` is `~Y3` inverted |
-| 10 | ~Y3 | U9.9 | |
-| 11 | ~A15 | U6.5 | Gate 4 output |
-| 12 | A15 | U1.25 | Gate 4: `~A15` is A15 inverted |
-| 13 | A15 | U9.12 | |
-| 14 | 3.3 V | 3.3 V | |
+| U9 pin | Signal | Connects to | Wire | Notes |
+| --- | --- | --- | --- | --- |
+| 1 | RWB | U1.34 | green | Gate 1: `~OE` is RWB inverted |
+| 2 | RWB | U9.1 | green | |
+| 3 | ~OE | U9.4 | green | Low while the CPU reads; goes to both RAMs later |
+| 4 | ~OE | U9.3 | green | Gate 2: `~WE` = NAND(PHI2, `~OE`) |
+| 5 | PHI2 | U1.37 | white | |
+| 6 | ~WE | | - | Low while the CPU writes and PHI2 is high; goes to both RAMs later |
+| 7 | GND | GND | black | |
+| 8 | MIACS | | - | Gate 3 output, active high. Goes to Pico 9 (GP6) in stage 5, not before |
+| 9 | ~Y3 | U8.12 | green | Gate 3: `MIACS` is `~Y3` inverted |
+| 10 | ~Y3 | U9.9 | green | |
+| 11 | ~A15 | U6.5 | green | Gate 4 output |
+| 12 | A15 | U1.25 | yellow | Gate 4: `~A15` is A15 inverted |
+| 13 | A15 | U9.12 | yellow | |
+| 14 | 3.3 V | 3.3 V | red | |
 
 ### U6, the I/O decoder
 
 U6 is enabled straight from A13-A15 rather than through U8, which saves a
 gate delay on the selects the VIA and the expansion cards need early.
 
-| U6 pin | Signal | Connects to | Notes |
-| --- | --- | --- | --- |
-| 1 | A10 | U1.19 | Input A0 |
-| 2 | A11 | U1.20 | Input A1 |
-| 3 | A12 | U1.22 | Input A2 |
-| 4 | A13 | U1.23 | `~E1`: A13 must be low |
-| 5 | ~A15 | U9.11 | `~E2`: A15 must be high |
-| 6 | A14 | U1.24 | `E3`: A14 must be high |
-| 7 | ~IOCS7 | | Expansion slot 7: nothing on the breadboard |
-| 8 | GND | GND | |
-| 9 | ~IOCS6 | | Expansion slot 6 |
-| 10 | ~IOCS5 | | Expansion slot 5 |
-| 11 | ~IOCS4 | | Expansion slot 4 |
-| 12 | ~IOCS3 | | Expansion slot 3 |
-| 13 | ~IOCS2 | | Expansion slot 2 |
-| 14 | ~IOCS1 | | Expansion slot 1 |
-| 15 | ~IOCS0 | | The VIA's select: goes to U3.23 in stage 7 |
-| 16 | 3.3 V | 3.3 V | |
+| U6 pin | Signal | Connects to | Wire | Notes |
+| --- | --- | --- | --- | --- |
+| 1 | A10 | U1.19 | yellow | Input A0 |
+| 2 | A11 | U1.20 | yellow | Input A1 |
+| 3 | A12 | U1.22 | yellow | Input A2 |
+| 4 | A13 | U1.23 | yellow | `~E1`: A13 must be low |
+| 5 | ~A15 | U9.11 | green | `~E2`: A15 must be high |
+| 6 | A14 | U1.24 | yellow | `E3`: A14 must be high |
+| 7 | ~IOCS7 | | - | Expansion slot 7: nothing on the breadboard |
+| 8 | GND | GND | black | |
+| 9 | ~IOCS6 | | - | Expansion slot 6 |
+| 10 | ~IOCS5 | | - | Expansion slot 5 |
+| 11 | ~IOCS4 | | - | Expansion slot 4 |
+| 12 | ~IOCS3 | | - | Expansion slot 3 |
+| 13 | ~IOCS2 | | - | Expansion slot 2 |
+| 14 | ~IOCS1 | | - | Expansion slot 1 |
+| 15 | ~IOCS0 | | - | The VIA's select: goes to U3.23 in stage 7 |
+| 16 | 3.3 V | 3.3 V | red | |
 
 ## Check
 

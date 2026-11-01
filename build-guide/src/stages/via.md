@@ -12,48 +12,48 @@ interrupt output, and eight LEDs on port B. The VIA's data pins carry D7-D0
 on the same pin numbers as the CPU's, 26 to 33, which makes that chain easy
 to check.
 
-| U3 pin | Signal | Connects to | Notes |
-| --- | --- | --- | --- |
-| 1 | GND | GND | `VSS` |
-| 2 | PA0 | | Extended RAM bank bit 0, in stage 8 |
-| 3 | PA1 | | Bank bit 1, stage 8 |
-| 4 | PA2 | | Bank bit 2, stage 8 |
-| 5 | PA3 | | Bank bit 3, stage 8 |
-| 6 | PA4 | | Bank bit 4, stage 8 |
-| 7 | unconnected | | `PA5` |
-| 8 | unconnected | | `PA6` |
-| 9 | unconnected | | `PA7` |
-| 10 | PB0 | | LED, the "high" way, to GND |
-| 11 | PB1 | | LED |
-| 12 | PB2 | | LED |
-| 13 | PB3 | | LED |
-| 14 | PB4 | | LED |
-| 15 | PB5 | | LED |
-| 16 | PB6 | | LED |
-| 17 | PB7 | | LED |
-| 18 | CB1 | | User port; see below |
-| 19 | CB2 | | User port |
-| 20 | 3.3 V | 3.3 V | `VDD` |
-| 21 | ~VIAIRQ | | To D2 (below) |
-| 22 | RWB | U1.34 | |
-| 23 | ~IOCS0 | U6.15 | `~CS2`: the VIA is slot 0, `$C000` |
-| 24 | 3.3 V | 3.3 V | `CS1`: always enabled; `~CS2` alone selects it |
-| 25 | PHI2 | U1.37 | |
-| 26 | D7 | U1.26 | |
-| 27 | D6 | U1.27 | |
-| 28 | D5 | U1.28 | |
-| 29 | D4 | U1.29 | |
-| 30 | D3 | U1.30 | |
-| 31 | D2 | U1.31 | |
-| 32 | D1 | U1.32 | |
-| 33 | D0 | U1.33 | |
-| 34 | ~RESB | U1.40 | MIA resets the VIA with the CPU |
-| 35 | A3 | U1.12 | `RS3` |
-| 36 | A2 | U1.11 | `RS2` |
-| 37 | A1 | U1.10 | `RS1` |
-| 38 | A0 | U1.9 | `RS0` |
-| 39 | CA2 | | User port |
-| 40 | CA1 | | User port |
+| U3 pin | Signal | Connects to | Wire | Notes |
+| --- | --- | --- | --- | --- |
+| 1 | GND | GND | black | `VSS` |
+| 2 | PA0 | | - | Extended RAM bank bit 0, in stage 8 |
+| 3 | PA1 | | - | Bank bit 1, stage 8 |
+| 4 | PA2 | | - | Bank bit 2, stage 8 |
+| 5 | PA3 | | - | Bank bit 3, stage 8 |
+| 6 | PA4 | | - | Bank bit 4, stage 8 |
+| 7 | unconnected | | - | `PA5` |
+| 8 | unconnected | | - | `PA6` |
+| 9 | unconnected | | - | `PA7` |
+| 10 | PB0 | | - | LED, the "high" way, to GND |
+| 11 | PB1 | | - | LED |
+| 12 | PB2 | | - | LED |
+| 13 | PB3 | | - | LED |
+| 14 | PB4 | | - | LED |
+| 15 | PB5 | | - | LED |
+| 16 | PB6 | | - | LED |
+| 17 | PB7 | | - | LED |
+| 18 | CB1 | | - | User port; see below |
+| 19 | CB2 | | - | User port |
+| 20 | 3.3 V | 3.3 V | red | `VDD` |
+| 21 | ~VIAIRQ | | - | To D2 (below) |
+| 22 | RWB | U1.34 | green | |
+| 23 | ~IOCS0 | U6.15 | green | `~CS2`: the VIA is slot 0, `$C000` |
+| 24 | 3.3 V | 3.3 V | red | `CS1`: always enabled; `~CS2` alone selects it |
+| 25 | PHI2 | U1.37 | white | |
+| 26 | D7 | U1.26 | blue | |
+| 27 | D6 | U1.27 | blue | |
+| 28 | D5 | U1.28 | blue | |
+| 29 | D4 | U1.29 | blue | |
+| 30 | D3 | U1.30 | blue | |
+| 31 | D2 | U1.31 | blue | |
+| 32 | D1 | U1.32 | blue | |
+| 33 | D0 | U1.33 | blue | |
+| 34 | ~RESB | U1.40 | green | MIA resets the VIA with the CPU |
+| 35 | A3 | U1.12 | yellow | `RS3` |
+| 36 | A2 | U1.11 | yellow | `RS2` |
+| 37 | A1 | U1.10 | yellow | `RS1` |
+| 38 | A0 | U1.9 | yellow | `RS0` |
+| 39 | CA2 | | - | User port |
+| 40 | CA1 | | - | User port |
 
 | Part | Value | First leg (band) | Second leg | Notes |
 | --- | --- | --- | --- | --- |

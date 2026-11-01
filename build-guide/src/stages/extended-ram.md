@@ -12,40 +12,40 @@ capacitor. Its low address and data lines tap the same chains as U4. Its
 top five address lines come from the VIA's port A instead, and they sit on
 scattered pins: watch those rows.
 
-| U2 pin | Signal | Connects to | Notes |
-| --- | --- | --- | --- |
-| 1 | PA4 | U3.6 | `A18`, bank bit 4 |
-| 2 | PA2 | U3.4 | `A16`, bank bit 2 |
-| 3 | PA0 | U3.2 | `A14`, bank bit 0 |
-| 4 | A12 | U1.22 | |
-| 5 | A7 | U1.16 | |
-| 6 | A6 | U1.15 | |
-| 7 | A5 | U1.14 | |
-| 8 | A4 | U1.13 | |
-| 9 | A3 | U1.12 | |
-| 10 | A2 | U1.11 | |
-| 11 | A1 | U1.10 | |
-| 12 | A0 | U1.9 | |
-| 13 | D0 | U1.33 | `DQ0` |
-| 14 | D1 | U1.32 | `DQ1` |
-| 15 | D2 | U1.31 | `DQ2` |
-| 16 | GND | GND | `VSS` |
-| 17 | D3 | U1.30 | `DQ3` |
-| 18 | D4 | U1.29 | `DQ4` |
-| 19 | D5 | U1.28 | `DQ5` |
-| 20 | D6 | U1.27 | `DQ6` |
-| 21 | D7 | U1.26 | `DQ7` |
-| 22 | ~EXRAMCS | U7.3 | `~CE`: selected for `$8000-$BFFF` |
-| 23 | A10 | U1.19 | |
-| 24 | ~OE | U9.3 | |
-| 25 | A11 | U1.20 | |
-| 26 | A9 | U1.18 | |
-| 27 | A8 | U1.17 | |
-| 28 | A13 | U1.23 | |
-| 29 | ~WE | U9.6 | |
-| 30 | PA3 | U3.5 | `A17`, bank bit 3 |
-| 31 | PA1 | U3.3 | `A15`, bank bit 1 |
-| 32 | 3.3 V | 3.3 V | `VCC` |
+| U2 pin | Signal | Connects to | Wire | Notes |
+| --- | --- | --- | --- | --- |
+| 1 | PA4 | U3.6 | green | `A18`, bank bit 4 |
+| 2 | PA2 | U3.4 | green | `A16`, bank bit 2 |
+| 3 | PA0 | U3.2 | green | `A14`, bank bit 0 |
+| 4 | A12 | U1.22 | yellow | |
+| 5 | A7 | U1.16 | yellow | |
+| 6 | A6 | U1.15 | yellow | |
+| 7 | A5 | U1.14 | yellow | |
+| 8 | A4 | U1.13 | yellow | |
+| 9 | A3 | U1.12 | yellow | |
+| 10 | A2 | U1.11 | yellow | |
+| 11 | A1 | U1.10 | yellow | |
+| 12 | A0 | U1.9 | yellow | |
+| 13 | D0 | U1.33 | blue | `DQ0` |
+| 14 | D1 | U1.32 | blue | `DQ1` |
+| 15 | D2 | U1.31 | blue | `DQ2` |
+| 16 | GND | GND | black | `VSS` |
+| 17 | D3 | U1.30 | blue | `DQ3` |
+| 18 | D4 | U1.29 | blue | `DQ4` |
+| 19 | D5 | U1.28 | blue | `DQ5` |
+| 20 | D6 | U1.27 | blue | `DQ6` |
+| 21 | D7 | U1.26 | blue | `DQ7` |
+| 22 | ~EXRAMCS | U7.3 | green | `~CE`: selected for `$8000-$BFFF` |
+| 23 | A10 | U1.19 | yellow | |
+| 24 | ~OE | U9.3 | green | |
+| 25 | A11 | U1.20 | yellow | |
+| 26 | A9 | U1.18 | yellow | |
+| 27 | A8 | U1.17 | yellow | |
+| 28 | A13 | U1.23 | yellow | |
+| 29 | ~WE | U9.6 | green | |
+| 30 | PA3 | U3.5 | green | `A17`, bank bit 3 |
+| 31 | PA1 | U3.3 | green | `A15`, bank bit 1 |
+| 32 | 3.3 V | 3.3 V | red | `VCC` |
 
 The CPU's A14 and A15 don't go to U2: the window is 16 KB, so the chip sees
 A0-A13 from the CPU, and its own A14-A18 are the bank number.

@@ -9,17 +9,17 @@ you a console to ask what is going on.
 The Pico on board 1, straddling the centre gap with its USB end at the
 board's edge, and C14, the 22 µF bulk capacitor next to its 3.3 V pin.
 
-| From | To | Signal | Notes |
-| --- | --- | --- | --- |
-| Pico 36 (3V3) | 3.3 V | 3.3 V | Feeds the whole build |
-| Pico 3 | GND | GND | |
-| Pico 8 | GND | GND | |
-| Pico 13 | GND | GND | |
-| Pico 18 | GND | GND | |
-| Pico 23 | GND | GND | |
-| Pico 28 | GND | GND | |
-| Pico 33 (AGND) | GND | GND | The schematic ties the analog ground to GND too |
-| Pico 38 | GND | GND | |
+| From | To | Signal | Wire | Notes |
+| --- | --- | --- | --- | --- |
+| Pico 36 (3V3) | 3.3 V | 3.3 V | red | Feeds the whole build |
+| Pico 3 | GND | GND | black | |
+| Pico 8 | GND | GND | black | |
+| Pico 13 | GND | GND | black | |
+| Pico 18 | GND | GND | black | |
+| Pico 23 | GND | GND | black | |
+| Pico 28 | GND | GND | black | |
+| Pico 33 (AGND) | GND | GND | black | The schematic ties the analog ground to GND too |
+| Pico 38 | GND | GND | black | |
 
 | Part | Value | First leg (+) | Second leg | Notes |
 | --- | --- | --- | --- | --- |
