@@ -11,9 +11,10 @@ the software is ready on your computer.
    on a + rail, black on a GND rail).
 2. Beep each + rail against its GND rail. It must stay silent.
 3. Place the boards side by side in the order of the
-   [layout](../breadboard.md#the-layout), and link their rails: + to + (red wire)
-   and GND to GND (black wire), on both sides, with at least two GND links between neighbouring
-   boards.
+   [layout](../breadboard.md#the-layout), and link their rails as
+   [Power rails](../breadboard.md#power-rails) shows: + to + (red wire) and
+   GND to GND (black wire), across each board and between neighbours, with
+   two GND links between each pair of neighbouring boards.
 4. Mark pin 1 on every chip.
 
 ## MIA's firmware
