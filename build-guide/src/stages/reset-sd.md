@@ -146,9 +146,16 @@ added.
 1. Before plugging in, beep SD 1 against GND: silent.
 2. Put the SD card in and plug in the USB cable. MIA reads `WIFI.CFG` and
    joins the network only at power-on, so the card must be in first.
-3. Open the console and type `status`. The `Status:` line lists `SD` and
-   `FS` among its flags (card present, filesystem mounted), and the `SD:`
-   line says `ready` and `fs:mounted`.
+3. Open the console and type `status`. The `SD:` line says `ready` and
+   names the card type, for example `SD:     ready  card:SDHC/SDXC
+   fs:unmounted`. `fs:unmounted` is right: MIA mounts the card at power-on
+   only long enough to read `WIFI.CFG`, and mounts it again when the
+   kernel first uses it.
+
+   Ignore the `Status:` line until stage 5. While `Mode:` says
+   `Bootloader`, the two bytes that hold MIA's status word ($FFEA-$FFEB)
+   hold part of MIA's loader program instead, so the flags shown there
+   (often `SD` and `FS` among them) mean nothing yet.
 4. Type `status wifi`. `config:` says `WIFI.CFG`, `mode:` says `sta`, and
    `ip:` is MIA's address on your network. Write it down: the video client
    needs it from stage 6.
@@ -157,6 +164,17 @@ added.
    the button is down. Let go and it goes back to 3.3 V.
 6. Measure Pico 32: 3.3 V with the button up, about 0.03 V held down (R4 and
    R3 divide the 3.3 V).
+7. See the button reset MIA. Type `exec pause`: `status` shows
+   `Exec:   Paused (PHI2 stopped low)`, and Pico 27 (PHI2) reads 0 V. Press
+   the button: `status` shows `Exec:   Running` again, and Pico 27 is back
+   to about 1.65 V.
+
+What the button resets: MIA holds the CPU in reset and puts itself back in
+`Bootloader` mode. Its registers are cleared and its loader rebuilt, a
+paused clock runs again, audio stops, open files close, and the error
+queue empties. The clock speed, Wi-Fi, the console and MIA's RAM stay as
+they are; keeping the speed is on purpose, so stage 5 can slow the clock
+and then press RESET to watch the loader.
 
 Without a meter, an LED on Pico 31 (the "high" way, see
 [How to wire an LED](../breadboard.md#how-to-wire-an-led-for-a-check)) goes
@@ -175,9 +193,9 @@ let go.
 
 | Symptom | Likely cause |
 | --- | --- |
-| No `SD` flag | Card not seated; SD 1/SD 2 not powered |
-| `SD` but no `FS` | The card isn't FAT32 |
-| `config: build` | No `WIFI.CFG` in the card's top folder, or the file breaks a rule; MIA prints the reason at power-on |
+| `SD: not ready`, `card:none` | Card not seated; SD 1/SD 2 not powered; an SD wire on the wrong Pico pin |
+| `SD: ready` but `config: build` | The card isn't FAT32, there's no `WIFI.CFG` in its top folder, or the file breaks a rule; MIA prints the reason at power-on |
+| `Exec:` stays `Paused` after the button | MIA didn't see the press: check Pico 32 drops to 0 V |
 | `(no IP)` | Wrong SSID or password; the network is 5 GHz only (the Pico 2 W uses 2.4 GHz) |
 | RESB stays at 3.3 V with the button held | The switch legs used are one joined pair; use diagonal legs |
 | Pico 32 sits near 0 V all the time | C1 or the switch shorted to GND |

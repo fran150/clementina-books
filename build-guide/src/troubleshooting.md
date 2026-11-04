@@ -16,7 +16,7 @@ part, and the quickest to catch.
 | The Pico drops off USB or resets when you plug in | Any | A short between 3.3 V and GND | Unplug; beep the rails; pull chips one by one |
 | A chip gets hot | Any | Seated backwards, or VCC and GND swapped | Pin 1 and the power pins |
 | A far rail reads under 3.25 V | 1 | A rail split not bridged, a loose rail link | Beep the rails end to end |
-| No `SD` flag in `status` | 2 | Card not seated, breakout unpowered | SD 1 and SD 2 |
+| `status` shows `SD: not ready` | 2 | Card not seated, breakout unpowered | SD 1 and SD 2 |
 | `status wifi` shows `config: build` | 2 | No valid `WIFI.CFG` | The file's name and rules (*User's Manual*, appendix G) |
 | RESB doesn't follow the button | 2 | Switch legs on one joined pair | Use diagonal legs |
 | A glue output reads about 1.5 V | 3 | A floating input | Every unused gate input on GND, every test jumper in |
