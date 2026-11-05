@@ -3,6 +3,15 @@
 Before any chip goes in, make sure the boards themselves are sound and that
 the software is ready on your computer.
 
+## Parts
+
+| Part | Qty | On the schematic | Notes |
+| --- | --- | --- | --- |
+| Breadboards, about 15 × 5.5 cm | 3 |  | With two rails down each long side |
+| 22 AWG solid wire, red and black | a few |  | Rail links |
+| microSD card | 1 |  | FAT32, for `WIFI.CFG` |
+| All the parts in [Parts and tools](../parts-and-tools.md) |  |  | Check you have them before you start |
+
 ## The breadboards
 
 1. On each breadboard, beep every power rail from one end to the other with

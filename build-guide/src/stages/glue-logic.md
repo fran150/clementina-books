@@ -5,11 +5,23 @@ and read and write strobes. You wire them before the CPU goes in, so you can
 set their inputs by hand with jumpers and check every output with the
 multimeter.
 
+## Parts
+
+| Part | Qty | On the schematic | Notes |
+| --- | --- | --- | --- |
+| 74AC138 decoder | 2 | U8, U6 | U8 decodes memory, U6 the I/O slots |
+| 74AC08 quad AND | 1 | U7 |  |
+| 74AC00 quad NAND | 1 | U9 |  |
+| 100 nF ceramic capacitor | 4 |  | One per chip |
+| Jumper wires | 8 |  | Test inputs, any colour; they come out at the end |
+| LEDs and 1 kΩ resistors | a few |  | Optional, for the check without a meter |
+
 ## What you add
 
-U8, U7, U9 and U6 on board 3, each with its 100 nF capacitor.
+The four glue chips on board 3, each with its 100 nF capacitor: U8 and
+U6 (74AC138), U7 (74AC08) and U9 (74AC00).
 
-First, decide where the CPU (U1) goes on board 2 and mark the rows its 40
+First, decide where the CPU (U1, W65C02S) goes on board 2 and mark the rows its 40
 pins will sit in, but leave the CPU out. The glue logic's inputs are wired
 to the CPU's rows, so you drive them with jumpers now and the CPU drives
 them in stage 4.
@@ -68,8 +80,9 @@ them in stage 4.
   (column 2, on the board-1 side) and pin 40 (column 2, on the board-3
   side). Pins 1-20 then face board 1, and pins 21-40, where A12-A15, RWB and
   PHI2 live, face board 3.
-- **The glue chips** go in a row on board 3, notch toward column 1: U8 in
-  columns 2-9, U7 in 12-18, U9 in 21-27 and U6 in 30-37. Leave columns
+- **The glue chips** go in a row on board 3, notch toward column 1: U8 (74AC138) in
+  columns 2-9, U7 (74AC08) in 12-18, U9 (74AC00) in 21-27 and U6 (74AC138)
+  in 30-37. Leave columns
   40-59 free for the VIA (stage 7), and columns 24-37 and 40-55 on board 2
   free for the base RAM (stage 6) and the extended RAM (stage 8).
 - **The CPU is a wide chip** (0.6", like the VIA and both RAMs): its body
@@ -241,7 +254,7 @@ the CPU's rows leave at the bottom; the outputs that later stages use
 A13, A14 and A15 each go to two chips, so eleven wires leave the CPU's
 rows; the overview above draws each signal once.
 
-### U8, the memory decoder
+### U8 (74AC138), the memory decoder
 
 | U8 pin | Signal | Connects to | Wire | Notes |
 | --- | --- | --- | --- | --- |
@@ -262,7 +275,7 @@ rows; the overview above draws each signal once.
 | 15 | ~Y0 | U7.1 | green | Low for `$8000-$9FFF` |
 | 16 | 3.3 V | 3.3 V | red | |
 
-### U7, the AND gates
+### U7 (74AC08), the AND gates
 
 Only one gate is used. Tie the unused gates' inputs to GND so they don't
 float, and leave their outputs open.
@@ -284,7 +297,7 @@ float, and leave their outputs open.
 | 13 | GND | GND | black | Unused input |
 | 14 | 3.3 V | 3.3 V | red | |
 
-### U9, the NAND gates
+### U9 (74AC00), the NAND gates
 
 All four gates are used. A NAND with both inputs joined is an inverter.
 
@@ -305,9 +318,9 @@ All four gates are used. A NAND with both inputs joined is an inverter.
 | 13 | A15 | U9.12 | yellow | |
 | 14 | 3.3 V | 3.3 V | red | |
 
-### U6, the I/O decoder
+### U6 (74AC138), the I/O decoder
 
-U6 is enabled straight from A13-A15 rather than through U8, which saves a
+U6 is enabled straight from A13-A15 rather than through U8 (the other 74AC138), which saves a
 gate delay on the selects the VIA and the expansion cards need early.
 
 | U6 pin | Signal | Connects to | Wire | Notes |
@@ -338,7 +351,7 @@ added.
 Plug the USB cable in: the glue logic needs power, and MIA can run as it is
 (MIA's pins aren't wired to the CPU's rows yet).
 
-Push jumper wires from the rails into the CPU's rows for A10-A15 (U1.19,
+Push jumper wires from the rails into the CPU's rows for A10-A15 (CPU pins U1.19,
 U1.20, U1.22-U1.25), RWB (U1.34) and PHI2 (U1.37). Every one of those inputs
 must go to a rail, high or low: a floating CMOS input gives random readings.
 Any colour will do for these test jumpers; they come out at the end.
@@ -362,10 +375,10 @@ Then set each row of the table below and measure the outputs. "0" is under
 | 1 1 0 | 1 1 1 | `$DC00-$DFFF` | 1 | 0 | `~IOCS7` (U6.7) = 0, the rest 1 |
 | 1 1 1 | x x x | `$E000-$FFFF` | 1 | 1 | all 1 |
 
-Try a few more A10-A12 values with A15-A13 at 1 1 0: exactly one U6 output
+Try a few more A10-A12 values with A15-A13 at 1 1 0: exactly one U6 (74AC138) output
 is 0 each time, `~IOCSn` where n is A12 A11 A10 read as a binary number.
 
-Check that U9.11 (`~A15`) is always the opposite of A15. Then the strobes:
+Check that U9.11 (`~A15`, on the 74AC00) is always the opposite of A15. Then the strobes:
 
 | RWB | PHI2 | `~OE` (U9.3) | `~WE` (U9.6) |
 | --- | --- | --- | --- |

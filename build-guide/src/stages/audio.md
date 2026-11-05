@@ -5,6 +5,18 @@ PWM on GP4 (left) and GP5 (right). Each channel goes through the same small
 stage to the jack: a divider and filter that turn the PWM into a line-level
 signal of about 1 V peak to peak, and a capacitor that blocks the DC.
 
+## Parts
+
+| Part | Qty | On the schematic | Notes |
+| --- | --- | --- | --- |
+| 220 Ω resistor | 2 | R6, R9 |  |
+| 100 Ω resistor | 2 | R7, R10 |  |
+| 100 nF ceramic capacitor | 2 | C2, C4 | Filter |
+| 47 µF electrolytic capacitor | 2 | C3, C5 | DC block |
+| 1.8 kΩ resistor | 2 | R8, R11 |  |
+| 3.5 mm stereo jack | 1 |  | On a breakout, or with short wires soldered on |
+| Headphones | 1 |  | For the check |
+
 ## What you add
 
 The audio stage and the jack on board 1. Both channels are the same: build

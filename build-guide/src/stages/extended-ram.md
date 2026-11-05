@@ -5,10 +5,17 @@ The AS6C4008 holds 512 KB, seen by the CPU through a 16 KB window at
 window. BASIC uses bank 0 as the top of its workspace, which is where it
 keeps its strings, so this stage is the one that makes BASIC complete.
 
+## Parts
+
+| Part | Qty | On the schematic | Notes |
+| --- | --- | --- | --- |
+| AS6C4008 512 KB SRAM | 1 | U2 | DIP-32, the extended RAM |
+| 100 nF ceramic capacitor | 1 |  |  |
+
 ## What you add
 
-The extended RAM (U2) on board 2, after the base RAM, with its 100 nF
-capacitor. Its low address and data lines tap the same chains as U4. Its
+The extended RAM (U2, AS6C4008) on board 2, after the base RAM, with its 100 nF
+capacitor. Its low address and data lines tap the same chains as the base RAM (U4). Its
 top five address lines come from the VIA's port A instead, and they sit on
 scattered pins: watch those rows.
 
@@ -47,7 +54,7 @@ scattered pins: watch those rows.
 | 31 | PA1 | U3.3 | green | `A15`, bank bit 1 |
 | 32 | 3.3 V | 3.3 V | red | `VCC` |
 
-The CPU's A14 and A15 don't go to U2: the window is 16 KB, so the chip sees
+The CPU's A14 and A15 don't go to the AS6C4008 (U2): the window is 16 KB, so the chip sees
 A0-A13 from the CPU, and its own A14-A18 are the bank number.
 
 After power-up the VIA's port A pins float until the kernel sets them. The
@@ -121,7 +128,7 @@ C001: 10
 Now go back through the same six banks and read `8000` in each (`C001: 00`,
 then `8000`; `C001: 01`, then `8000`; and so on). They read `11`, `22`,
 `33`, `44`, `55` and `66`. If two banks show the same value, the PA line
-that tells them apart is open or on the wrong U2 pin.
+that tells them apart is open or on the wrong AS6C4008 (U2) pin.
 
 Then test the window's own A13 in bank 0: `C001: 00`, `8000: 00`,
 `A000: 0E`, then read `8000`: still `00`.
@@ -130,10 +137,10 @@ Press RESET to go back to BASIC, which needs bank 0 selected.
 
 ## With a scope
 
-Run the string test above and put channel 1 on `~EXRAMCS` (U2.22) and
+Run the string test above and put channel 1 on `~EXRAMCS` (U2.22, the AS6C4008) and
 channel 2 on `~WE` (U2.29). `~WE` pulses while `~EXRAMCS` is low as BASIC
 writes its strings into bank 0. Compare a `~WE` pulse here with the one at
-U4.27 in stage 6: the same gate drives both, so they should look alike.
+the base RAM's U4.27 in stage 6: the same gate drives both, so they should look alike.
 
 ## If it fails
 

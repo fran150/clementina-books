@@ -4,6 +4,14 @@ The Pico comes first because it is the one part that works on its own, and
 everything later uses it: it powers the board, makes the clock, and gives
 you a console to ask what is going on.
 
+## Parts
+
+| Part | Qty | On the schematic | Notes |
+| --- | --- | --- | --- |
+| Raspberry Pi Pico 2 WH | 1 | MIA | Header pins already soldered |
+| 22 µF electrolytic capacitor | 1 | C14 | Bulk capacitor at the Pico |
+| USB cable for the Pico | 1 |  | Power and console |
+
 ## What you add
 
 The Pico on board 1, straddling the centre gap with its USB end at the

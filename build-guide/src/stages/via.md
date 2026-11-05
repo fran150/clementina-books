@@ -5,9 +5,19 @@ RAM bank (stage 8), its port B goes to the user port, and its Timer 1
 interrupts the CPU about 190 times a second. The kernel uses that interrupt
 to blink the cursor, which makes the blink this stage's first check.
 
+## Parts
+
+| Part | Qty | On the schematic | Notes |
+| --- | --- | --- | --- |
+| W65C22S VIA | 1 | U3 | DIP-40 |
+| 100 nF ceramic capacitor | 1 |  |  |
+| BAT85 Schottky diode | 1 | D2 | The VIA's interrupt |
+| LEDs and 1 kΩ resistors | 8 each |  | On port B; the ones from stage 4 |
+| 10 kΩ resistor | 4 |  | Optional: CA1, CA2, CB1, CB2 to 3.3 V |
+
 ## What you add
 
-The VIA (U3) on board 3, with its 100 nF capacitor, the diode D2 on its
+The VIA (U3, W65C22S) on board 3, with its 100 nF capacitor, the diode D2 on its
 interrupt output, and eight LEDs on port B. The VIA's data pins carry D7-D0
 on the same pin numbers as the CPU's, 26 to 33, which makes that chain easy
 to check.
@@ -109,15 +119,15 @@ added.
 
 ## With a scope
 
-- **The interrupt.** Probe U3.21 (`~VIAIRQ`) and trigger on a falling edge.
+- **The interrupt.** Probe the VIA's U3.21 (`~VIAIRQ`) and trigger on a falling edge.
   It goes low every 5.21 ms (Timer 1 counts 6250, plus two cycles to
   reload, at 1.2 MHz) and comes back up a few microseconds later, when the
-  kernel's interrupt handler reads Timer 1 and clears the flag. On U1.4
+  kernel's interrupt handler reads Timer 1 and clears the flag. On the CPU's U1.4
   (`~IRQB`) the same pulse sits a diode drop higher: about 0.2-0.3 V instead
   of 0 V, still well under the CPU's threshold.
 - **The chip select's setup time.** The VIA needs `~CS2` low at least about
   10 ns before PHI2 rises. Run the counting program, put channel 1 on PHI2
-  (U3.25) and channel 2 on `~IOCS0` (U3.23), and trigger on `~IOCS0`
+  (U3.25, the VIA) and channel 2 on `~IOCS0` (U3.23), and trigger on `~IOCS0`
   falling. At 1.2 MHz the select falls hundreds of nanoseconds before PHI2
   rises. Note the gap: stage 10 watches it shrink.
 
