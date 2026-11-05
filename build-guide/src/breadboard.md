@@ -88,8 +88,13 @@ side back up to the top. On a 40-pin chip, pin 20 is bottom left, pin 21
 bottom right, and pin 40 top right.
 
 A chip straddles the breadboard's centre gap, so each pin gets its own row
-of five holes. That leaves four free holes per pin on each side: plan one
-wire per hole.
+of five holes. A narrow chip (0.3", like the 74AC glue chips) leaves four
+free holes per pin. A wide chip (0.6": the CPU, the VIA and both RAMs) leaves
+fewer, because its body covers the holes between its two rows of legs:
+one to four per pin, depending on the rows it sits in. Plan one wire per
+hole, and when a signal needs more wires than its row has holes, take the
+extra ones from another pin on the same signal: any hole on the signal
+works.
 
 The Pico straddles the gap the same way. Its pins count like a DIP chip's,
 with pin 1 next to the USB connector.
