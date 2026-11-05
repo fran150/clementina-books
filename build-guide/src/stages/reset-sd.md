@@ -152,10 +152,7 @@ added.
    only long enough to read `WIFI.CFG`, and mounts it again when the
    kernel first uses it.
 
-   Ignore the `Status:` line until stage 5. While `Mode:` says
-   `Bootloader`, the two bytes that hold MIA's status word ($FFEA-$FFEB)
-   hold part of MIA's loader program instead, so the flags shown there
-   (often `SD` and `FS` among them) mean nothing yet.
+   The `Status:` line lists `SD` among its flags: the card initialized.
 4. Type `status wifi`. `config:` says `WIFI.CFG`, `mode:` says `sta`, and
    `ip:` is MIA's address on your network. Write it down: the video client
    needs it from stage 6.
