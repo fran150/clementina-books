@@ -18,6 +18,7 @@ part, and the quickest to catch.
 | A far rail reads under 3.25 V | 1 | A rail split not bridged, a loose rail link | Beep the rails end to end |
 | `status` shows `SD: not ready` | 2 | Card not seated, breakout unpowered | SD 1 and SD 2 |
 | `status wifi` shows `config: build` | 2 | No valid `WIFI.CFG` | The file's name and rules (*User's Manual*, appendix G) |
+| `status wifi` shows `mode: off` with `config: WIFI.CFG` | 2 | The join failed three times at power-on | Type `wifi connect` to retry with the file's settings; the SSID and password |
 | RESB doesn't follow the button | 2 | Switch legs on one joined pair | Use diagonal legs |
 | A glue output reads about 1.5 V | 3 | A floating input | Every unused gate input on GND, every test jumper in |
 | No LED moves in the NOP test | 4 | RESB low, no PHI2, RDY low, BE low | U1.40, U1.37, U1.2, U1.36 |

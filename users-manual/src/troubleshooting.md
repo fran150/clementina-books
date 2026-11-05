@@ -22,8 +22,11 @@ The video client's window stays black, or never shows `READY.`.
     rule broken (see [WIFI.CFG and the USB console](appendix/wifi-console.md)).
     One unknown word or a line without `=` makes MIA ignore the whole file.
   - A wrong password or a network out of reach shows as a failed
-    connection. Move the board nearer the router, check the password, and
-    switch off and on again: MIA only reads the file at power-on.
+    connection. MIA already tried three times (once for a wrong password).
+    If the network is fine, type `wifi connect` on the console to try again
+    with the settings from `WIFI.CFG`. Otherwise move the board nearer the
+    router, check the password, and switch off and on again: MIA only reads
+    the file at power-on.
   - MIA joins 2.4 GHz networks; a 5 GHz-only network won't work.
 - Check that `--server` is MIA's address with `:6502` after it.
 - Check that the computer running the client is on the same network. Guest

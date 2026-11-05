@@ -205,6 +205,7 @@ let go.
 | `SD: not ready`, `card:none` | Card not seated; SD 1/SD 2 not powered; an SD wire on the wrong Pico pin |
 | `SD: ready` but `config: build` | The card isn't FAT32, there's no `WIFI.CFG` in its top folder, or the file breaks a rule; MIA prints the reason at power-on |
 | `Exec:` stays `Paused` after the button | MIA didn't see the press: check Pico 32 drops to 0 V |
+| `mode: off` and `Wi-Fi: connection failed` at power-on | The network didn't answer in three attempts. Type `wifi connect` to try again with `WIFI.CFG`'s settings; if that fails too, check the SSID and password |
 | `(no IP)` | Wrong SSID or password; the network is 5 GHz only (the Pico 2 W uses 2.4 GHz) |
 | RESB stays at 3.3 V with the button held | The switch legs used are one joined pair; use diagonal legs |
 | Pico 32 sits near 0 V all the time | C1 or the switch shorted to GND |
