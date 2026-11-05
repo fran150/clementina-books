@@ -4,9 +4,16 @@ With 32 KB of RAM at `$0000-$7FFF`, the loader's copies land somewhere, and
 the kernel can run. This is the stage where Clementina first says
 `READY.`
 
+## Parts
+
+| Part | Qty | On the schematic | Notes |
+| --- | --- | --- | --- |
+| AS6C62256 32 KB SRAM | 1 | U4 | DIP-28, the base RAM |
+| 100 nF ceramic capacitor | 1 |  |  |
+
 ## What you add
 
-The base RAM (U4) on board 2, next to the CPU, with its 100 nF capacitor.
+The base RAM (U4, AS6C62256) on board 2, next to the CPU, with its 100 nF capacitor.
 Run each address and data line as a chain from chip to chip: the VIA and the
 extended RAM tap the same chains later.
 
@@ -143,7 +150,7 @@ The write strobe is the one signal on this board whose timing matters at
 every speed. The W65C02S only holds its address and data for about 10 ns
 after PHI2 falls, and the RAM needs both held until `~WE` rises.
 
-Put channel 1 on PHI2 (U1.37) and channel 2 on `~WE` (U4.27). Run a loop
+Put channel 1 on PHI2 (U1.37, the W65C02S) and channel 2 on `~WE` (U4.27, the AS6C62256). Run a loop
 that writes all the time, to a free byte at `$0280` (640), and `RUN` it:
 
 <!-- example: skip -->
@@ -163,7 +170,7 @@ back to it.
 | Symptom | Likely cause |
 | --- | --- |
 | `Normal` on the console, but no banner | Wi-Fi or the video client: check `status wifi` and the client's address first |
-| A blank or garbled screen after RESET | The RAM isn't answering: probe U4.22 (`~OE`) and U4.27 (`~WE`), check U4.20 is on A15 |
+| A blank or garbled screen after RESET | The RAM isn't answering: probe the AS6C62256's U4.22 (`~OE`) and U4.27 (`~WE`), check U4.20 is on A15 |
 | WozMon writes don't stick | `~WE` not reaching U4.27, or RWB not reaching U9.1 |
 | A value turns up at two addresses | An address line open at the RAM: the address test names it |
 | Every byte has the same wrong bit | A data line open or swapped at the RAM |

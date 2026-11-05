@@ -10,12 +10,24 @@ MIA makes the clock and the reset, as it always will. The only thing you
 change for this test is that MIA must not answer the CPU: its chip select
 input stays grounded, so it never drives the data bus.
 
+## Parts
+
+| Part | Qty | On the schematic | Notes |
+| --- | --- | --- | --- |
+| W65C02S CPU | 1 | U1 | DIP-40 |
+| 100 nF ceramic capacitor | 1 |  |  |
+| 2.2 kΩ resistor | 1 | R1 | RDY pull-up |
+| 4.7 kΩ resistor | 2 | R2, R5 | `~IRQB` and `~NMI` pull-ups |
+| 4.7 kΩ resistor | 8 |  | The `$EA` resistors; they come off in stage 5 |
+| Jumper wire | 1 |  | Pico 9 to GND; it comes out in stage 5 |
+| LEDs and 1 kΩ resistors | 8 each |  | For the check |
+
 ## What you add
 
-The CPU (U1) on board 2, in the rows you marked in stage 3, with its 100 nF
+The CPU (U1, W65C02S) on board 2, in the rows you marked in stage 3, with its 100 nF
 capacitor and its three pull-up resistors, and its links to MIA.
 
-### U1, the CPU
+### U1, the CPU (W65C02S)
 
 | U1 pin | Signal | Connects to | Wire | Notes |
 | --- | --- | --- | --- | --- |
@@ -79,7 +91,7 @@ These come off again in stage 5.
   D2 and D0 to GND. Use 4.7 kΩ, not 10 kΩ: a Pico 2 input can hold a pin up
   against a pull-down weaker than about 8.2 kΩ (RP2350 erratum E9).
 - **MIA's select, grounded.** Push a jumper from Pico 9 (GP6) to GND. Leave
-  U9.8 (`MIACS`) unconnected: never join it to Pico 9 while that jumper is
+  U9.8 (`MIACS`, on the 74AC00) unconnected: never join it to Pico 9 while that jumper is
   in, or the gate's output is shorted to GND.
 
 <div class="diagram">
@@ -106,7 +118,7 @@ added.
 The check watches the address lines count. MIA's `speed` command slows the
 clock until you can read the count on the LEDs.
 
-1. Wire eight LEDs the "high" way (lit = 1) on A0-A7: U1.9 to U1.16. Put
+1. Wire eight LEDs the "high" way (lit = 1) on A0-A7: CPU pins U1.9 to U1.16. Put
    them in a row with A7 on the left, so they read as a binary number.
 2. Plug in the USB cable and open the console. MIA starts the CPU at
    1.2 MHz, far too fast to see: all eight LEDs glow at half brightness.
@@ -121,7 +133,7 @@ clock until you can read the count on the LEDs.
    Then the count starts at `1110 1010`. (For clocks under about 72 Hz MIA slows the whole Pico down: to
    18 MHz for `speed 10`, to about 4 MHz for `speed 2`. If the console turns
    sluggish at `speed 2`, skip this step; nothing later needs it.)
-6. Move the eight LEDs to A8-A15 (U1.17, U1.18, U1.19, U1.20, U1.22, U1.23,
+6. Move the eight LEDs to A8-A15 (CPU pins U1.17, U1.18, U1.19, U1.20, U1.22, U1.23,
    U1.24, U1.25; pin 21 is GND, skip it) and type `speed 2000`. After a reset
    the high byte also starts at `1110 1010` and counts up every 0.26 s. A full
    trip through memory takes about 65 seconds.
@@ -159,7 +171,7 @@ When you are done, type `speed 1200000` and take the LEDs off.
 
 Put the clock back to 1.2 MHz first.
 
-- **PHI2 at the CPU.** Probe U1.37: the same clean 0-3.3 V square wave as at
+- **PHI2 at the CPU.** Probe the CPU's U1.37: the same clean 0-3.3 V square wave as at
   the Pico, now with a real load. Small overshoot is normal; ringing that
   takes a large part of the half-cycle to settle means a long PHI2 wire or a
   long probe ground.
@@ -172,7 +184,7 @@ Put the clock back to 1.2 MHz first.
   thirty-second (about 1.7 ms) starting right at the middle, and `MIACS` is
   high for the last half.
 - **A gate delay.** At 5 ns per division, trigger on a rising edge of A15
-  and look at U9.11 (`~A15`) on channel 2: it falls a few nanoseconds later.
+  and look at U9.11 (`~A15`, on the 74AC00) on channel 2: it falls a few nanoseconds later.
   That is one 74AC gate, near the limit of what a 50 MHz scope resolves;
   you will see it as about 7-10 ns.
 

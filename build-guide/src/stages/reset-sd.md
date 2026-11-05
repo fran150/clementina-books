@@ -4,6 +4,18 @@ Both hang off the Pico alone, so they can be proven before the CPU exists.
 The SD card also brings `WIFI.CFG`, so from this stage on MIA joins your
 network at power-on.
 
+## Parts
+
+| Part | Qty | On the schematic | Notes |
+| --- | --- | --- | --- |
+| 6 × 6 mm tactile switch | 1 | SW1 | The reset button |
+| 10 kΩ resistor | 1 | R3 | Pull-up |
+| 1 µF ceramic capacitor | 1 | C1 | Debounce |
+| 100 Ω resistor | 1 | R4 |  |
+| Adafruit 4682 microSD breakout | 1 |  | Solder its 9-pin header first |
+| microSD card with `WIFI.CFG` | 1 |  | From stage 0 |
+| LED and 1 kΩ resistor | 1 |  | Optional, for the check without a meter |
+
 ## What you add
 
 The reset button SW1 with its debounce parts, and the microSD breakout.

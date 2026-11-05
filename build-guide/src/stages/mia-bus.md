@@ -8,6 +8,13 @@ MIA's registers, so the CPU has to read and write MIA correctly about 24,000
 times in a row to finish it. When it does, MIA switches to normal mode, and
 the console tells you.
 
+## Parts
+
+| Part | Qty | On the schematic | Notes |
+| --- | --- | --- | --- |
+| BAT85 Schottky diode | 1 | D1 | MIA's interrupt |
+| LED and 1 kΩ resistor | 1 |  | Optional, for the check |
+
 ## What you add
 
 1. Unplug the USB cable.
@@ -69,7 +76,8 @@ an LED on `MIACS` (the "high" way): it glows while the loader runs.
 
 ## With a scope
 
-At 1.2 MHz, put channel 1 on `MIACS` (U9.8) and channel 2 on RWB (U1.34).
+At 1.2 MHz, put channel 1 on `MIACS` (U9.8, the 74AC00) and channel 2 on RWB (U1.34,
+the CPU).
 Set the trigger to single, on a falling edge of `MIACS`, and press RESET.
 
 The loader's 13-cycle loop repeats every 10.8 µs. In each loop `MIACS` drops

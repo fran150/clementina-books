@@ -82,6 +82,23 @@ Then plug in, and watch the first few seconds:
 
 ## Reading a chip's pins
 
+The tables name chips by their schematic designator, so U9.3 means pin 3
+of U9. This is which chip is which:
+
+| Designator | Chip | Job | Board | Goes in at |
+| --- | --- | --- | --- | --- |
+| U1 | W65C02S | CPU | 2 | Stage 4 |
+| U2 | AS6C4008 | Extended RAM, 512 KB | 2 | Stage 8 |
+| U3 | W65C22S | VIA | 3 | Stage 7 |
+| U4 | AS6C62256 | Base RAM, 32 KB | 2 | Stage 6 |
+| U6 | 74AC138 | I/O decoder | 3 | Stage 3 |
+| U7 | 74AC08 | AND gates (`~EXRAMCS`) | 3 | Stage 3 |
+| U8 | 74AC138 | Memory decoder | 3 | Stage 3 |
+| U9 | 74AC00 | NAND gates (`MIACS`, `~OE`, `~WE`) | 3 | Stage 3 |
+
+The schematic skips U5. MIA, the Pico, has no U number: the tables call
+its pins "Pico" and the pin number.
+
 Hold a DIP chip with its notch or dot at the top. Pin 1 is at the top left,
 the pins count down the left side, and continue from the bottom of the right
 side back up to the top. On a 40-pin chip, pin 20 is bottom left, pin 21
