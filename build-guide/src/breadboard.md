@@ -116,6 +116,24 @@ works.
 The Pico straddles the gap the same way. Its pins count like a DIP chip's,
 with pin 1 next to the USB connector.
 
+### Chain, don't star
+
+The CPU is wide, so its rows have only two or three free holes, and by
+the end its busiest signals go to four chips. Wiring every chip straight
+to the CPU (a star) runs out of holes. So each signal is a chain: it
+leaves the CPU once in each direction, and the next chip passes it on
+from its own row.
+
+- **Board 3:** A13-A15 go from the CPU to U8 (74AC138) only; U6 and U9 take
+  them from U8's rows.
+- **Board 2:** the bus runs CPU → base RAM (U4) → VIA (U3) → extended RAM
+  (U2). D0-D7 and A0-A3 follow the whole chain; A4-A13, `~OE` and `~WE` go
+  from U4 straight to U2.
+- **The Pico** takes its address and data lines straight from the CPU.
+
+Wired this way, no CPU pin needs more than two wires. The tables follow
+the chain: a pin's "Connects to" names the row its wire comes from.
+
 ## How to wire an LED for a check
 
 The checks use the LEDs two ways:

@@ -18,9 +18,11 @@ to blink the cursor, which makes the blink this stage's first check.
 ## What you add
 
 The VIA (U3, W65C22S) on board 3, with its 100 nF capacitor, the diode D2 on its
-interrupt output, and eight LEDs on port B. The VIA's data pins carry D7-D0
-on the same pin numbers as the CPU's, 26 to 33, which makes that chain easy
-to check.
+interrupt output, and eight LEDs on port B. The VIA takes its bus lines
+from its neighbours' rows, not from the CPU's: D0-D7 and A0-A3 from the base
+RAM (U4), RWB and PHI2 from U9 (74AC00). Its data pins carry D7-D0 on the
+same pin numbers as the CPU's, 26 to 33. Leave a free hole in each of its
+D0-D7 and A0-A3 rows: the extended RAM takes them from here in stage 8.
 
 | U3 pin | Signal | Connects to | Wire | Notes |
 | --- | --- | --- | --- | --- |
@@ -45,29 +47,29 @@ to check.
 | 19 | CB2 | | - | User port |
 | 20 | 3.3 V | 3.3 V | red | `VDD` |
 | 21 | ~VIAIRQ | | - | To D2 (below) |
-| 22 | RWB | U1.34 | green | |
+| 22 | RWB | U9.1 | green | From U9.1's row on board 3 |
 | 23 | ~IOCS0 | U6.15 | green | `~CS2`: the VIA is slot 0, `$C000` |
 | 24 | 3.3 V | 3.3 V | red | `CS1`: always enabled; `~CS2` alone selects it |
-| 25 | PHI2 | U1.37 | white | |
-| 26 | D7 | U1.26 | blue | |
-| 27 | D6 | U1.27 | blue | |
-| 28 | D5 | U1.28 | blue | |
-| 29 | D4 | U1.29 | blue | |
-| 30 | D3 | U1.30 | blue | |
-| 31 | D2 | U1.31 | blue | |
-| 32 | D1 | U1.32 | blue | |
-| 33 | D0 | U1.33 | blue | |
+| 25 | PHI2 | U9.5 | white | From U9.5's row on board 3 |
+| 26 | D7 | U4.19 | blue | |
+| 27 | D6 | U4.18 | blue | |
+| 28 | D5 | U4.17 | blue | |
+| 29 | D4 | U4.16 | blue | |
+| 30 | D3 | U4.15 | blue | |
+| 31 | D2 | U4.13 | blue | |
+| 32 | D1 | U4.12 | blue | |
+| 33 | D0 | U4.11 | blue | |
 | 34 | ~RESB | U1.40 | green | MIA resets the VIA with the CPU |
-| 35 | A3 | U1.12 | yellow | `RS3` |
-| 36 | A2 | U1.11 | yellow | `RS2` |
-| 37 | A1 | U1.10 | yellow | `RS1` |
-| 38 | A0 | U1.9 | yellow | `RS0` |
+| 35 | A3 | U4.7 | yellow | `RS3` |
+| 36 | A2 | U4.8 | yellow | `RS2` |
+| 37 | A1 | U4.9 | yellow | `RS1` |
+| 38 | A0 | U4.10 | yellow | `RS0` |
 | 39 | CA2 | | - | User port |
 | 40 | CA1 | | - | User port |
 
 | Part | Value | First leg (band) | Second leg | Notes |
 | --- | --- | --- | --- | --- |
-| D2 | BAT85 | U3.21 | U1.4 | The band (cathode) faces the VIA |
+| D2 | BAT85 | U3.21 | U1.4 | The band (cathode) faces the VIA. The second leg goes in the `~IRQB` row from stage 4 |
 
 The register selects run backwards: RS0 (A0) is pin 38 and RS3 (A3) pin 35.
 
