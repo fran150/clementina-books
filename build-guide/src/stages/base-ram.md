@@ -14,8 +14,11 @@ the kernel can run. This is the stage where Clementina first says
 ## What you add
 
 The base RAM (U4, AS6C62256) on board 2, next to the CPU, with its 100 nF capacitor.
-Run each address and data line as a chain from chip to chip: the VIA and the
-extended RAM tap the same chains later.
+Each U4 pin takes its signal straight from the CPU's row, and passes it on
+from its own row later: A0-A3 and D0-D7 go on to the VIA (stage 7), the
+other address lines and the strobes to the extended RAM (stage 8). So
+**leave a free hole in every U4 row**: one wire in, one wire out (see
+[Chain, don't star](../breadboard.md#chain-dont-star)).
 
 | U4 pin | Signal | Connects to | Wire | Notes |
 | --- | --- | --- | --- | --- |

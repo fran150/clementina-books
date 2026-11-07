@@ -29,7 +29,7 @@ the console tells you.
 
 | Part | Value | First leg (band) | Second leg | Notes |
 | --- | --- | --- | --- | --- |
-| D1 | BAT85 | Pico 29 (GP22) | U1.4 | The band (cathode) faces the Pico |
+| D1 | BAT85 | Pico 29 (GP22) | U1.4 | The band (cathode) faces the Pico. The second leg goes in the `~IRQB` row from stage 4 |
 
 MIA and the VIA share the CPU's `~IRQB` line. Each pulls it low through its
 own diode and nothing ever drives it high, so R2 pulls it back up when

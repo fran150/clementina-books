@@ -53,9 +53,9 @@ capacitor and its three pull-up resistors, and its links to MIA.
 | 20 | A11 | U6.2 | yellow | From stage 3 |
 | 21 | GND | GND | black | `VSS` |
 | 22 | A12 | U6.3 | yellow | From stage 3 |
-| 23 | A13 | U6.4, U8.1 | yellow | From stage 3 |
-| 24 | A14 | U6.6, U8.2 | yellow | From stage 3 |
-| 25 | A15 | U8.6, U9.12 | yellow | From stage 3 |
+| 23 | A13 | U8.1 | yellow | From stage 3 |
+| 24 | A14 | U8.2 | yellow | From stage 3 |
+| 25 | A15 | U8.6 | yellow | From stage 3 |
 | 26 | D7 | Pico 20 (GP15) | blue | |
 | 27 | D6 | Pico 19 (GP14) | blue | |
 | 28 | D5 | Pico 17 (GP13) | blue | |
@@ -79,8 +79,15 @@ pins 13 and 18.
 | Part | Value | First leg | Second leg | Notes |
 | --- | --- | --- | --- | --- |
 | R1 | 2.2 kΩ | 3.3 V | U1.2 | RDY pull-up. Not stronger: the CPU pulls RDY low itself during `WAI` |
-| R2 | 4.7 kΩ | 3.3 V | U1.4 | `~IRQB` pull-up |
+| R2 | 4.7 kΩ | 3.3 V | U1.4 | `~IRQB` pull-up, in the `~IRQB` row (below) |
 | R5 | 4.7 kΩ | 3.3 V | U1.6 | `~NMI` pull-up |
+
+**The `~IRQB` row.** By stage 7, U1.4 has three parts on it: R2 now, D1
+in stage 5 and D2 in stage 7. That's more than its row has free holes. Run
+one short green wire from U1.4 to a free row on board 2, on the same
+side of the gap (column 22 or 23, between the CPU and the base RAM), and
+put R2's leg there. D1 and D2 go in the same row later. The tables
+still say U1.4 for that row, because it's the same signal.
 
 ### Just for this test
 
