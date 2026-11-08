@@ -89,6 +89,12 @@ If it fails early, before 4 MHz:
 
 ## The Wi-Fi signal (optional)
 
+Before you measure, look at the wiring near the Pico's antenna end
+(columns 20-23 of board 1). The guide routes everything clear of it: the
+wires that cross the Pico do so between columns 9 and 18. A bundle of wires
+right over the antenna can cost a few dB; one or two crossing it don't
+matter much.
+
 The PCB puts the Pico's antenna inside the board, which costs a few dB of
 Wi-Fi signal; the hardware README's rule is that more than about 6 dB
 against a bare Pico means the antenna should move to the board edge in
