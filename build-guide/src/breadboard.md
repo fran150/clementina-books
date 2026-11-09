@@ -88,8 +88,8 @@ of U9. This is which chip is which:
 | Designator | Chip | Job | Board | Goes in at |
 | --- | --- | --- | --- | --- |
 | U1 | W65C02S | CPU | 2 | Stage 4 |
-| U2 | AS6C4008 | Extended RAM, 512 KB | 2 | Stage 8 |
-| U3 | W65C22S | VIA | 3 | Stage 7 |
+| U2 | AS6C4008 | Extended RAM, 512 KB | 2 | Stage 7 |
+| U3 | W65C22S | VIA | 3 | Stage 8 |
 | U4 | AS6C62256 | Base RAM, 32 KB | 2 | Stage 6 |
 | U6 | 74AC138 | I/O decoder | 3 | Stage 3 |
 | U7 | 74AC08 | AND gates (`~EXRAMCS`) | 3 | Stage 3 |
@@ -126,9 +126,9 @@ from its own row.
 
 - **Board 3:** A13-A15 go from the CPU to U8 (74AC138) only; U6 and U9 take
   them from U8's rows.
-- **Board 2:** the bus runs CPU → base RAM (U4) → VIA (U3) → extended RAM
-  (U2). D0-D7 and A0-A3 follow the whole chain; A4-A13, `~OE` and `~WE` go
-  from U4 straight to U2.
+- **Board 2:** the bus runs CPU → base RAM (U4) → extended RAM (U2) → VIA
+  (U3). D0-D7 and A0-A3 follow the whole chain; A4-A13, `~OE` and `~WE` end
+  at U2.
 - **The Pico** takes its address and data lines straight from the CPU.
 
 Wired this way, no CPU pin needs more than two wires. The tables follow

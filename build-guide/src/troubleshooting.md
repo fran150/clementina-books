@@ -28,11 +28,11 @@ part, and the quickest to catch.
 | `Normal`, but no banner | 6 | Wi-Fi or the video client; or the base RAM | `status wifi`; the client's `--server`; U4.20, U4.22, U4.27 |
 | WozMon writes don't stick | 6 | `~WE` not reaching the RAM, RWB not reaching U9 | U9.6 pulses low while writing |
 | A value turns up at two addresses | 6 | An address line open at the RAM | The stage 6 table names it |
-| `PRINT "HELLO"` prints garbage | 6-7 | Expected until the extended RAM is in | Stage 8 |
-| No cursor blink | 7 | VIA not selected, or D2 reversed | U3.24 at 3.3 V, U3.23 on `~IOCS0`, D2's band at U3.21 |
-| Port B LEDs stay dark | 7 | RS lines swapped, LEDs reversed | RS0 is U3.38, RS3 is U3.35 |
-| Strings still print garbage | 8 | Extended RAM not selected | U2.22 for `~EXRAMCS` pulses |
-| Every bank shows the same value | 8 | PA lines on the wrong U2 pins | U2 pins 1, 2, 3, 30, 31 |
+| `PRINT "HELLO"` prints garbage | 6 | Expected until the extended RAM is in | Stage 7 |
+| Strings still print garbage | 7 | Extended RAM not selected | U2.22 for `~EXRAMCS` pulses |
+| No cursor blink | 8 | VIA not selected, or D2 reversed | U3.24 at 3.3 V, U3.23 on `~IOCS0`, D2's band at U3.21 |
+| Port B LEDs stay dark | 8 | RS lines swapped, LEDs reversed | RS0 is U3.38, RS3 is U3.35 |
+| Every bank shows the same value | 8 | PA lines on the wrong U2 pins, or a stage 7 GND wire still in | U2 pins 1, 2, 3, 30, 31 |
 | One ear silent | 9 | That channel's chain | R6/R9 on the right Pico pin; C3/C5 to tip/ring |
 | Random crashes, worse at speed | 10 | Missing decoupling, long PHI2 or `~WE` wires, weak ground | Add GND links, shorten those wires, lower the speed |
 

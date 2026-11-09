@@ -281,7 +281,7 @@ capacitor and its three pull-up resistors, and its links to MIA.
   green wire to its own row in column 22, and R2 goes there (see
   [the `~IRQB` row](#the-irqb-row) below).
 - **The LEDs for the check** sit in columns 40-55 of board 2, which stay
-  free until the extended RAM arrives in stage 8.
+  free until the extended RAM arrives in stage 7.
 
 ### U1, the CPU (W65C02S)
 
@@ -340,8 +340,8 @@ pins 13 and 18.
 
 ### The `~IRQB` row
 
-By stage 7, U1.4 has three parts on it: R2 now, D1
-in stage 5 and D2 in stage 7. That's more than its row has free holes. Run
+By stage 8, U1.4 has three parts on it: R2 now, D1
+in stage 5 and D2 in stage 8. That's more than its row has free holes. Run
 one short green wire from U1.4 to a free row on board 2, on the same
 side of the gap (column 22 or 23, between the CPU and the base RAM), and
 put R2's leg there. D1 and D2 go in the same row later. The tables

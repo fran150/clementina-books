@@ -44,8 +44,8 @@ C6-C13 are the eight decoupling capacitors, one per chip.
 | --- | --- | --- |
 | Breadboards, about 15 × 5.5 cm | 3 (4 if short) | Everything |
 | 4.7 kΩ resistors | 8 | Stage 4, the `$EA` data bus |
-| LEDs | 8 | Stages 2-7 |
+| LEDs | 8 | Stages 2-8 |
 | 1 kΩ resistors | 8 | One per LED |
-| 10 kΩ resistors (optional) | 4 | Stage 7, pull-ups on CA1, CA2, CB1, CB2 |
+| 10 kΩ resistors (optional) | 4 | Stage 8, pull-ups on CA1, CA2, CB1, CB2 |
 | 22 AWG solid wire | kit and spools | Everything |
 | microSD card | 1 | `WIFI.CFG`, and BASIC's files later |

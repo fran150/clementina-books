@@ -53,7 +53,7 @@ them in stage 4.
 <rect x="424" y="80" width="202" height="50" rx="3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="5 3" opacity="0.7"/>
 <path d="M424 99.0a6 6 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="5 3" opacity="0.7"/>
 <text x="525.0" y="109.0" text-anchor="middle" font-family="sans-serif" font-size="11" fill="currentColor" opacity="0.8">VIA U3</text>
-<text x="525.0" y="146" text-anchor="middle" font-family="sans-serif" font-size="9" fill="currentColor" opacity="0.8">stage 7</text>
+<text x="525.0" y="146" text-anchor="middle" font-family="sans-serif" font-size="9" fill="currentColor" opacity="0.8">stage 8</text>
 <rect x="20" y="240" width="640" height="150" rx="6" fill="none" stroke="currentColor" stroke-width="1.5"/>
 <g stroke-width="3" opacity="0.35"><path d="M35 250H645M35 380H645" stroke="currentColor"/><path d="M35 260H645M35 370H645" stroke="#d0312d"/></g>
 <path d="M35 315H645" stroke="currentColor" stroke-dasharray="2 4" opacity="0.4"/>
@@ -69,7 +69,7 @@ them in stage 4.
 <rect x="424" y="290" width="162" height="50" rx="3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="5 3" opacity="0.7"/>
 <path d="M424 309.0a6 6 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="5 3" opacity="0.7"/>
 <text x="505.0" y="319.0" text-anchor="middle" font-family="sans-serif" font-size="11" fill="currentColor" opacity="0.8">U2</text>
-<text x="505.0" y="356" text-anchor="middle" font-family="sans-serif" font-size="9" fill="currentColor" opacity="0.8">stage 8</text>
+<text x="505.0" y="356" text-anchor="middle" font-family="sans-serif" font-size="9" fill="currentColor" opacity="0.8">stage 7</text>
 <g><path d="M200 290V214H100V130" fill="none" stroke="#d4a017" stroke-width="2"/><path d="M210 290V218H60V130" fill="none" stroke="#d4a017" stroke-width="2"/><path d="M220 290V222H50V130" fill="none" stroke="#d4a017" stroke-width="2"/><path d="M230 290V226H350V130" fill="none" stroke="#d4a017" stroke-width="2"/><path d="M110 290V206H240V130" fill="none" stroke="#2e9d5b" stroke-width="2"/><path d="M80 290V202H280V130" fill="none" stroke="currentColor" stroke-width="4"/><path d="M80 290V202H280V130" fill="none" stroke="#ffffff" stroke-width="2"/><path d="M230 340V350H260V226H330V130" fill="none" stroke="#d4a017" stroke-width="2" opacity="0.9"/><path d="M240 340V350H260V230H340V130" fill="none" stroke="#d4a017" stroke-width="2" opacity="0.9"/></g>
 <g fill="currentColor" font-family="sans-serif" font-size="9"><text x="370" y="200">8 wires from the CPU rows:</text><text x="370" y="212">A10-A15 yellow, RWB green, PHI2 white</text><text x="40" y="410">Every notch points to column 1. Dashed: parts of later stages.</text></g>
 </svg>
@@ -83,8 +83,8 @@ them in stage 4.
 - **The glue chips** go in a row on board 3, notch toward column 1: U8 (74AC138) in
   columns 2-9, U7 (74AC08) in 12-18, U9 (74AC00) in 21-27 and U6 (74AC138)
   in 30-37. Leave columns
-  40-59 free for the VIA (stage 7), and columns 24-37 and 40-55 on board 2
-  free for the base RAM (stage 6) and the extended RAM (stage 8).
+  40-59 free for the VIA (stage 8), and columns 24-37 and 40-55 on board 2
+  free for the base RAM (stage 6) and the extended RAM (stage 7).
 - **The CPU is a wide chip** (0.6", like the VIA and both RAMs): its body
   covers some of the holes in its rows, so its pins keep only one to four
   free holes, not four like the glue chips (see
@@ -287,7 +287,7 @@ float, and leave their outputs open.
 | --- | --- | --- | --- | --- |
 | 1 | ~Y0 | U8.15 | green | |
 | 2 | ~Y1 | U8.14 | green | |
-| 3 | ~EXRAMCS | | - | Goes to U2.22 in stage 8: leave a free hole |
+| 3 | ~EXRAMCS | | - | Goes to U2.22 in stage 7: leave a free hole |
 | 4 | GND | GND | black | Unused input |
 | 5 | GND | GND | black | Unused input |
 | 6 | unconnected | | - | Unused output |
@@ -342,7 +342,7 @@ gate delay on the selects the VIA and the expansion cards need early.
 | 12 | ~IOCS3 | | - | Expansion slot 3 |
 | 13 | ~IOCS2 | | - | Expansion slot 2 |
 | 14 | ~IOCS1 | | - | Expansion slot 1 |
-| 15 | ~IOCS0 | | - | The VIA's select: goes to U3.23 in stage 7 |
+| 15 | ~IOCS0 | | - | The VIA's select: goes to U3.23 in stage 8 |
 | 16 | 3.3 V | 3.3 V | red | |
 
 ## Check

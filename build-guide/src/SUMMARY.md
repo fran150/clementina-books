@@ -14,8 +14,8 @@
 - [Stage 4: The CPU runs free](stages/free-run.md)
 - [Stage 5: MIA on the bus](stages/mia-bus.md)
 - [Stage 6: Base RAM](stages/base-ram.md)
-- [Stage 7: The VIA](stages/via.md)
-- [Stage 8: Extended RAM](stages/extended-ram.md)
+- [Stage 7: Extended RAM](stages/extended-ram.md)
+- [Stage 8: The VIA](stages/via.md)
 - [Stage 9: Audio](stages/audio.md)
 - [Stage 10: Speed](stages/speed.md)
 
