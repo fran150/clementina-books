@@ -54,7 +54,7 @@ At each step:
    faster in proportion (the blink counts clock cycles).
 2. Run the stage 6 address test and the stage 8 bank test in WozMon, then
    RESET.
-3. Run the stage 8 string test in BASIC: `DONE`, no `BAD`.
+3. Run the stage 7 string test in BASIC: `DONE`, no `BAD`.
 4. Leave BASIC idling at `READY.` for 10 minutes, then type something.
 
 Record the highest speed that passes every check. Then go one step below
@@ -70,7 +70,7 @@ If it fails early, before 4 MHz:
 
 ## With a scope
 
-- **The chip-select margin.** Run the counting program from stage 7, put
+- **The chip-select margin.** Run the counting program from stage 8, put
   channel 1 on PHI2 (U3.25, the VIA) and channel 2 on `~IOCS0` (U3.23), and trigger
   on `~IOCS0` falling. Measure from `~IOCS0` falling to PHI2 rising at each
   speed. At 1.2 MHz the gap is hundreds of nanoseconds; it shrinks as PHI2's

@@ -33,7 +33,7 @@ the factory list are for the PCB. Leave them in the bag.
 | 4.7 kΩ resistors | 8 | Holding the data bus at `$EA` in stage 4 |
 | LEDs | 8 | Watching signals in stages 2 to 7. Any colour; red and green ones light best at 3.3 V |
 | 1 kΩ resistors | 8 | One in series with each LED (about 1.3 mA at 3.3 V) |
-| 10 kΩ resistors | 4 | Optional: holding the VIA's unused CA1, CA2, CB1 and CB2 high (stage 7) |
+| 10 kΩ resistors | 4 | Optional: holding the VIA's unused CA1, CA2, CB1 and CB2 high (stage 8) |
 | 22 AWG solid wire | a kit and spools | Pre-cut lengths for short hops, spools for the long bus runs |
 
 That is all the extra hardware. The LEDs and their resistors are the only

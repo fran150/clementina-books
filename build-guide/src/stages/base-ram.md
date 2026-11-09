@@ -15,8 +15,8 @@ the kernel can run. This is the stage where Clementina first says
 
 The base RAM (U4, AS6C62256) on board 2, next to the CPU, with its 100 nF capacitor.
 Each U4 pin takes its signal straight from the CPU's row, and passes it on
-from its own row later: A0-A3 and D0-D7 go on to the VIA (stage 7), the
-other address lines and the strobes to the extended RAM (stage 8). So
+from its own row later: all of them go on to the extended RAM (stage 7),
+which passes D0-D7 and A0-A3 on to the VIA (stage 8). So
 **leave a free hole in every U4 row**: one wire in, one wire out (see
 [Chain, don't star](../breadboard.md#chain-dont-star)).
 
@@ -168,8 +168,8 @@ other address lines and the strobes to the extended RAM (stage 8). So
   rows d and h like the CPU. Columns 22 and 23, between the two chips, stay
   for the `~IRQB` row and the diodes D1 and D2.
 - **Wires come in on the outer rows.** Each U4 wire from the CPU or U9 lands
-  in row a (top pins) or row j (bottom pins). Rows b and i stay free: the VIA
-  and the extended RAM take their lines from there. The CPU side is the
+  in row a (top pins) or row j (bottom pins). Rows b and i stay free: the
+  extended RAM takes its lines from there. The CPU side is the
   same: the wire to U4 uses the CPU row's last free hole, which is why the
   `$EA` resistors had to go in stage 5.
 - **Route the wires between chips and boards, not over the chips.** The
@@ -216,11 +216,11 @@ added.
 
 The kernel, WozMon and BASIC now sit in RAM from `$0400` to about `$6400`,
 copied there by the loader, and the kernel runs from them. The cursor
-doesn't blink yet: the VIA makes the blink, in stage 7.
+doesn't blink yet: the VIA makes the blink, in stage 8.
 
 Hold off on BASIC for now. BASIC already counts `$8000-$BFFF`, the
 extended RAM's window, as its own, and keeps its strings at the top of it.
-Until stage 8, anything with a string (even `PRINT "HELLO"`) may print
+Until stage 7, anything with a string (even `PRINT "HELLO"`) may print
 garbage or crash. Numbers and `POKE` are fine.
 
 ### Data and address lines
