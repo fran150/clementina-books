@@ -29,7 +29,7 @@ the console tells you.
 
 | Part | Value | First leg (band) | Second leg | Notes |
 | --- | --- | --- | --- | --- |
-| D1 | BAT85 | Pico 29 (GP22) | U1.4 | The band (cathode) faces the Pico. The second leg goes in the `~IRQB` row from stage 4 |
+| D1 | BAT85 | Pico 29 (GP22) | U1.4 | The band (cathode) goes on the side of the green wire from Pico 29: on board 2, the top half (row d). The second leg goes in the `~IRQB` row from stage 4 |
 
 ### Where things go
 
