@@ -69,7 +69,7 @@ takes over the extended RAM's bank pins from the stage 7 GND wires.
 
 | Part | Value | First leg (band) | Second leg | Notes |
 | --- | --- | --- | --- | --- |
-| D2 | BAT85 | U3.21 | U1.4 | The band (cathode) faces the VIA. The second leg goes in the `~IRQB` row from stage 4 |
+| D2 | BAT85 | U3.21 | U1.4 | The band (cathode) goes on the side of the green wire from U3.21: on board 2, the top half (row d), like D1's. The second leg goes in the `~IRQB` row from stage 4 |
 
 ### Where things go
 
@@ -249,8 +249,8 @@ takes over the extended RAM's bank pins from the stage 7 GND wires.
   U2.1-3 are on U2's far side, so go round its left end.
 - **D2** crosses board 2's gap at a slant: its band in column 23, row d
   (the top half, where the green wire from U3.21 lands in row b), its other
-  leg in column 22, row g, the `~IRQB` strip from stage 4. The band faces
-  the VIA's wire.
+  leg in column 22, row g, the `~IRQB` strip from stage 4. The band is on
+  the VIA's wire, the same way round as D1.
 - **The LEDs.** Board 3 has no free strips left for a resistor and an LED
   each, so solder each LED's 1 kΩ to its long leg (or use LEDs with the
   resistor built in) and put it straight from the PB row's free hole (row i)
