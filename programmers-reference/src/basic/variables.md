@@ -147,7 +147,7 @@ the free bytes:
 PRINT FRE(0)
 ```
 
-prints ` 23645` with no program loaded. The value is a signed 16-bit number,
+prints ` 23579` with no program loaded. The value is a signed 16-bit number,
 so it would read negative above 32767; the workspace is smaller than that.
 
 When the program, variables, arrays and strings no longer fit, BASIC stops

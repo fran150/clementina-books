@@ -217,7 +217,7 @@ added.
 
 ### BASIC
 
-1. Plug in, start the video client, and press RESET. `23647 BYTES FREE` is
+1. Plug in, start the video client, and press RESET. The start-up screen is
    the same as in stage 6: BASIC counted bank 0 from the start, it just
    couldn't use it until now.
 2. Now strings work. `PRINT "HELLO"` prints `HELLO`, and:

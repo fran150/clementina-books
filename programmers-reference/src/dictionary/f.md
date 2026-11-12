@@ -192,7 +192,7 @@ PRINT FRE(0)
 ```
 
 ```text
- 23645
+ 23579
 ```
 
 That is the value with no program in memory. The result is a signed 16-bit

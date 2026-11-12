@@ -2,34 +2,31 @@
 
 When Clementina starts, the screen turns blue and shows:
 
-<img src="images/boot.png" width="640" alt="The start-up screen: the banner, 23647 BYTES FREE, the Microsoft copyright line and READY." style="image-rendering: pixelated">
+<img src="images/boot.png" width="640" alt="The start-up screen: a sky blue and white flag beside the title and copyright lines, then READY." style="image-rendering: pixelated">
 
 ```text
-**** CLEMENTINA V1.0 BASIC V2 ****
-(C) 2026 PACHISOFT, 1977 MICROSOFT
-
-
-
- 23647 BYTES FREE
-
-
-COPYRIGHT 1977 BY MICROSOFT CO.
+ ███████◤  CLEMENTINA V1.0 BASIC V2
+ ██████◤   © 2026 PACHISOFT
+ █████◤    © 1977 MICROSOFT BASIC
 
 READY.
 ```
 
-- The **banner** names the kernel and the BASIC. Clementina BASIC grew from
-  the Microsoft BASIC that the Commodore 64 also used, which is why the
-  copyright line is there.
-- **23647 BYTES FREE** is the memory left for your BASIC program and its
-  variables. Pictures and music are kept in MIA's own memory and don't use
-  it.
+- The **flag**, sky blue and white, is Clementina's logo. It comes from
+  Argentina, where the first computer, in 1961, was also called Clementina.
+- The **banner** names the computer and its BASIC. Clementina BASIC grew
+  from the Microsoft BASIC that the Commodore 64 also used, which is why
+  Microsoft has a copyright line.
 - **READY.** means BASIC is waiting for you.
 
 Below `READY.` is the **cursor**, a blinking square where the next
 character you type appears. It blinks about every 0.4 seconds. The blink
 follows the processor's clock, so if a program speeds the processor up, the
 cursor blinks faster too.
+
+To see how much memory is left for your BASIC program and its variables,
+type `PRINT FRE(0)`. Pictures and music are kept in MIA's own memory and
+don't use it.
 
 The screen holds 40 columns and 25 rows of text, in white on a blue
 background. Chapter 4 shows how to type in other colors.
