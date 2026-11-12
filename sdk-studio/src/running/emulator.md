@@ -130,7 +130,11 @@ $ clementina-emulator --sd ~/games/catch -p /tmp/ttyComputer
 ```
 
 Then open `/tmp/ttyTerminal` with any terminal program, at 115200 baud. The
-commands are in MIA's README.
+commands are in MIA's README. The commands for looking inside MIA (`dump`,
+`status ctx` and `trace`) work here as on the board ([Looking inside
+MIA](hardware.md#looking-inside-mia)). In the emulator the bus trace is
+always on, with no special build, and `dump` files go to the `--sd`
+folder.
 
 ## Other options
 
