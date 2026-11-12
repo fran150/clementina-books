@@ -201,15 +201,9 @@ added.
 3. Press RESET. The screen shows:
 
    ```text
-   **** CLEMENTINA V1.0 BASIC V2 ****
-   (C) 2026 PACHISOFT, 1977 MICROSOFT
-
-
-
-    23647 BYTES FREE
-
-
-   COPYRIGHT 1977 BY MICROSOFT CO.
+    ███████◤  CLEMENTINA V1.0 BASIC V2
+    ██████◤   © 2026 PACHISOFT
+    █████◤    © 1977 MICROSOFT BASIC
 
    READY.
    ```

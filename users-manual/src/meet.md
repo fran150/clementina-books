@@ -25,7 +25,7 @@ screen, the sound, the keyboard, mouse and gamepads, and the SD card.
 | Language | Clementina BASIC: Microsoft BASIC with more than 100 extra keywords for graphics, sound, input and files |
 | Monitor | WozMon, for looking at memory and running machine code |
 
-When BASIC starts it has 23,647 bytes free for your program and its
+When BASIC starts it has about 23,500 bytes free for your program and its
 variables. Graphics and music live in MIA's own memory, so they don't take
 from that.
 
