@@ -74,10 +74,9 @@ This book explains how to *use* the machine. Its companions cover the rest:
 
 Nothing in Clementina has been released yet. The book describes the machine
 built from `main` of every Clementina repository at the commits listed in the
-library's `manifest.json`. The board itself has not been built, so every
-example in this book was run on the emulator (`clementina-6502`), and the
-book makes no claim about timing on real hardware. Where a speed matters, it
-says what it depends on.
+library's `manifest.json`. Every example in this book was run on the
+emulator (`clementina-6502`). Where a speed matters, the book says what it
+depends on.
 
 The reference tables in the appendices and in some chapters are generated
 from the SDK's specification files, which the SDK checks against MIA's

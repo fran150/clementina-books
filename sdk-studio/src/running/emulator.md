@@ -3,8 +3,8 @@
 The emulator, `clementina-emulator`, runs the whole machine on your computer: the
 65C02, its RAM and VIA, and MIA with its video, input, sound and SD card. It
 is cycle-accurate for the CPU, and it boots the same kernel and BASIC the
-board does. With the video client it is the way to play a game before the
-board exists, and the one this book uses throughout.
+board does. With the video client it is a way to play a game without the
+board, and the one this book uses throughout.
 
 ## Starting it
 
@@ -157,7 +157,7 @@ book uses. Two others exist:
 
 - `clementina-gpio` runs the 65C02, RAM and VIA on a Raspberry Pi 5 wired
   to a real MIA (a Pico 2 W running MIA's firmware). It tests MIA's
-  firmware against a 6502 before the board exists; video, input, sound and
+  firmware against a 6502 without the board; video, input, sound and
   the SD card come from the real MIA.
 - `beneater` emulates Ben Eater's breadboard computer, the project
   Clementina grew from.

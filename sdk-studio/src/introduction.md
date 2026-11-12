@@ -67,7 +67,7 @@ Commands typed on Clementina itself, in BASIC, are shown without a prompt.
 ## What this book describes
 
 Nothing in Clementina is released yet: there are no tagged versions of the
-SDK, Studio, the emulator or the video client, and no board has been built.
+SDK, Studio, the emulator or the video client.
 The book describes the tools as they are built from `main` of every
 repository at the commits pinned in this repository's `manifest.json`, and
 it says so where something only exists in the emulator so far.
