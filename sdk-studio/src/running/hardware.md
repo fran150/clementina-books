@@ -97,6 +97,7 @@ so they don't slow the bus:
 | --- | --- |
 | `status ctx` | The `MIA_CTX` stack: how deep it is, and what each push saved. |
 | `status pio` | The bus state machines' stall flags. A stall on the action machine means MIA missed bus events. `status pio clear` resets them. |
+| `status sys` | What MIA has left and how busy it is: flash, RAM, stack peaks, temperature, where the console core's time goes, and how close the bus core came to missing events. `status sys clear` resets the peaks. |
 | `dump regs` | The 32 registers at `$FFE0-$FFFF`, with their names. |
 | `dump idx` | Every index in use; `dump idx 16` shows one. |
 | `dump ram 14000 100` | MIA RAM as hex and ASCII, as the monitor's `m` does. Numbers are hex. |
@@ -134,9 +135,12 @@ $ make flash-diag
 
 Run the program until it fails, then type `trace` on the console. It lists
 the accesses oldest first, each one a read (`R`) or a write (`W`) of a
-register, with its value. `trace clear` starts again. When you are done,
+register, with its value. `trace clear` starts again. The diagnostic
+firmware also adds a `busy` line to `status sys`: the share of time the bus
+core spends on the program's register accesses. When you are done,
 `make flash` puts the normal firmware back.
 
-The emulator has the same commands. There the trace is always on, and
-`status pio` only says that the emulator has no state machines
+The emulator has the same commands. There the trace is always on,
+`status pio` only says that the emulator has no state machines, and
+`status sys` shows only the uptime
 ([The emulator](emulator.md#mias-console)).
