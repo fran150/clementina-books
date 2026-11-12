@@ -21,8 +21,8 @@ The video client asks MIA for a frame 25 times a second by default (`--fps`,
 | 4.6875 MHz, the fastest at the Pico's rated clock | 187,500 | 156,250 |
 | 8 MHz, the most MIA can be asked for | 320,000 | 266,667 |
 
-The clock the board will really run at isn't known until it is built:
-the glue logic is rated to about 6.5 MHz. Plan for the default, 1.2 MHz.
+Above 4.6875 MHz, MIA overclocks the Pico to reach the speed. Plan for the
+default, 1.2 MHz.
 
 The kernel's timer interrupt takes 66 cycles every 6,250, about 1% of the
 CPU at any clock, unless the game turns it off.

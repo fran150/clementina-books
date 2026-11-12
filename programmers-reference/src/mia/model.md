@@ -307,8 +307,8 @@ requests from 1 Hz to 8 MHz.
         sta CFG_PORT            ; this write asks for the change
 ```
 
-How fast the board can really run is not known yet: it has not been built.
-The VIA's timers and the kernel's `KJIFFY` follow the CPU's clock; MIA's
+Up to 4.6875 MHz MIA runs the Pico at its rated 150 MHz; above that it
+overclocks the Pico to 256 MHz. The VIA's timers and the kernel's `KJIFFY` follow the CPU's clock; MIA's
 clocks, sound and key repeat do not.
 
 ## Where this is in Mapping Clementina

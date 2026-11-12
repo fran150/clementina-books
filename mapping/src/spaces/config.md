@@ -37,9 +37,8 @@ fields returns the speed in use. The default is 1.2 MHz (`$124F80`).
 
 Three things change with the clock: how fast the CPU runs, the kernel's
 Timer 1 tick (192 Hz at 1.2 MHz) and with it `KJIFFY` and the cursor blink.
-MIA's own clocks, `TI` and key repeat do not. The board's glue logic is
-rated for about 6.5 MHz with worst-case parts, so speeds above that are not
-guaranteed on every board.
+MIA's own clocks, `TI` and key repeat do not. Up to 4.6875 MHz MIA runs the
+Pico at its rated 150 MHz; above that it overclocks the Pico to 256 MHz.
 
 ## Field entries
 

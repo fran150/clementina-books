@@ -42,10 +42,6 @@ same kernel and BASIC, and it talks to the same video client.
 
 ## A tour of the board
 
-> The first board has not been built yet, so this tour describes the rev 1
-> design from its schematic. Photos will replace this note once a board
-> exists.
-
 The rev 1 board measures 172.7 × 108.6 mm. Holding it with the text the
 right way up:
 

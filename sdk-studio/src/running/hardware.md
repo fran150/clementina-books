@@ -1,9 +1,8 @@
 # On the real machine
 
-Everything in this book runs in the emulator. The board it emulates hasn't
-been built yet, so nothing here has run on the real machine. This chapter
-says what will differ there, how to take a game to it, and how the SDK
-records evidence that the hardware behaves as the emulator does.
+Everything in this book runs in the emulator. This chapter says how to take
+a game to the board, what differs there, and how to look inside MIA when
+something goes wrong.
 
 ## Taking a game to the board
 
@@ -62,9 +61,9 @@ KB/s at best, so a level that loads instantly in the emulator may take a
 noticeable moment.
 
 **Speed.** The emulator runs at the clock you ask for, if your computer
-keeps up. The board's top speed isn't known until it is built: MIA allows
-up to 8 MHz, but the glue logic is rated to about 6.5 MHz. A game timed by
-MIA's clock is unaffected; one timed by counting loops isn't.
+keeps up. On the board, MIA accepts any speed from 1 Hz to 8 MHz; above
+4.6875 MHz it overclocks the Pico to get there. A game timed by MIA's clock
+is unaffected by the speed; one timed by counting loops isn't.
 
 **Picture.** The client draws the board's screen exactly as the emulator's,
 but the picture travels over Wi-Fi, so a slow network delays it. That is
@@ -80,8 +79,8 @@ works in both.
 
 ## Testing on GPIO
 
-Before the board exists, the CPU side of Clementina can run against a real
-MIA: the emulator's `clementina-gpio` model runs the 65C02, RAM and VIA on a
+The CPU side of Clementina can also run against a real MIA without the
+board: the emulator's `clementina-gpio` model runs the 65C02, RAM and VIA on a
 Raspberry Pi 5, wired through its GPIO header to a Pico 2 W running MIA's
 firmware. Video, input, sound and the SD card are then the real MIA's, so
 everything above about the screen, the card and time applies. It tests
@@ -141,24 +140,3 @@ register, with its value. `trace clear` starts again. When you are done,
 The emulator has the same commands. There the trace is always on, and
 `status pio` only says that the emulator has no state machines
 ([The emulator](emulator.md#mias-console)).
-
-## Recording what the hardware does
-
-The SDK's `docs/hardware-verification.md` is a procedure for checking a
-board against the emulator, with two test programs:
-
-- **The runtime demo** (`examples/runtime-demo`) calls every runtime routine
-  and checks each result. It writes the number of the last check it passed
-  to `$0280`, the runtime's error to `$0281`, and `$A5` to `$0282` when it
-  finishes. Build it, copy `build/sd` to the card, and run `BOOT.BAS`.
-- **The audio test** (`examples/hardware-audio`) plays a 440 Hz tone on the
-  left; `R` plays 880 Hz on the right, `L` goes back, `Q` stops. Record
-  each state from the board's audio jack as a WAV file, and the SDK's
-  `scripts/analyze-audio-capture.mjs` measures each channel's level and
-  frequency.
-
-The procedure asks for the commits of every piece of software, the board's
-revision and hashes of the files, so a result says exactly what was tested.
-A result is evidence about one board and one set of versions. Until one is
-recorded, the emulator is the only evidence, and this book's claims about
-the machine rest on it.
