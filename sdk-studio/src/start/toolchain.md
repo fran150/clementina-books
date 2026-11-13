@@ -1,28 +1,48 @@
 # The toolchain at a glance
 
-A Clementina game is a folder on your computer. The tools read it, turn it
-into files Clementina can load, and run those files, in the emulator or on
-the machine.
+A Clementina game is a folder on your computer. You edit what is in it, the
+SDK builds it into files Clementina can load, and you run those files in
+the emulator or on the machine:
 
-```text
-  Studio  ─────┐  palettes, tilesets, backgrounds, overlays,
-  (or a text   │  shapes, animations, instruments, sounds, songs
-  editor, or   ▼
-  an agent)   my-game/
-               ├── clementina.yaml     the manifest
-               ├── src/                BASIC or assembly source
-               └── assets/             one JSON file per asset
-                    │
-                    ▼   clementina build
-               my-game/build/          program, asset files, load plan
-                    │
-          ┌─────────┴──────────┐
-          ▼                    ▼
-   the emulator             SD card for the
-                            real machine
-          │                    │
-          └──── video client ──┘   the screen, keyboard, mouse, gamepads
-```
+<div class="diagram">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 575 200" width="100%" style="max-width:640px" role="img" aria-label="Four steps from left to right. 1, Edit: in Studio, a text editor or an agent. 2, Project: the my-game folder with the manifest, source and assets. 3, Build: clementina build writes my-game/build. 4, Run: in the emulator or from an SD card in the machine. Under Run, a note says you see it on the video client.">
+<g fill="none" stroke="currentColor" stroke-width="1.5">
+<rect x="10" y="20" width="120" height="110" rx="6"/>
+<rect x="155" y="20" width="120" height="110" rx="6"/>
+<rect x="300" y="20" width="120" height="110" rx="6"/>
+<rect x="445" y="20" width="120" height="110" rx="6"/>
+<path d="M132 75H151"/><path d="M146 70L152 75L146 80"/>
+<path d="M277 75H296"/><path d="M291 70L297 75L291 80"/>
+<path d="M422 75H441"/><path d="M436 70L442 75L436 80"/>
+<path d="M505 132V152" stroke-dasharray="3 3"/>
+</g>
+<g fill="currentColor" font-family="sans-serif" font-size="12" text-anchor="middle">
+<text x="70" y="46" font-size="14" font-weight="bold">1. Edit</text>
+<text x="70" y="76">Studio,</text>
+<text x="70" y="94">a text editor</text>
+<text x="70" y="112">or an agent</text>
+<text x="215" y="46" font-size="14" font-weight="bold">2. Project</text>
+<text x="215" y="76" font-family="monospace" font-size="11">my-game/</text>
+<text x="215" y="94">manifest, source</text>
+<text x="215" y="112">and assets</text>
+<text x="360" y="46" font-size="14" font-weight="bold">3. Build</text>
+<text x="360" y="76" font-family="monospace" font-size="11">clementina build</text>
+<text x="360" y="94">writes</text>
+<text x="360" y="112" font-family="monospace" font-size="11">my-game/build/</text>
+<text x="505" y="46" font-size="14" font-weight="bold">4. Run</text>
+<text x="505" y="76">the emulator</text>
+<text x="505" y="94">or an SD card</text>
+<text x="505" y="112">in the machine</text>
+<text x="505" y="170">you see and play it</text>
+<text x="505" y="186">on the video client</text>
+</g>
+</svg>
+</div>
+
+[The project folder](../projects/project-folder.md) shows what is inside
+`my-game/`. Both ways of running show the screen through the same video
+client, as [the section below](#clementina-has-no-screen-of-its-own)
+explains.
 
 ## The pieces
 
