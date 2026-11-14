@@ -7,28 +7,29 @@ template and makes it print a line.
 ## Make the project
 
 ```text
-$ cd clementina-sdk
-$ node agents/workflows/create-game.mjs init ~/games/hello --kind assembly --name "Hello"
-Created /home/you/games/hello
+$ clementina new ~/games/hello --template assembly --name "Hello"
+Created /home/you/games/hello from the assembly template.
 ```
 
 The folder holds `clementina.yaml`, `src/main.s`, `link.cfg` and
-`checks/code.json`. The manifest's `build` section is different from a BASIC
-project's:
+`checks/code.json`. The project has no BASIC program, so the manifest has
+no `program` section, and its `build` section has `assembly` instead of
+`basic`:
 
 ```yaml
-program:
-  kind: assembly
-  entry: src/main.s
 build:
   outputDirectory: build
   assembly:
+    sources:
+      - src/main.s
     linkerConfig: link.cfg
     outputName: game
     loadAddress: 6144
     entrySymbol: game_start
 ```
 
+- `sources` lists the assembly files, assembled in order and linked into
+  one program.
 - `linkerConfig` is ld65's configuration file, which places the program in
   memory.
 - `loadAddress` is where the program loads, 6144 (`$1800`). The SDK does not
@@ -38,16 +39,25 @@ build:
 
 ## The linker configuration
 
-`link.cfg` puts all the code in one block of RAM from `$1800` to `$7FFF`:
+`link.cfg` puts the program in one block of RAM from `$1800` to `$7FFF`,
+and its zero-page variables in `$98-$DF`:
 
 ```text
 MEMORY {
+  ZP: start=$98, size=$48, type=rw;
   RAM: start=$1800, size=$6800, type=rw, file=%O;
 }
 SEGMENTS {
+  ZEROPAGE: load=ZP, type=zp;
   CODE: load=RAM, type=ro;
+  RODATA: load=RAM, type=ro;
+  DATA: load=RAM, type=rw;
+  BSS: load=RAM, type=bss, define=yes;
 }
 ```
+
+These are the segments [the Clementina library](../building/runtime.md)
+uses, so the program can call it without changing the file.
 
 `$1800` is where the SDK's templates put programs, and the reason matters.
 Clementina has no ROM: at power-on MIA copies the kernel, WozMon and BASIC
@@ -110,8 +120,10 @@ against `loadAddress`, and writes:
 | `build/game.dbg`, `.lbl`, `.map` | ld65's debug information, labels and memory map. The debugger reads the first. |
 | `build/000-main.o`, `.lst` | ca65's object file and listing, one pair per source. |
 | `build/include/` | `clementina.inc` and `mia.inc`. |
+| `build/lib/` | The Clementina library, which every program with assembly links. |
 | `build/bootstrap.bas` | The BASIC line that starts the program, as text. |
 | `build/load-plan.json` | The same steps as data. |
+| `build/memory-layout.json` | Where each part sits in CPU memory and MIA RAM. |
 
 The bootstrap is one line:
 
@@ -157,18 +169,22 @@ written:
 }
 ```
 
-The SDK's code-game script builds the program, runs it headless for
-`settleCycles` cycles, and compares memory:
+`clementina check` builds the program, runs it headless for `settleCycles`
+cycles, and compares memory:
 
 ```text
-$ node ~/clementina/clementina-sdk/agents/workflows/code-game.mjs ~/games/hello
-Code checks passed; report: /home/you/games/hello/build/inspection/report.json
+$ clementina check
+Checks passed for /home/you/games/hello.
+CPU: PC=$...., cycles=...
+Screen:
+  ...
+Report: /home/you/games/hello/build/inspection/report.json
 ```
 
 ## Where to go next
 
 - To give the program graphics and sound, add assets
   ([Part II](../projects/project-folder.md)) and the asset build
-  ([Assets in an assembly game](../building/asset-build.md)).
+  ([The asset build](../building/asset-build.md)).
 - To step through it, use the debugger ([Debugging in VS
   Code](../running/debugging.md)).

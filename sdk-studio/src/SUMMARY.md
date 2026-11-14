@@ -20,8 +20,8 @@
 - [How a program reaches the machine](building/loading.md)
 - [Programming in BASIC with the SDK](building/basic.md)
 - [Programming in assembly with the SDK](building/assembly.md)
-- [Assets in an assembly game](building/asset-build.md)
-- [The asset runtime](building/runtime.md)
+- [The asset build](building/asset-build.md)
+- [The Clementina library](building/runtime.md)
 
 # Part IV: Running, debugging and testing
 
@@ -36,6 +36,7 @@
 [A. CLI reference](appendix/cli.md)
 [B. Project and asset file fields](appendix/schemas.md)
 [C. Asset limits](appendix/limits.md)
-[D. Runtime routine index](appendix/runtime-index.md)
+[D. Library routine index](appendix/runtime-index.md)
 [E. Emulator automation methods](appendix/automation.md)
 [F. Troubleshooting](appendix/troubleshooting.md)
+[G. A development install](appendix/source.md)

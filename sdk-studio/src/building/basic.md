@@ -1,6 +1,6 @@
 # Programming in BASIC with the SDK
 
-A BASIC project's source is a text file of numbered lines, edited on your
+A project's BASIC program is a text file of numbered lines, edited on your
 computer. The SDK compiles it into the same file Clementina's `SAVE` would
 write, and the program runs exactly as if it had been typed in. This chapter
 covers the source format, what the build does, how a BASIC program gets its
@@ -37,7 +37,9 @@ program builds them at run time instead.
 ## What the build makes
 
 `build.basic.outputName` names the output: `game` makes
-`build/game.bas`. The file is exactly what `SAVE` writes: the program's
+`build/game.bas`. `build.basic.memoryTop`, optional, lowers BASIC's top of
+memory to leave room for assembly ([Code that returns to
+BASIC](assembly.md#code-that-returns-to-basic)). The file is exactly what `SAVE` writes: the program's
 lines from the start of BASIC's program area to the start of its variables,
 with no header. It is not a PRG, and `BLOAD` can't read it; `LOAD` can.
 
@@ -97,12 +99,13 @@ renderer scan only sprite 0, and `SPRITE` sets sprite 0's tile, position,
 palette and flags.
 
 The other kinds of asset (backgrounds, overlays, shapes, animations, songs,
-sound effects) reach the card only through the asset build, which needs an
-assembly program, because the routines that use them are 6502 code. A BASIC
+sound effects) reach the card only through the asset build, which needs
+`build.assembly`, because the routines that use them are 6502 code. A BASIC
 program draws its backgrounds and plays its music with BASIC statements, and
 can load raw data it saved earlier with `NTLOAD`, `ATRLOAD`, `OAMLOAD`,
-`PALLOAD`, `CHRLOAD` and `MIALOAD`. A project that mixes BASIC with the
-asset runtime is what the reserved `mixed` kind is for.
+`PALLOAD`, `CHRLOAD` and `MIALOAD`. A BASIC program can also call assembly
+routines built in the same project, with `SYS`: see [Code that returns to
+BASIC](assembly.md#code-that-returns-to-basic).
 
 ## Editing BASIC in VS Code
 

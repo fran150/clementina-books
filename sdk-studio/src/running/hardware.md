@@ -1,60 +1,35 @@
 # On the real machine
 
 Everything in this book runs in the emulator. This chapter says how to take
-a game to the board, what differs there, and how to look inside MIA when
+a project to the board, what differs there, and how to look inside MIA when
 something goes wrong.
 
-## Taking a game to the board
+## Taking a project to the board
 
 The build's output is what the card needs. Nothing else has to change.
 
-1. Format the card as **FAT32** (FAT12 and FAT16 work too). MIA can't read
-   exFAT, and cards of 64 GB and more usually come formatted that way.
+1. Use a FAT32 card, as for any Clementina program.
 2. Copy the files:
-   - a BASIC game: the project's `build` folder, keeping its name;
-   - an assembly game without assets: the same;
-   - an assembly game with assets: the **contents** of `build/sd`, into any
-     folder of the card.
+   - without an asset build: the project's `build` folder, keeping its name;
+   - with an asset build (`build.assets`): the **contents** of `build/sd`,
+     into any folder of the card.
 3. Put the card in MIA's slot and power on.
-4. Start the video client and point it at MIA (below).
-5. In BASIC, change to the game's folder and type the load plan, as in the
-   emulator: `LOAD "BOOT.BAS"` and `RUN` for an asset build.
+4. Connect the video client to MIA, as in the *User's Manual*,
+   [The Clementina board](../../../users-manual/src/setup/board.md).
+5. In BASIC, change to the project's folder and type the load plan, as in the
+   emulator: `LOAD "BOOT.BAS"` and `RUN` for an asset build. When the project
+   has a BASIC program, the bootstrap ends by loading it, so type `RUN` a
+   second time to start it.
 
 FAT doesn't care about case, so `boot.bas` finds `BOOT.BAS` on the card, as
 it wouldn't in the emulator on Linux. Long file names work. Keep names to
 plain ASCII.
 
-## The screen and the keyboard
-
-Clementina has no video connector. MIA sends the screen over Wi-Fi to the
-video client on your computer, and the client sends back the keyboard, the
-mouse and gamepads: the same client as in the emulator, pointed at MIA
-instead.
-
-MIA joins a Wi-Fi network when it starts, with the settings in `WIFI.CFG`
-at the root of the card:
-
-```ini
-# Clementina Wi-Fi settings
-ssid = your-network
-password = your-password
-```
-
-Then start the client with MIA's address:
-
-```text
-$ clementina-video-client --server 192.168.1.50:6502
-```
-
-MIA's USB console prints its address (`status wifi`). MIA can also start
-its own network instead (`mode = ap`), at `192.168.4.1`. Its README has the
-details.
-
 ## What differs from the emulator
 
 **Time.** In the emulator, MIA's commands, its DMA copies and SD card loads
 finish at once; on the board they take real time. A program that waits for
-MIA properly (the runtime always does, and so does the kernel) works the
+MIA properly (the library always does, and so does the kernel) works the
 same. One that assumes a command is done without checking may work in the
 emulator and fail on the board. Loads from the card run at a few hundred
 KB/s at best, so a level that loads instantly in the emulator may take a
@@ -76,15 +51,6 @@ its stereo jack. The emulator plays the same samples, without that stage.
 **Case of file names.** As above: case-sensitive in the emulator on Linux,
 never on the card. Name files in the build the way they are on disk, and it
 works in both.
-
-## Testing on GPIO
-
-The CPU side of Clementina can also run against a real MIA without the
-board: the emulator's `clementina-gpio` model runs the 65C02, RAM and VIA on a
-Raspberry Pi 5, wired through its GPIO header to a Pico 2 W running MIA's
-firmware. Video, input, sound and the SD card are then the real MIA's, so
-everything above about the screen, the card and time applies. It tests
-MIA's firmware against a 6502; it says nothing about the board's speed.
 
 ## Looking inside MIA
 

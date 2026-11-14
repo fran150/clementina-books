@@ -10,12 +10,8 @@ your keyboard, mouse and gamepads. Pick a path, follow its section, then read
 **For the emulator:**
 
 - A computer running Linux, macOS or Windows.
-- [Go](https://go.dev/dl/) 1.23 or later, to build the emulator and the
-  video client. On Linux, the emulator also needs a C compiler and the ALSA
-  headers (`libasound2-dev` on Debian, Ubuntu and Raspberry Pi OS) for
-  sound, and the video client needs the X11 and OpenGL development
-  packages its graphics library uses.
-- [Git](https://git-scm.com/), to download the source.
+- On Linux, the ALSA sound library (`libasound2` on Debian, Ubuntu and
+  Raspberry Pi OS), which most desktops already have.
 - A terminal window at least 80 × 24 characters, for the emulator's
   debugger screen.
 
@@ -33,10 +29,11 @@ your keyboard, mouse and gamepads. Pick a path, follow its section, then read
   [The Clementina board](board.md)).
 - A computer for the video client, as in the emulator list, on the same
   network as MIA.
-- A computer to build the MIA firmware once (it can be the same one).
+- A computer to copy MIA's firmware to the Pico once (it can be the same
+  one).
 
-There are no ready-made downloads yet. Clementina is built from the source
-in its GitHub repositories, which the next two sections walk through.
+Everything you install comes from the **Releases** page of its GitHub
+repository, which the next two sections walk through.
 
 | Repository | What it is |
 | --- | --- |

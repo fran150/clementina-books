@@ -1,7 +1,6 @@
 # The asset model
 
-Clementina's assets follow the hardware closely. Each kind is one thing MIA
-draws or plays, and its rules are the hardware's rules, so an asset that
+Each kind of asset is one thing MIA draws or plays, and an asset that
 validates is one the machine can show. This chapter explains each kind and
 the hardware fact behind it. Appendix B lists every field of every file, and
 Appendix C every limit.
@@ -56,7 +55,7 @@ A tileset is either 3 bits per pixel (256 tiles of eight colors) or 1 bit
 per pixel. At 1 bpp the same 6,144 bytes hold three independent *planes* of
 256 two-color tiles each, and each layer picks which plane it reads. The
 `bpp` field says which; MIA's `CHR_1BPP_MASK` says it per bank, and the
-runtime's `UseTileset` sets it from the tileset.
+library's `UseTileset` sets it from the tileset.
 
 `chr` holds the 6,144 bytes exactly as MIA stores them. `authoring` holds
 what Studio and other editors need but the machine doesn't:
@@ -92,9 +91,9 @@ The background layer itself is smaller than most maps. MIA has eight
 background tables of 40×25 cells, in two sets of four, and `BGMODE` arranges
 one set into a plane of 40×25, 80×25, 40×50, 160×25, 40×100 or 80×50 cells
 that scrolls and wraps. A map bigger than the plane streams through it: the game copies the
-columns or rows about to scroll into view. The runtime's `DrawColumn`,
+columns or rows about to scroll into view. The library's `DrawColumn`,
 `DrawRow` and the partial loads do exactly that
-([The asset runtime](../building/runtime.md)).
+([The Clementina library](../building/runtime.md)).
 
 Color 0 of a background tile is a real color, drawn in the cell's palette.
 
@@ -108,7 +107,7 @@ box. Color 0 is transparent, so the layers below show through.
 An overlay can have **placeholders**: named rectangles where the game will
 write tiles while it runs. The score's digits, a player's name. A
 placeholder holds no tiles of its own: what is painted under it is the
-overlay's starting content, and the runtime's `FillPlaceholder` overwrites
+overlay's starting content, and the library's `FillPlaceholder` overwrites
 the tile numbers inside it at run time, keeping the colors and flips.
 Placeholders can't overlap.
 
@@ -214,7 +213,7 @@ of the loop.
 a volume, a pulse width, a waveform and the gate (on while the sound plays;
 when it goes off the release starts). Frequencies are in Hz × 16 (`freq`
 4000 is 250 Hz). The build stores, for each frame, only the registers that
-change, and the runtime's `TickSound` writes one frame per call.
+change, and the library's `TickSound` writes one frame per call.
 
 ## What an asset doesn't hold
 

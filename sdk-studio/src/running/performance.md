@@ -31,7 +31,7 @@ CPU at any clock, unless the game turns it off.
 
 MIA's own work takes no time in the emulator: its commands, its DMA copies
 and SD card transfers finish at once. On the board they take real time. A
-runtime routine that starts a copy returns without waiting, and the next
+library routine that starts a copy returns without waiting, and the next
 call waits for it to finish, so on the board that wait comes on top of the
 figures here. Loads from the card aren't listed at all: the emulator's card
 has no real timing. MIA's SPI clock allows at most 1.5 MB/s from the card;
@@ -43,7 +43,7 @@ expect a few hundred KB/s.
 | --- | ---: |
 | Read or write a MIA register | 4 |
 | Write a sprite's 5-byte record through its own index | 46 |
-| Point an index at a MIA address (the runtime's seek) | 147 |
+| Point an index at a MIA address (the library's seek) | 147 |
 | Copy from the CPU to MIA through a window, simple loop | 13 per byte |
 | The same, unrolled 8 times | 9.4 per byte |
 | Copy from MIA to the CPU, simple loop | 14 per byte |
@@ -55,7 +55,7 @@ expect a few hundred KB/s.
 An indexed read that crosses a page boundary takes a cycle more, so align
 the buffers a loop reads.
 
-## The runtime
+## The library
 
 Measured with a 40×25 background, a 6,144-byte tileset and a one-frame
 animation, its shape made of 1 and then of 4 sprites. A call's count runs
@@ -91,7 +91,7 @@ setup.
 | `PlaySong` | 882 |
 | `SongPosition` | 213 |
 | `StopSong` | 252 |
-| `RuntimeSave` / `RuntimeRestore` | 505 / 639 |
+| `LibSave` / `LibRestore` | 505 / 639 |
 | `WaitTick`, when MIA's count has already moved on | 236 |
 | `ReadPad`, players 1-3: the gamepad | 269 |
 | `ReadPad`, player 0: the gamepad and the keyboard | 989 |

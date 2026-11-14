@@ -58,5 +58,6 @@ Clementina library go deeper:
 - **Hardware & MIA Technical Reference**: the board, its chips and
   connectors, building one, and how MIA works inside.
 
-The manual describes the machine as built from `main` of every Clementina
-repository on the date in the library's `manifest.json`.
+The manual describes the released machine software (MIA's firmware, the
+emulator and the video client) at the versions recorded in the library's
+`manifest.json`.

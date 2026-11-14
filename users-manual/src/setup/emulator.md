@@ -6,34 +6,51 @@ BASIC inside it are the same ones the board loads.
 
 ## Get the emulator and the video client
 
-Open a terminal and download both:
+On a Mac, or on Linux with [Homebrew](https://brew.sh), install both with:
 
 ```bash
-git clone https://github.com/fran150/clementina-6502.git
-git clone https://github.com/fran150/clementina-video-client.git
+brew install fran150/clementina/clementina-emulator
+brew install fran150/clementina/clementina-video-client
 ```
 
-The emulator's published releases are older than the Clementina model, so
-always build it from this source.
+The emulator's sample SD card is then in
+`$(brew --prefix)/share/clementina-emulator/SD`; start it below with
+`clementina-emulator --sd "$(brew --prefix)/share/clementina-emulator/SD"`
+and leave out the `./` in front of each program.
+
+Otherwise, download both from their GitHub releases pages, picking the file for your
+computer: `darwin-arm64` for an Apple Silicon Mac, `darwin-amd64` for an
+Intel Mac, `linux-amd64` or `linux-arm64` for Linux, `windows-amd64` for
+Windows.
+
+| Program | Releases | File |
+| --- | --- | --- |
+| The emulator | [clementina-6502](https://github.com/fran150/clementina-6502/releases) | `clementina-emulator-<version>-<os>-<arch>.tar.gz` (`.zip` on Windows) |
+| The video client | [clementina-video-client](https://github.com/fran150/clementina-video-client/releases) | `clementina-video-client-<version>-<os>-<arch>.tar.gz` (`.zip` on Windows) |
+
+Unpack both into one folder. The emulator's archive also has an `SD` folder
+with sample programs. On a Mac, the programs aren't signed, so macOS refuses
+to open them at first; clear that once, in the folder:
+
+```bash
+xattr -d com.apple.quarantine clementina-emulator clementina-video-client
+```
 
 ## Start Clementina
 
-In the emulator's folder, start the emulator with its sample SD card:
+In that folder, start the emulator with its sample SD card:
 
 ```bash
-cd clementina-6502
-go run ./cmd --sd SD
+./clementina-emulator --sd SD
 ```
 
-The first run takes a minute while Go builds it. Then the terminal shows the
-emulator's debugger: the processor's registers, memory and a menu at the
+The terminal shows the emulator's debugger: the processor's registers, memory and a menu at the
 bottom. Leave it running.
 
 In a second terminal, start the video client:
 
 ```bash
-cd clementina-video-client
-go run ./cmd/clementina-video-client
+./clementina-video-client
 ```
 
 A window opens with Clementina's blue screen and the `READY.` prompt. Click
@@ -44,7 +61,7 @@ other with no options.
 ## The SD card is a folder
 
 `--sd` turns a folder on your computer into Clementina's SD card. The `SD`
-folder in the emulator's repository has a few sample programs; type `DIR` to
+folder from the emulator's download has a few sample programs; type `DIR` to
 list them and `LOAD "demo.bas"` to load one. You can make your own folder and
 point `--sd` at it instead. Without `--sd`, the slot is empty.
 
@@ -79,7 +96,7 @@ it. On Linux or macOS, the `socat` tool makes a pair of linked virtual ports:
 
 ```bash
 socat -d -d pty,raw,echo=0,link=/tmp/ttyComputer pty,raw,echo=0,link=/tmp/ttyTerminal
-go run ./cmd --sd SD -p /tmp/ttyComputer
+./clementina-emulator --sd SD -p /tmp/ttyComputer
 ```
 
 Then open `/tmp/ttyTerminal` with any terminal program, such as

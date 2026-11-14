@@ -26,8 +26,7 @@ slot is empty. Which folder to give it:
 
 | Project | Folder |
 | --- | --- |
-| BASIC | The project folder: the load plan's paths start with `build/`. |
-| Assembly without assets | The project folder, likewise. |
+| BASIC, assembly, or both, without assets | The project folder: the load plan's paths start with `build/`. |
 | Assembly with assets | `build/sd`, which holds `BOOT.BAS`, the program and `ASSETS/`. |
 
 The emulator reads and writes the folder directly, so a `clementina build`
@@ -114,7 +113,7 @@ Code](debugging.md)).
 
 The emulator plays MIA's four voices through your computer's sound output.
 On Linux that needs the ALSA headers when the emulator is built
-([Installing](../start/installing.md#the-emulator)); built with
+([Installing](../start/installing.md#the-command-line-tools)); built with
 `CGO_ENABLED=0` instead, it runs silently.
 
 ## MIA's console
@@ -149,18 +148,6 @@ The video and input services have no authentication, as on the real MIA, so
 only open them on a network you trust. To run the client on another
 computer, point it at the emulator's: `clementina-video-client --server
 192.168.1.50:6502`.
-
-## Other machines
-
-`-m` picks the machine. `clementina` is the default and the only one this
-book uses. Two others exist:
-
-- `clementina-gpio` runs the 65C02, RAM and VIA on a Raspberry Pi 5 wired
-  to a real MIA (a Pico 2 W running MIA's firmware). It tests MIA's
-  firmware against a 6502 without the board; video, input, sound and
-  the SD card come from the real MIA.
-- `beneater` emulates Ben Eater's breadboard computer, the project
-  Clementina grew from.
 
 ## The headless emulator
 

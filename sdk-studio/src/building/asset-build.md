@@ -1,14 +1,11 @@
-# Assets in an assembly game
+# The asset build
 
-An assembly game's levels, sprites and music go on the SD card as files,
-and the game loads them while it runs. The asset build makes those files,
-plus a description of each one the game's code can use: its size, its
+With an asset build, a project's levels, sprites and music go on the SD
+card as files, and its assembly loads them while it runs. The asset build makes those files,
+plus a description of each one the program's code can use: its size, its
 default place in memory, and its parts. This chapter covers the `build.assets`
-section and what it makes. The next one covers the runtime routines that
+section and what it makes. The next one covers the library routines that
 load and use the files.
-
-The build never decides when anything loads, or what is on screen. It
-writes files and constants; the game's code does the rest.
 
 ## An example
 
@@ -20,6 +17,8 @@ manifest lists the assets as usual, and adds:
 build:
   outputDirectory: build
   assembly:
+    sources:
+      - src/main.s
     linkerConfig: link.cfg
     outputName: walker
     loadAddress: 6144
@@ -72,7 +71,7 @@ slots:
   programs ([Free MIA RAM](../../../mapping/src/mia/free-ram.md)). Below
   `$14000` is the firmware's.
 - A bank slot names a bank from 1 to 31 and an address in `$8000-$BFFF`. It
-  may run on through the following banks, up to bank 31; the runtime
+  may run on through the following banks, up to bank 31; the library
   switches banks as it reads.
 - Names start with a letter and hold letters, digits and `_`, are unique
   ignoring case, and can't be a built-in slot's name. Each becomes a
@@ -125,12 +124,11 @@ it.
 (`LEVEL01.BG`). `file` overrides the name; MIA's file system takes long
 names too. Names must be unique ignoring case.
 
-Two more fields of `build.assets`:
+One more field of `build.assets`:
 
 | Field | Default | Meaning |
 | --- | --- | --- |
 | `folder` | `ASSETS` | The folder on the card the files go in. |
-| `checks` | `true` | Whether the runtime checks its arguments. With checks, a call with a location that isn't loaded, an item number out of range or a shape that isn't there fails with an error code instead of drawing garbage. Without them the routines are smaller and faster. |
 
 ## What the build checks
 
@@ -140,7 +138,7 @@ Errors stop the build:
 - An asset bigger than its slot, except a background (below).
 - An unknown slot or asset, or an asset included twice.
 - Two files with the same name.
-- A song whose voices don't fit the runtime's 16-bit offsets.
+- A song whose voices don't fit the library's 16-bit offsets.
 
 Warnings don't:
 
@@ -163,7 +161,7 @@ On the card, in `build/sd`:
 | `ASSETS/` | One file per included asset. |
 
 The asset files have no headers. They are the bytes the hardware or the
-runtime uses, so a file that matches a hardware layout loads straight into
+library uses, so a file that matches a hardware layout loads straight into
 it:
 
 | Asset | File contents | Size |
@@ -184,11 +182,9 @@ In `build/`, for the game's code:
 
 | File | Contents |
 | --- | --- |
-| `assets.inc` | Constants and the runtime's macros. `.include` it. |
+| `assets.inc` | Constants for the assets. It includes `clementina-lib.inc`, so `.include` it instead. |
 | `assets.s` | One descriptor per asset, assembled and linked with the game. |
 | `memory-report.json` | Every slot, how full it is, and what is in it. |
-| `runtime/` | The runtime's ca65 sources, objects and listings, and `code-sizes.json`. |
-| `runtime.lib` | The runtime, archived for ld65. |
 
 ### `assets.inc`
 
@@ -224,24 +220,25 @@ ANIM_PLAYER_IDLE = 0
 ### `assets.s` and descriptors
 
 A *descriptor* is a small record per asset, in the `DATA` segment, that the
-runtime reads and updates. It holds the asset's kind, its current location
+library reads and updates. It holds the asset's kind, its current location
 (where it is loaded now, or nowhere), its default location (its slot), its
 size and file path, and what the kind needs: a tileset's 1 bpp flag, a
 background's width and height and the part of it that is loaded, a song's
 track offsets, a sprite file's table of shapes and animations and where each
 is loaded.
 
-The game passes the descriptor's label to every runtime call: `Load
+The game passes the descriptor's label to every library call: `Load
 BG_LEVEL1`. A location is three bytes: `$000000-$03FFFF` is an address in
 MIA RAM, `$80 | bank` in the top byte means a CPU bank with the address in
 the low two bytes, and `$FFFFFF` means not loaded.
 
-## Linking the runtime
+## Linking the library
 
-The build assembles `assets.s` with the game's sources and passes
-`runtime.lib` to ld65, which takes only the routines the game calls, and the
-routines they call. The runtime uses four segments, so the linker
-configuration needs them all:
+The build assembles `assets.s` with the game's sources and links them with
+[the Clementina library](runtime.md), as it does for any project with
+assembly. ld65 takes only the routines the game calls, and the routines they
+call. The library uses four segments, so the linker configuration needs them
+all; the assembly template's `link.cfg` already has them:
 
 ```text
 MEMORY {
@@ -257,7 +254,4 @@ SEGMENTS {
 }
 ```
 
-The runtime takes 42 bytes of zero page. Keep zero page below `$E0`.
-
-`runtime/code-sizes.json` lists each runtime module's code size; the whole
-runtime is about 6.4 KiB, and a game links only what it uses.
+The library takes 42 bytes of zero page. Keep zero page below `$E0`.

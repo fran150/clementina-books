@@ -20,30 +20,19 @@ the board from scratch.
 
 ## 2. Put MIA's firmware on the Pico
 
-MIA's firmware is a single file, `mia.uf2`, built from the
-[clementina-mia](https://github.com/fran150/clementina-mia) repository. The
-kernel, BASIC, the character set and the colors are all inside it, so this
-is also how Clementina gets a new version of BASIC.
+MIA's firmware is a single file, `mia.uf2`. Download it from the
+[clementina-mia releases page](https://github.com/fran150/clementina-mia/releases).
+The kernel, BASIC, the character set and the colors are all inside it, so
+this is also how Clementina gets a new version of BASIC.
 
-To build it you need the Raspberry Pi Pico SDK 2.2.0, the Arm GNU toolchain
-and CMake; the repository's `setup_dev.sh` checks for them, and the
-*Hardware & MIA Technical Reference* explains them. With those installed:
-
-```bash
-git clone https://github.com/fran150/clementina-mia.git
-cd clementina-mia
-export PICO_SDK_PATH=/path/to/pico-sdk
-make build
-```
-
-The firmware is now in `build/mia.uf2`. To copy it onto the Pico:
+To copy it onto the Pico:
 
 1. Hold down the **BOOTSEL** button on the Pico.
 2. Plug the Pico's USB cable into your computer, then let go of the button.
 3. A drive called `RP2350` appears. Copy `mia.uf2` onto it.
 
-The Pico restarts by itself with the new firmware. Next time, `make flash`
-does the copy for you if you have the `picotool` program.
+The Pico restarts by itself with the new firmware. To update it later,
+download the newer `mia.uf2` and do the same.
 
 ## 3. Tell MIA about your Wi-Fi
 
@@ -109,8 +98,7 @@ Now start the video client on any computer on the same network, giving it
 that address and the video port, 6502:
 
 ```bash
-cd clementina-video-client
-go run ./cmd/clementina-video-client --server 192.168.1.50:6502
+./clementina-video-client --server 192.168.1.50:6502
 ```
 
 Clementina's blue screen and `READY.` appear in the window. The client finds

@@ -84,7 +84,7 @@ Step Out isn't supported. To leave a subroutine, set a breakpoint after its
 call and continue.
 
 Stepping in assembly follows source lines. When the next instruction has no
-source line (the kernel, the runtime library without its sources, code in
+source line (the kernel, the Clementina library without its sources, code in
 RAM), a step runs one instruction and stops there, and VS Code shows the
 **Disassembly** view instead. Step Over only treats `JSR` as a call: a
 subroutine reached through `JMP` or an interrupt is stepped into.
@@ -152,5 +152,5 @@ with the debugger:
 | What did this line, or this macro, assemble to? | `build/NNN-source.lst` |
 | Where did a label end up? | `build/NAME.lbl` |
 | How big is each segment, and where is it? | `build/NAME.map` |
-| What does each runtime routine cost in bytes? | `build/runtime/code-sizes.json` |
+| What does each library routine cost in bytes? | `build/lib/code-sizes.json` |
 | What is in each slot? | `build/memory-report.json` |

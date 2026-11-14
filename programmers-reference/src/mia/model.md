@@ -70,7 +70,7 @@ The flags:
 
 | Indexes | Owner |
 | --- | --- |
-| `$00-$4F` | Programs. The SDK's runtime library uses `$40-$41`. |
+| `$00-$4F` | Programs. The SDK's Clementina library uses `$40-$41`. |
 | `$50-$6F` | Input, set up by MIA. |
 | `$70-$DF` | Video, set up by MIA. |
 | `$E0-$E5` | SD card and files, set up by MIA. |

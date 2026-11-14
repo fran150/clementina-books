@@ -19,12 +19,12 @@ what the build makes, and how to run, debug and test what it made.
 - **Part II** covers the project: the `clementina.yaml` manifest, the asset
   files, and Studio's editors that make them.
 - **Part III** covers the build: how a program gets onto the machine, what
-  the SDK does for a BASIC program and for an assembly program, and the
-  asset runtime, the library of 6502 routines that loads and uses assets.
+  the SDK does for BASIC code and for assembly, and the
+  Clementina library, the SDK's 6502 routines for assembly programs.
 - **Part IV** covers running the result: the emulator, the debugger,
   automated checks and AI agents, performance, and testing on a real board.
 - **The appendices** are reference: every CLI command, every field of every
-  file format, the asset limits, the runtime routines on one page, the
+  file format, the asset limits, the library routines on one page, the
   emulator automation protocol, and what to do when something goes wrong.
 
 ## The other books
@@ -66,11 +66,8 @@ Commands typed on Clementina itself, in BASIC, are shown without a prompt.
 
 ## What this book describes
 
-Nothing in Clementina is released yet: there are no tagged versions of the
-SDK, Studio, the emulator or the video client.
-The book describes the tools as they are built from `main` of every
-repository at the commits pinned in this repository's `manifest.json`, and
-it says so where something only exists in the emulator so far.
+The book describes the released SDK, Studio, emulator and video client, at
+the versions recorded in the library's `manifest.json`.
 
 Every command, project and program in this book was run against those
-commits while it was written.
+versions while it was written.
