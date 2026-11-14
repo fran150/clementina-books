@@ -72,8 +72,7 @@ This book explains how to *use* the machine. Its companions cover the rest:
 
 ## What this book describes
 
-Nothing in Clementina has been released yet. The book describes the machine
-built from `main` of every Clementina repository at the commits listed in the
+The book describes the machine as released, at the versions recorded in the
 library's `manifest.json`. Every example in this book was run on the
 emulator (`clementina-6502`). Where a speed matters, the book says what it
 depends on.

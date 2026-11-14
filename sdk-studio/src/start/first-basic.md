@@ -5,18 +5,16 @@ Star*, from a new folder to the screen.
 
 ## Make the project
 
-The SDK has two starter projects in `templates/`: `basic-game` and
-`asm-game`. The quickest way to start is the SDK's create-game script, run
-from the SDK checkout:
+`clementina new` makes a project from one of the SDK's two templates,
+`basic` and `assembly`. BASIC is the default:
 
 ```text
-$ cd clementina-sdk
-$ node agents/workflows/create-game.mjs init ~/games/catch --name "Catch the Star"
-Created /home/you/games/catch
+$ clementina new ~/games/catch --name "Catch the Star"
+Created /home/you/games/catch from the basic template.
 ```
 
 It copies the template to a new folder and puts your name in the manifest.
-Copying `templates/basic-game` by hand does the same. The folder holds:
+The folder holds:
 
 ```text
 catch/
@@ -42,7 +40,6 @@ name: Catch the Star
 target:
   machine: clementina-6502
 program:
-  kind: basic
   entry: src/main.bas
 assets:
   palettes:
@@ -62,7 +59,8 @@ build:
     paletteConfigId: palette-config:main
 ```
 
-- `program` says this is a BASIC program and where its source is.
+- `program` names the BASIC program's source. The project has no assembly,
+  so there is no `build.assembly`.
 - `assets` lists every asset file. This one has a palette (eight colors) and
   a palette config (which palette goes in each of the sixteen palette banks).
 - `build` says where the output goes, what to call the program, and, under
@@ -99,7 +97,7 @@ $ cd ~/games/catch
 $ clementina project validate
 Validation passed.
 $ clementina build
-Built build/game.bas and build/load-plan.json.
+Built build/game.bas and build/load-plan.json. SD card: ..
 ```
 
 `project validate` reads the manifest, checks every asset against its format
@@ -112,6 +110,8 @@ the output:
 | `build/game.bas` | The program, tokenized the way BASIC's `SAVE` writes it. `LOAD` reads it. |
 | `build/asset-palette.bin` | The palette config: 256 bytes, all sixteen banks, ready for palette RAM. |
 | `build/load-plan.json` | The steps that load the program: the palette into MIA RAM at `$00100`, then the program. |
+| `build/bootstrap.bas` | The same steps as a numbered BASIC program, for starting the project from a card. |
+| `build/memory-layout.json` | Where each part sits in CPU memory and MIA RAM. |
 
 Nothing in `build/` is meant to be edited. Delete it whenever you like; the
 next build makes it again.
@@ -175,16 +175,20 @@ interactive emulator as above.
 }
 ```
 
-The create-game script's `check` command builds the game, runs it headless,
-looks for the first text on the screen, types `A`, and looks for the second:
+`clementina check` builds the game, runs it headless, looks for the first
+text on the screen, types `A`, and looks for the second:
 
 ```text
-$ node ~/clementina/clementina-sdk/agents/workflows/create-game.mjs check ~/games/catch
-CATCH THE STAR
-PRESS A TO CATCH IT
-CAUGHT! SCORE 1
-PRESS R TO RESTART
-Inspection: /home/you/games/catch/build/inspection/report.json
+$ clementina check
+Checks passed for /home/you/games/catch.
+CPU: PC=$...., cycles=...
+Screen:
+  CATCH THE STAR
+  PRESS A TO CATCH IT
+After input:
+  CAUGHT! SCORE 1
+  PRESS R TO RESTART
+Report: /home/you/games/catch/build/inspection/report.json
 ```
 
 It fails if either text is missing. [Automation and AI

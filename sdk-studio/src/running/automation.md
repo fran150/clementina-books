@@ -3,12 +3,9 @@
 Everything the SDK does can run without a person at the keyboard: validate,
 build, start the program in the headless emulator, type into it, and look
 at its memory and its screen. This chapter covers the pieces: the CLI's JSON
-output, the checks a project can carry, the workflow scripts, the emulator's
-endpoint, and the MCP server that gives an AI agent the same tools.
-
-The same rule holds throughout: a check runs the real program in the real
-ROM, through the same load plan you would type. Nothing is simulated around
-it.
+output, the checks a project can carry, `clementina check` and
+`clementina debug`, the emulator's endpoint, and the MCP server that gives
+an AI agent the same tools.
 
 ## The CLI in scripts
 
@@ -19,8 +16,8 @@ output, and nothing else:
 $ clementina build --json
 {"version":1,"ok":true,"diagnostics":[],"exitCode":0,
  "message":"Built build/game.prg and build/load-plan.json. ...",
- "data":{"kind":"assembly","sdRoot":"...","prg":"...","loadPlan":"...",
-         "bootstrap":"...","entryAddress":6144}}
+ "data":{"sdRoot":"...","loadPlan":"...","bootstrap":"...","memoryLayout":"...",
+         "assembly":{"prg":"...","entryAddress":6144}}}
 ```
 
 | Field | Meaning |
@@ -45,7 +42,7 @@ field), then the severity and a code that scripts can match on.
 ## Checks
 
 A project can say what it should do in files under `checks/`. They aren't
-part of the manifest; the workflow scripts read them.
+part of the manifest; `clementina check` reads them.
 
 **`checks/smoke.json`** (BASIC): text that should be on the screen, and
 keys to type.
@@ -59,7 +56,7 @@ keys to type.
 }
 ```
 
-The script runs the program for `settleCycles`, looks for `beforeText`,
+`clementina check` runs the program for `settleCycles`, looks for `beforeText`,
 types `input`, runs again, and looks for `afterText`. The text is read from
 the overlay, where BASIC prints.
 
@@ -80,29 +77,29 @@ the overlay, where BASIC prints.
 Addresses are CPU addresses; each check reads up to 256 bytes. A check with
 `"phase": "after"` is made after `smoke.json`'s input has been typed. A game
 that writes its state to a known address (a score, a level number, an error
-code) can be checked this way. The runtime demo in the SDK writes the number
+code) can be checked this way. The library demo in the SDK writes the number
 of the last check it passed to `$0280`, for exactly this reason.
 
 `settleCycles` is how long the emulator runs before looking, in CPU cycles.
 It is a budget for the test, not a statement about how fast anything is on
 the board: the headless emulator runs as fast as your computer allows.
 
-## The workflow scripts
+## Checking and inspecting
 
-The SDK's `agents/workflows` folder has four scripts. Each documents itself
-in a Markdown file next to it, written for people and agents alike.
-
-| Script | Does |
+| Command | Does |
 | --- | --- |
-| `create-game.mjs init DIR [--kind assembly] [--name NAME]` | Makes a project from a template. |
-| `create-game.mjs check DIR` | Validates, builds, runs, checks `smoke.json` or `code.json`. |
-| `code-game.mjs DIR` | The same, for a project being changed: runs every check the project has. |
-| `debug-game.mjs DIR --line N [--source FILE] [--memory ADDR:COUNT]` | Stops at a source line and records what it finds. |
-| `create-character.mjs DIR` | Compares a drawn animation frame with its asset. |
+| `clementina new DIR [--template basic\|assembly] [--name NAME]` | Makes a project from a template. |
+| `clementina check [DIR]` | Validates, builds, runs, and checks everything in `checks/`. |
+| `clementina debug [DIR] --line N [--source FILE] [--memory ADDR:COUNT]` | Stops at a source line and records what it finds. |
 
-All of them take `--emulator PATH` (by default `CLEMENTINA_EMULATOR`, then
-`clementina-automation` on the `PATH`). The ones that capture the screen take
-`--renderer PATH` for `clementina-render`, and then also write PNG images.
+Both take `--emulator PATH` (by default `CLEMENTINA_EMULATOR`, then
+`clementina-automation` on the `PATH`). `check` also takes `--renderer PATH`
+for `clementina-render`, and then writes PNG images too. `debug` takes
+`--timeout MS`, and its `--memory` address can be decimal, `$0280` or
+`0x280` (quote a `$` in the shell: `--memory '$0280:4'`).
+
+`check` exits with 1 and one diagnostic per failed check. A project without
+check files is only built and run.
 
 They write what they find to `build/inspection/`:
 
@@ -111,26 +108,26 @@ They write what they find to `build/inspection/`:
 | `report.json` | The CPU's registers, the cycle count, the overlay's text row by row, each check's result. |
 | `before.video.bin`, `after.video.bin` | MIA's video state before and after the input: 68,944 bytes each. |
 | `before.png`, `after.png` | Those drawn at 320×200, with `--renderer`. |
-| `debug-report.json`, `debug.video.bin` | From `debug-game.mjs`: the stop, the registers, the source line, the memory asked for. |
+| `debug-report.json`, `debug.video.bin` | From `clementina debug`: the stop, the registers, the source line, the memory asked for. |
 
 A video snapshot is MIA's video memory, not a picture: tables, tiles,
 sprites, palettes and the registers. `clementina-render` composes it the way
-the video client would. To draw any snapshot, give the renderer its bytes as
-a JSON array:
+the video client would. To draw any snapshot, pass it to the renderer:
 
 ```text
-$ node -e 'process.stdout.write(JSON.stringify([...require("fs").readFileSync(process.argv[1])]))' \
-    build/inspection/debug.video.bin | clementina-render > frame.png
+$ clementina-render build/inspection/debug.video.bin > frame.png
 ```
 
 ### Stopping at a line
 
 ```text
-$ node agents/workflows/debug-game.mjs ~/games/walker --line 61 --memory 640:4
-Breakpoint at runtime.inc:127; report: .../build/inspection/debug-report.json
+$ clementina debug ~/games/walker --line 61 --memory 640:4
+Stopped at clementina-lib.inc:… (PC=$....).
+Memory $0280: .. .. .. ..
+Report: .../build/inspection/debug-report.json
 ```
 
-Line 61 of `src/main.s` is `TickAnimation player`. The script builds, sets
+Line 61 of `src/main.s` is `TickAnimation player`. `debug` builds, sets
 the breakpoint before the program loads, waits for the stop, and saves the
 registers, the source location, the four bytes at 640 and the video state.
 As in VS Code, a line that makes no code is refused rather than moved.
@@ -191,7 +188,7 @@ The SDK's MCP server offers the SDK:
 Configure the assistant to start it with:
 
 ```text
-node ~/clementina/clementina-sdk/packages/mcp/bin/clementina-mcp.mjs
+clementina mcp
 ```
 
 How to add an MCP server depends on the assistant; most take the command in
@@ -199,7 +196,6 @@ a settings file. The server runs on your computer, works on paths on your
 computer, and owns at most one emulator at a time. To step, the agent
 pauses first (`emulator_control`), then steps.
 
-An agent working on a game is best given the workflow scripts' Markdown
-files as its instructions: they describe the same loop of edit, validate,
-build, check and look, and the scripts leave evidence a person can read
-afterwards.
+An agent works on a game in the same loop a person does: edit, validate,
+build, check and look. `clementina check` and `clementina debug` leave their
+evidence in `build/inspection/`, where a person can read it afterwards.

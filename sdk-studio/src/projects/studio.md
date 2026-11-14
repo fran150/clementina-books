@@ -1,8 +1,7 @@
 # Making assets in Studio
 
 Clementina Studio is a desktop editor for every kind of asset in the
-previous chapter. It speaks the hardware's vocabulary (palette banks, CHR
-banks, OAM order) and previews everything the way MIA draws and plays it.
+previous chapter. It previews everything the way MIA draws and plays it.
 This chapter shows how Studio works with an SDK project, then walks through
 its editors.
 
@@ -51,7 +50,7 @@ To turn a `.cstudio` sketch into a project folder, import it with the SDK:
 $ clementina project import sketch.cstudio my-game --name "My Game"
 ```
 
-This writes a new assembly project: each asset in its own file under
+This writes a new project with assembly: each asset in its own file under
 `assets/`, the session's Builder settings as `build.assets`, and a starter
 `src/main.s` and `link.cfg`. It never overwrites a file. The name defaults to
 the session file's name. Open the new `clementina.yaml` in Studio as above.
@@ -273,4 +272,3 @@ Space plays and stops when tapped, and pans while held.
 
 What Studio can't preview yet is a whole scene: a background, sprites and an
 overlay together under one config, with sprite-against-background priority.
-That is the program's job, and the emulator's to show.

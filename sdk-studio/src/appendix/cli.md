@@ -8,7 +8,7 @@ Run without a command, or with `--help`, it prints this list.
 
 | Command | Does |
 | --- | --- |
-| `project import SESSION FOLDER [--name NAME]` | Writes a new assembly project from a Studio `.cstudio` session: its assets, its Builder settings as `build.assets`, and a starter `src/main.s` and `link.cfg`. Refuses to overwrite any file. |
+| `project import SESSION FOLDER [--name NAME]` | Writes a new project, with assembly, from a Studio `.cstudio` session: its assets, its Builder settings as `build.assets`, and a starter `src/main.s` and `link.cfg`. Refuses to overwrite any file. |
 | `project validate [folder]` | Validates the manifest, every asset it lists, the references between them, and that the program's sources exist. The folder defaults to the current one. |
 | `asset validate FILE` | Validates one asset file of any kind against its format and its own rules. References to other assets aren't checked: use `project validate`. |
 | `sprite validate FILE` | Validates a shape file. |
@@ -48,8 +48,11 @@ Run without a command, or with `--help`, it prints this list.
 ```
 
 `message` appears where a person would have been told something; `data`
-appears for `build` and `run`. For `build`, `data.kind` is `"basic"` or
-`"assembly"`, and `data.sdRoot` is the folder to use as the SD card.
+appears for `build` and `run`. For `build`, `data.sdRoot` is the folder to
+use as the SD card, `loadPlan`, `bootstrap` and `memoryLayout` are the
+paths of those files, and `assembly` (`prg`, `entryAddress`) and `basic`
+(`program`, `lines`) appear for the parts the project has. `run` reports
+`assembly.entryAddress` and `basic.program`.
 
 A diagnostic has a severity (`error` or `warning`), a code, a message, the
 file it is about and a JSON pointer into that file (`/build/assembly/entrySymbol`).
@@ -63,7 +66,7 @@ FILE/POINTER: SEVERITY CODE: MESSAGE
 
 | Program | From | Does |
 | --- | --- | --- |
-| `clementina-emulator` | `clementina-6502` | The interactive emulator ([The emulator](../running/emulator.md)), built under that name ([Installing](../start/installing.md#the-emulator)). |
+| `clementina-emulator` | `clementina-6502` | The interactive emulator ([The emulator](../running/emulator.md)), built under that name ([Installing](../start/installing.md#the-command-line-tools)). |
 | `clementina-automation -sd FOLDER [-port N]` | `clementina-6502` | The headless emulator. |
 | `clementina-video-client [--server HOST:PORT]` | `clementina-video-client` | The screen and input devices. |
 | `clementina-render` | `clementina-video-client` | A video snapshot, as a JSON array on standard input, to a PNG on standard output. |

@@ -9,11 +9,11 @@ message in `code` style is what the SDK prints; the code after `error` or
 **`clementina build` starts the emulator, or `clementina --sd` says it
 doesn't know the command.** The SDK's command and the emulator's
 `make build` output are both called `clementina`. Build the emulator as
-`clementina-emulator` ([Installing](../start/installing.md#the-emulator)).
+`clementina-emulator` ([Installing](../start/installing.md#the-command-line-tools)).
 
 **`clementina doctor` warns that `ca65` is missing.** cc65 isn't installed,
-or isn't on the `PATH`. BASIC projects build without it; assembly projects
-don't.
+or isn't on the `PATH`. Only a project with assembly (`build.assembly`)
+needs it.
 
 **The emulator won't build on Linux: `Package alsa was not found`.**
 Install the ALSA headers (`libasound2-dev`), or build with `CGO_ENABLED=0`
@@ -24,12 +24,21 @@ on the `PATH`, set `CLEMENTINA_EMULATOR` to its path, or pass `--emulator`.
 
 ## Validating and building
 
-**`project.build.kind: Mixed-project composition is not defined yet`.**
-`program.kind: mixed` is reserved. Use `basic` or `assembly`.
+**`project.program`.** The project has neither a BASIC program
+(`program.entry`) nor `build.assembly`. It needs at least one.
 
-**`project.build.assets.kind`.** `build.assets` is only for assembly
-projects. A BASIC program gets its palettes and tilesets from
-`build.video`, and the rest through BASIC's own statements.
+**`project.build.basic`.** `program.entry` and `build.basic` go together:
+add the one that's missing.
+
+**`project.build.assets.assembly`.** `build.assets` needs
+`build.assembly`, because the Clementina library is assembly code. A BASIC-only
+program gets its palettes and tilesets from `build.video`, and the rest
+through BASIC's own statements.
+
+**`build.layout.overlap`.** Two parts of the project, or a part and one of
+the machine's own areas, share memory. `build/memory-layout.json` shows
+where each one is. It is only a warning: if you meant it, such as a
+program that overwrites BASIC, ignore it.
 
 **`assembler.image.placement: Segment CODE starts at $1800, but binary
 offset $0 requires $1900`.** `build.assembly.loadAddress` and the linker
@@ -39,10 +48,10 @@ configuration disagree about where the program starts. Make them the same.
 entry symbol isn't exported. Add `.export game_start` (or your symbol's
 name) to the source that defines it.
 
-**ca65: `Range error (… not in [-128..127])`** on a branch after a runtime
+**ca65: `Range error (… not in [-128..127])`** on a branch after a library
 macro. The macros assemble to many bytes, and a branch reaches only 127.
-Jump instead: `bcc :+` then `jmp fail` ([The asset
-runtime](../building/runtime.md#walker) has an `Ok` macro for it).
+Jump instead: `bcc :+` then `jmp fail` ([The Clementina
+library](../building/runtime.md#walker) has an `Ok` macro for it).
 
 **`build.assets.slot.size`.** An asset is bigger than its slot. Make the
 slot bigger, or give the asset its own. Only a background may be bigger than
@@ -79,7 +88,7 @@ mode, Ctrl+M or F1 goes back to normal mode.
 on the emulated card are case-sensitive. Type them as they are on disk:
 `BOOT.BAS`, not `boot.bas`.
 
-**The game's assets fail to load (`rt_error` 3).** The runtime loads from
+**The game's assets fail to load (`cl_error` 3).** The library loads from
 the current folder. Start the game from its own folder (`build/sd` in the
 emulator), and copy the contents of `build/sd`, not the folder, to the card.
 
@@ -96,7 +105,7 @@ uses zero page from `$E0`, which is the system's. Keep it below `$E0`.
 
 **Nothing is drawn, or the wrong tiles are.**
 
-- `rt_error` 1: drawing an asset that isn't loaded. Load it first.
+- `cl_error` 1: drawing an asset that isn't loaded. Load it first.
 - The layer is off: `SetLayers` bit 0 for the background, 1 for the overlay,
   2 for sprites.
 - The layer reads another CHR bank: `SetChrBanks`.
@@ -106,7 +115,7 @@ uses zero page from `$E0`, which is the system's. Keep it below `$E0`.
 **Sprites don't appear.** Check the sprite layer is on (`SetLayers`), the
 sprites' CHR bank (`SetChrBanks`), and that the animation was started.
 
-**A frame is skipped and `rt_error` is 5.** A shape the animation uses isn't
+**A frame is skipped and `cl_error` is 5.** A shape the animation uses isn't
 loaded. `LoadAnimationShapes` loads them.
 
 **BASIC's text is garbage after a game ran.** The game loaded tiles into

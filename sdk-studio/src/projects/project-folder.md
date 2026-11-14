@@ -2,8 +2,7 @@
 
 A Clementina project is a folder with a `clementina.yaml` at its top. The
 manifest names the program's source files and every asset file, and says how
-to build them. Everything in it is *portable*: it means the same thing to the
-CLI, to Studio, to the debugger and to an AI agent, on any computer.
+to build them.
 
 ## Layout
 
@@ -44,11 +43,6 @@ name: Temple Explorer
 description: Find the idol and get out.
 target:
   machine: clementina-6502
-program:
-  kind: assembly
-  entry: src/main.s
-  sources:
-    - src/player.s
 assets:
   palettes:
     - assets/palettes/main.palette.json
@@ -73,6 +67,9 @@ assets:
 build:
   outputDirectory: build
   assembly:
+    sources:
+      - src/main.s
+      - src/player.s
     linkerConfig: link.cfg
     outputName: temple
     loadAddress: 0x1800
@@ -81,8 +78,7 @@ build:
 
 ### `format`, `version`, `name`, `description`
 
-`format` is always `clementina-project` and `version` is 1, the only
-version so far. `name` (up to 80 characters) is the project's display name.
+`format` is always `clementina-project` and `version` is 1. `name` (up to 80 characters) is the project's display name.
 `description` (up to 500) is optional.
 
 ### `target`
@@ -94,11 +90,19 @@ speed itself if it wants to.
 
 ### `program`
 
-| Field | Meaning |
+`program.entry` names the project's BASIC program, such as `src/main.bas`.
+It is one file. A project with only assembly leaves `program` out; its
+sources are listed under `build.assembly`, as in the example above.
+
+A project has a BASIC program, assembly, or both:
+
+| Parts | How it starts |
 | --- | --- |
-| `kind` | `basic` or `assembly`. `mixed` is reserved for BASIC programs that call assembly routines; it is rejected until the SDK can build it. |
-| `entry` | The main source file: `src/main.bas` or `src/main.s`. |
-| `sources` | Assembly only: more source files, assembled after `entry` and linked with it. A BASIC program is one file. |
+| BASIC only | The program is loaded and run. |
+| Assembly only | A generated BASIC loader runs the assembly with `BRUN`, and it takes over the machine. |
+| BASIC and assembly | The loader loads the assembly with `BLOAD`, then loads and runs the BASIC program, which calls the assembly with `SYS`. |
+
+[How a program reaches the machine](../building/loading.md) shows each one.
 
 ### `assets`
 
@@ -115,15 +119,18 @@ program. What reaches the SD card is decided by the `build` section.
 ### `build`
 
 `build` is optional for validation but needed to build. It always has an
-`outputDirectory`, where everything the build makes goes, and exactly one
-of `basic` or `assembly`:
+`outputDirectory`, where everything the build makes goes, and a section for
+each part the project has:
 
 | Section | For | Chapter |
 | --- | --- | --- |
-| `basic` | `kind: basic`: `outputName`, the compiled program's file name | [Programming in BASIC with the SDK](../building/basic.md) |
-| `assembly` | `kind: assembly`: linker configuration, load address, entry symbol, bank, include folders, defines | [Programming in assembly with the SDK](../building/assembly.md) |
-| `video` | Either kind: a palette config and tilesets the build loads before the program starts | [How a program reaches the machine](../building/loading.md) |
-| `assets` | Assembly only: the assets the build writes to the SD card for the asset runtime, and where they go | [Assets in an assembly game](../building/asset-build.md) |
+| `basic` | Needed with `program.entry`: `outputName`, the compiled program's file name, and `memoryTop`, where BASIC's memory ends | [Programming in BASIC with the SDK](../building/basic.md) |
+| `assembly` | The assembly: its sources, linker configuration, load address, entry symbol, bank, include folders, defines | [Programming in assembly with the SDK](../building/assembly.md) |
+| `video` | Any project: a palette config and tilesets the build loads before the program starts | [How a program reaches the machine](../building/loading.md) |
+| `assets` | Needs `assembly`: the assets the build writes to the SD card for the Clementina library, and where they go | [The asset build](../building/asset-build.md) |
+
+The build writes `memory-layout.json`, a map of every part in CPU memory
+and MIA RAM, and warns about each overlap.
 
 Appendix B lists every field with its type and range.
 
@@ -161,7 +168,7 @@ path. Studio names a file it creates after the asset's id.
 
 ## What is not in the project
 
-The manifest is portable, so it holds nothing that depends on one computer:
+The manifest holds nothing that depends on one computer:
 
 - where `clementina-automation` is installed and which port it uses
   (`--emulator`, `--port`, `CLEMENTINA_EMULATOR`);
@@ -179,14 +186,15 @@ writing anything:
   (Appendix C), then its references: every id an asset names must exist,
   every frame of an animation must come from one tileset, and so on;
 - that every source file exists and is a regular file;
-- the `build` section: the right settings for the program's kind, slots
-  that fit and don't overlap, every included asset known.
+- the `build` section: the right settings for the parts the project has,
+  slots that fit, every included asset known. Overlapping slots are a
+  warning, not an error.
 
 A problem is printed as the file, the place in it as a JSON pointer, its
 severity, a code and a message:
 
 ```text
-clementina.yaml/build/assets: error project.build.assets.kind: Asset builds need an assembly program: the runtime library is ca65 code
+clementina.yaml/build/assets: error project.build.assets.assembly: Asset builds need build.assembly: the Clementina library is ca65 code
 ```
 
 The code is stable; the message is for people. The command exits with 0 when

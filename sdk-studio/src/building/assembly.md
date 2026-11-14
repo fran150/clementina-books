@@ -1,7 +1,7 @@
 # Programming in assembly with the SDK
 
-An assembly project is a ca65 program. The SDK runs ca65 on each source and
-ld65 on the result, exactly as you would by hand, then checks the linked
+A project's assembly is ca65 code. The SDK runs ca65 on each source and
+ld65 on the result, then checks the linked
 program against what the manifest says and writes the PRG and its load
 plan. This chapter covers the build settings, the linker configuration, the
 include files the SDK provides, and the rules a program that owns the
@@ -10,15 +10,13 @@ machine lives by.
 ## The build settings
 
 ```yaml
-program:
-  kind: assembly
-  entry: src/main.s
-  sources:
-    - src/player.s
-    - src/level.s
 build:
   outputDirectory: build
   assembly:
+    sources:
+      - src/main.s
+      - src/player.s
+      - src/level.s
     linkerConfig: link.cfg
     outputName: temple
     loadAddress: 0x1800
@@ -32,16 +30,17 @@ build:
 
 | Field | Meaning |
 | --- | --- |
+| `sources` | The assembly files, at least one. |
 | `linkerConfig` | ld65's configuration file. It decides where everything goes. |
 | `outputName` | The output files' name: `temple` makes `build/temple.prg`. Letters, digits, `_` and `-`, starting with a letter. |
 | `loadAddress` | Where the program loads, 1 to `$BFFF`. Must be where the linker configuration puts the first byte. |
 | `bank` | Only for a program linked at `$8000-$BFFF`: the bank it loads into, 1-31. Required there, rejected elsewhere. |
 | `entrySymbol` | The exported label where the program starts. |
 | `includeDirectories` | Folders searched for `.include` files, before the SDK's own. |
+| `checks` | Whether [the Clementina library](runtime.md)'s routines check their arguments. Default `true`. |
 | `defines` | Symbols for every source, as if each began with `NAME = value`. A value is a number or a short text of letters, digits and `_.$+-`. |
 
-ca65 assembles `entry` first, then each of `sources` in order, each into its
-own object file; ld65 links them in that order. Every source is assembled
+ca65 assembles each of `sources` in order, each into its own object file; ld65 links them in that order. Every source is assembled
 for the 65C02 (`--cpu 65C02`) with debug information and a listing.
 
 ## The linker configuration
@@ -140,6 +139,7 @@ subject of the *Programmer's Reference Guide*, Part III.
 | `NAME.map` | ld65's memory map: segments, their sizes and addresses. |
 | `NNN-source.o`, `.lst` | ca65's object and listing for each source, numbered in link order. |
 | `include/` | `clementina.inc` and `mia.inc`. |
+| `lib/` | [The Clementina library](runtime.md): `clementina-lib.inc`, `clementina.lib`, and `code-sizes.json`. |
 | `bootstrap.bas`, `load-plan.json` | How to load it ([How a program reaches the machine](loading.md)). |
 
 The `.lst` listings show each source line with the bytes it assembled to,
@@ -212,7 +212,7 @@ wait_tick:
         rts
 ```
 
-A game that uses the asset runtime can call `WaitTick` instead, which also
+A game that uses the Clementina library can call `WaitTick` instead, which also
 says how many ticks went by ([Timing and input](runtime.md#timing-and-input)).
 
 ## Code that returns to BASIC
@@ -221,7 +221,36 @@ A machine-code routine for a BASIC program (called with `SYS` or `USR`) is
 the opposite case: it must leave BASIC whole. Link it where BASIC doesn't
 live: `$0280-$02F7`, a bank from 1 to 31 (with `bank` set and a
 `loadAddress` in `$8000-$BFFF`), or above a top of memory the BASIC program
-lowered. Keep its zero page in `$98-$DF`. The SDK can build such a routine as
-a project, but its bootstrap would `BRUN` it, so load it from your BASIC
-program with `BANK` and `BLOAD` instead. Building BASIC and assembly together
-in one project is what the reserved `mixed` kind will do.
+lowered. Keep its zero page in `$98-$DF`.
+
+A project with both a BASIC program and `build.assembly` builds exactly
+this. The loader `BLOAD`s the PRG instead of `BRUN`ning it, then loads and
+runs the BASIC program, which calls the routine with `SYS`. To make room in
+bank 0, set `build.basic.memoryTop`:
+
+```yaml
+program:
+  entry: src/main.bas
+build:
+  outputDirectory: build
+  basic:
+    outputName: game
+    memoryTop: 0xA000
+  assembly:
+    sources:
+      - src/routines.s
+    linkerConfig: link.cfg
+    outputName: routines
+    loadAddress: 0xA000
+    entrySymbol: start
+```
+
+`memoryTop` lowers BASIC's top of memory before the program loads (`POKE
+63,lo:POKE 64,hi:CLEAR`), so BASIC keeps its program, variables and strings
+below it, and `$A000-$BFFF` is free for the routine. `FRE` reports that much
+less. Lowering the top doesn't make room low in RAM: BASIC's program starts
+at the bottom of its area, so code at `$1800` still lands on it.
+
+The build checks none of this for you. It writes `memory-layout.json`, a
+map of every part, and warns when two overlap, but it never stops on an
+overlap: where each part goes is your decision.

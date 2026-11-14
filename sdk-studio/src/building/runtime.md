@@ -1,17 +1,27 @@
-# The asset runtime
+# The Clementina library
 
-The runtime is a library of 6502 routines that load the asset build's files
-and use them: load a level, draw it, show a sprite, run an animation, play a
-song. It gives you primitives and nothing more. It has no scenes, no level
-loader and no main loop; the game decides what happens and when.
+The Clementina library is the SDK's 6502 routines your assembly can call
+to load and use the asset build's files, play sound, keep time and read
+input.
+
+Every build with `build.assembly` links it. The build puts it in
+`build/lib/`: `clementina.lib`, archived for ld65, with its ca65 sources,
+objects, listings, and `code-sizes.json`, each module's code size. The
+whole library is about 6.4 KiB, and ld65 links only what a program calls.
+
+`build.assembly.checks` (default `true`) says whether the routines check
+their arguments. With checks, a call with a location that isn't loaded, an
+item number out of range or a shape that isn't there fails with an error
+code instead of drawing garbage. Without them the routines are smaller and
+faster.
 
 This chapter walks through *Walker*, the game from the previous chapter,
 then covers each group of routines. Appendix D lists them all.
 
 ## Calling a routine
 
-Every routine has a macro of the same name in `runtime.inc`, which
-`assets.inc` includes. The macro puts the arguments where the routine wants
+Every routine has a macro of the same name in `clementina-lib.inc`.
+`.include` it, or `assets.inc`, which includes it. The macro puts the arguments where the routine wants
 them and calls it:
 
 ```asm
@@ -24,25 +34,25 @@ them and calls it:
   else is the memory that holds it. `MoveAnimation player, px, #150` takes
   the X position from the two bytes at `px` and the Y position 150.
 - **The result** is in the carry flag. Carry clear means it worked. Carry set
-  means it failed, and `rt_error` says why:
+  means it failed, and `cl_error` says why:
 
-| `rt_error` | Name | Meaning |
+| `cl_error` | Name | Meaning |
 | ---: | --- | --- |
-| 1 | `RT_ERR_NOT_LOADED` | The asset or item isn't loaded. |
-| 2 | `RT_ERR_LOCATION` | A location is invalid, or of the wrong kind. |
-| 3 | `RT_ERR_FILE` | The SD card reported an error, or the file is short. |
-| 4 | `RT_ERR_RANGE` | Coordinates or a size fall outside the asset. |
-| 5 | `RT_ERR_MISSING` | A shape an animation uses isn't loaded. |
-| 6 | `RT_ERR_ARGUMENT` | An argument is out of range. |
+| 1 | `CL_ERR_NOT_LOADED` | The asset or item isn't loaded. |
+| 2 | `CL_ERR_LOCATION` | A location is invalid, or of the wrong kind. |
+| 3 | `CL_ERR_FILE` | The SD card reported an error, or the file is short. |
+| 4 | `CL_ERR_RANGE` | Coordinates or a size fall outside the asset. |
+| 5 | `CL_ERR_MISSING` | A shape an animation uses isn't loaded. |
+| 6 | `CL_ERR_ARGUMENT` | An argument is out of range. |
 
-With `checks: false` the runtime skips most of these checks: smaller and
+With `checks: false` the library skips most of these checks: smaller and
 faster, but a mistake draws garbage instead of failing.
 
 The routines pass their arguments in a 42-byte block of zero page
-(`rt_a0` to `rt_a11` and scratch bytes), and use MIA's index descriptors
+(`cl_a0` to `cl_a11` and scratch bytes), and use MIA's index descriptors
 `$40` and `$41`, both index windows, `CFG_SELECT` and the command registers.
 They leave all of these changed. A game that drives MIA itself as well uses
-other descriptors, and sets up its windows again after a runtime call.
+other descriptors, and sets up its windows again after a library call.
 
 Before sending a command to MIA, each routine waits for MIA's previous
 command and any copy still running. A routine that starts a copy returns
@@ -67,7 +77,7 @@ gamepad's A button; only the sound), Q stops the music.
 
 SFX_VOICE = 3                   ; the song uses voices 0 and 1
 
-; After a runtime call: carry set means it failed, and rt_error says why.
+; After a library call: carry set means it failed, and cl_error says why.
 .macro Ok
         bcc :+
         jmp fail
@@ -78,7 +88,7 @@ SFX_VOICE = 3                   ; the song uses voices 0 and 1
 ptr:        .res 2
 
 .segment "BSS"
-player:     .res RT_ANIM_SIZE
+player:     .res CL_ANIM_SIZE
 px:         .res 2
 held:       .res 1              ; the controls held on the last tick
 sfx_on:     .res 1
@@ -127,13 +137,13 @@ pad:    ReadPad #0              ; gamepad 0 and the keyboard
         eor held                ; the controls that changed...
         sty held
         and held                ; ...and are held now: just pressed
-        and #RT_PAD_A
+        and #CL_PAD_A
         bne jump
         tya
-        and #RT_PAD_LEFT
+        and #CL_PAD_LEFT
         bne left
         tya
-        and #RT_PAD_RIGHT
+        and #CL_PAD_RIGHT
         bne right
         KeyHeld #$14            ; Q
         beq loop
@@ -156,7 +166,7 @@ jump:   PlaySound SFX_JUMP, #SFX_VOICE
         sta sfx_on
         jmp loop                ; too far for bra
 
-fail:   lda rt_error
+fail:   lda cl_error
         jsr KERN_PRBYTE
 :       bra :-
 
@@ -180,7 +190,7 @@ What to notice:
 - **The `Ok` macro.** A routine's failure is in the carry, so every call is
   followed by a check. `bcs fail` would be shorter, but a branch reaches only
   127 bytes, and the macros expand to many bytes; `Ok` jumps instead. On
-  failure Walker prints `rt_error` in hex and stops.
+  failure Walker prints `cl_error` in hex and stops.
 - **Loading to built-in slots.** `PAL_MAIN`'s default slot is `palettes` and
   `CHR_PLAYER`'s is `chr2`, so loading them puts the colors and the tiles
   where the hardware reads them. Nothing more is needed.
@@ -226,7 +236,7 @@ Its memory report shows how full each slot is:
 | `Forget asset` | Marks it not loaded. Nothing is erased. |
 
 A location is three bytes: a MIA address such as `#$20000`, or a bank and
-an address built with `RT_BANK_LOC`, such as `#RT_BANK_LOC(3, $8000)`.
+an address built with `CL_BANK_LOC`, such as `#CL_BANK_LOC(3, $8000)`.
 The `SLOT_` constants are locations too.
 
 **Streaming.** A load into MIA RAM is MIA's own work: the SD card's data
@@ -300,7 +310,7 @@ card:
 
 The part loaded becomes the *window* the draw routines read, and its place
 in the map is recorded in the descriptor. A draw that asks for cells outside
-the window fails with `RT_ERR_RANGE`. A scrolling game loads the window
+the window fails with `CL_ERR_RANGE`. A scrolling game loads the window
 ahead of the screen as it moves, and draws each new edge with `DrawRow` or
 `DrawColumn`.
 
@@ -354,13 +364,13 @@ record, so shapes can be drawn one after the other:
 
 An animation needs somewhere to keep its state: which frame shows, how many
 ticks are left, where it is. That is an *instance*, 12 bytes the game
-reserves (`.res RT_ANIM_SIZE`). Several instances can play the same
+reserves (`.res CL_ANIM_SIZE`). Several instances can play the same
 animation: three enemies walking out of step.
 
 | Macro | Does |
 | --- | --- |
 | `StartAnimation inst, file, anim, sprite, x, y` | Shows frame 0 from sprite record `sprite` on. |
-| `TickAnimation inst` | One tick. A has `RT_TICK_FRAME` (1) set when a new frame shows, and `RT_TICK_WRAP` (2) when it went back to frame 0. |
+| `TickAnimation inst` | One tick. A has `CL_TICK_FRAME` (1) set when a new frame shows, and `CL_TICK_WRAP` (2) when it went back to frame 0. |
 | `MoveAnimation inst, x, y` | Moves it. |
 | `StopAnimation inst` | Hides its sprites. |
 
@@ -368,8 +378,8 @@ Call `TickAnimation` once per tick, 60 times a second to match Studio's
 preview. A tick that doesn't change the frame costs about 50 cycles; one
 that does redraws the frame's sprites.
 
-If a frame's shape isn't loaded, the frame is skipped and `rt_error` reports
-`RT_ERR_MISSING`. Nothing is drawn from the wrong memory.
+If a frame's shape isn't loaded, the frame is skipped and `cl_error` reports
+`CL_ERR_MISSING`. Nothing is drawn from the wrong memory.
 
 ### All sprites
 
@@ -429,18 +439,18 @@ tick. It remembers the last tick in BSS, so call it from one place.
 
 | Bit | Constant | Gamepad | Keyboard |
 | ---: | --- | --- | --- |
-| `$01` | `RT_PAD_UP` | d-pad or left stick up | W, up arrow |
-| `$02` | `RT_PAD_DOWN` | d-pad or left stick down | S, down arrow |
-| `$04` | `RT_PAD_LEFT` | d-pad or left stick left | A, left arrow |
-| `$08` | `RT_PAD_RIGHT` | d-pad or left stick right | D, right arrow |
-| `$10` | `RT_PAD_A` | A (Cross) | Z, Space |
-| `$20` | `RT_PAD_B` | B (Circle) | X |
-| `$40` | `RT_PAD_SELECT` | Select (Back) | Tab |
-| `$80` | `RT_PAD_START` | Start (Menu) | Enter |
+| `$01` | `CL_PAD_UP` | d-pad or left stick up | W, up arrow |
+| `$02` | `CL_PAD_DOWN` | d-pad or left stick down | S, down arrow |
+| `$04` | `CL_PAD_LEFT` | d-pad or left stick left | A, left arrow |
+| `$08` | `CL_PAD_RIGHT` | d-pad or left stick right | D, right arrow |
+| `$10` | `CL_PAD_A` | A (Cross) | Z, Space |
+| `$20` | `CL_PAD_B` | B (Circle) | X |
+| `$40` | `CL_PAD_SELECT` | Select (Back) | Tab |
+| `$80` | `CL_PAD_START` | Start (Menu) | Enter |
 
 A gamepad that isn't connected reads as 0. The other buttons, the right
 stick and the analog values aren't in the bits. The keyboard's keys are the
-runtime's choice; for any other key, `KeyHeld` takes its USB HID usage:
+library's choice; for any other key, `KeyHeld` takes its USB HID usage:
 `$04`-`$1D` A to Z, `$28` Enter, `$2C` Space, `$4F`-`$52` the right, left,
 down and up arrows. *Mapping Clementina*'s [Input
 state](../../../mapping/src/mia/input.md) chapter has the key bitmap and
@@ -456,14 +466,14 @@ paced by MIA's clock with `WaitTick`. A game may instead use an interrupt to
 keep time, and have the handler only count ticks while the main loop does
 the work.
 
-A handler may also call the runtime's drawing, animation, sound and copy
+A handler may also call the library's drawing, animation, sound and copy
 routines, if it protects what the main loop was in the middle of:
 
 1. Save the registers.
 2. Write `MIA_CTX_PUSH` to `MIA_CTX`, to save MIA's registers.
-3. `RuntimeSave`, which pushes the runtime's 42 zero-page bytes.
-4. Make the runtime calls.
-5. `RuntimeRestore`, which waits for the handler's last MIA command and
+3. `LibSave`, which pushes the library's 42 zero-page bytes.
+4. Make the library calls.
+5. `LibRestore`, which waits for the handler's last MIA command and
    pulls the bytes back.
 6. Write `MIA_CTX_POP` to `MIA_CTX`.
 7. Restore the registers.

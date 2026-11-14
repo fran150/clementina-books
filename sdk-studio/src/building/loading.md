@@ -2,9 +2,9 @@
 
 Clementina loads programs from its SD card with BASIC: `LOAD` for a BASIC
 program, `BRUN` for machine code, `MIALOAD` for data that goes into MIA RAM.
-The build doesn't invent another way. It writes the files, and then the
-BASIC commands that load them, in a *load plan*. This chapter explains the
-plan and the three shapes it takes.
+The build writes the files, and then the BASIC commands that load them, in
+a *load plan*. This chapter explains the plan and the shape it takes for
+each combination of parts.
 
 ## The load plan
 
@@ -15,6 +15,7 @@ steps, run in order:
 | --- | --- | --- |
 | `mia` | Loads a file into MIA RAM at an address. | `MIALOAD "path",address` |
 | `prg` | Loads a PRG file into CPU RAM; the last one also starts it. | `BANK n:BLOAD "path"`, or `BANK n:BRUN "path"` |
+| `memoryTop` | Lowers BASIC's top of memory, first. | `POKE 63,lo:POKE 64,hi:CLEAR` |
 | `basic` | Loads a tokenized BASIC program, last. | `LOAD "path"`, then `RUN` |
 
 The plan ends with exactly one *terminal* step, the one that starts the
@@ -23,8 +24,8 @@ it could run, because the program takes over. Appendix B has the plan's
 format.
 
 Paths in the plan are relative to the folder that is the SD card when the
-plan runs. That folder is the project folder, except for an assembly game
-with an asset build, whose card is `build/sd`.
+plan runs. That folder is the project folder, except with an asset build, whose card
+is `build/sd`.
 
 The same plan drives everything that starts a program: `clementina run`, the
 debugger, the agent workflows, the MCP server and Studio type its commands
@@ -32,8 +33,8 @@ into the emulator's BASIC, as you would.
 
 ## Before the program: `build.video`
 
-Either kind of program can have the build load its palettes and tilesets
-before it starts:
+Any project can have the build load its palettes and tilesets before it
+starts:
 
 ```yaml
 build:
@@ -47,17 +48,15 @@ build:
 - `paletteConfigId` names a palette config. The build writes it as
   `asset-palette.bin`, 256 bytes, loaded into palette RAM at `$00100`.
 - `tilesets` places tilesets in CHR banks 0-7, one tileset per bank. Each
-  becomes `asset-chr-N.bin`, loaded at its bank's address. A tileset goes
-  exactly where you say; the build never infers a bank from the order of the
-  asset lists.
+  becomes `asset-chr-N.bin`, loaded at its bank's address.
 
 CHR banks 0 and 1 hold BASIC's text font, so a BASIC program that still
 prints text should leave them alone. A game that draws everything itself
 can use all eight.
 
-## A BASIC program
+## BASIC only
 
-For a BASIC program the plan is typed directly, with no line numbers:
+For a BASIC program on its own the plan is typed directly, with no line numbers:
 
 ```basic
 MIALOAD "build/asset-palette.bin",256
@@ -72,14 +71,19 @@ type these lines as they are. On a real card, copy the project's `build`
 folder to the card, keeping its name, and type the same lines from the
 folder that holds it.
 
-The SDK writes no file with these commands; they are in `load-plan.json`.
+The build also writes the same steps as a numbered program,
+`build/bootstrap.bas`, whose last line is the `LOAD`. A `LOAD` ends at
+`READY.` even inside a program, so running the bootstrap leaves your program
+loaded, and a second `RUN` starts it. On a card, that is `LOAD` of the
+bootstrap, `RUN`, then `RUN` again.
+
 A program that needs more than its palettes and tilesets loads the rest
 itself, with BASIC's statements
 ([Programming in BASIC with the SDK](basic.md)).
 
-## An assembly program without an asset build
+## Assembly only
 
-For an assembly program the plan becomes a small numbered BASIC program, the
+For assembly on its own the plan becomes a small numbered BASIC program, the
 *bootstrap*, written as text to `build/bootstrap.bas`:
 
 ```basic
@@ -92,7 +96,27 @@ Type it (or just its last line, if there is nothing to load first) and
 `RUN`. The bootstrap can be a program because `BRUN` never returns: by the
 time BASIC would need it again, the game owns the machine.
 
-## An assembly game with an asset build
+## BASIC and assembly
+
+A project with both parts loads the assembly first, without running it, and
+then the BASIC program, which calls it with `SYS`. With `memoryTop` set to
+`$A000` and the routines linked there, the plan is typed directly, as for a
+BASIC program:
+
+```basic
+POKE 63,0:POKE 64,160:CLEAR
+MIALOAD "build/asset-palette.bin",256
+BANK 0:BLOAD "build/routines.prg"
+LOAD "build/game.bas"
+RUN
+```
+
+The first line lowers BASIC's top of memory to `$A000`, so BASIC leaves
+`$A000-$BFFF` alone. Only a cold start resets it, so it survives `LOAD`,
+`RUN` and `CLEAR`. [Code that returns to
+BASIC](assembly.md#code-that-returns-to-basic) has the manifest.
+
+## With an asset build
 
 With `build.assets`, the build makes a complete SD card folder in
 `build/sd`:
@@ -121,8 +145,8 @@ RUN
 `BOOT.BAS` is already tokenized, so `LOAD` reads it directly. Its paths are
 relative to the current folder, so the game can live in any folder of the
 card. The bootstrap only starts the program; the game loads its assets
-itself, through the asset runtime, when it wants them
-([Assets in an assembly game](asset-build.md)).
+itself, through the Clementina library, when it wants them
+([The asset build](asset-build.md)).
 
 In the emulator, start it with `--sd` pointing at `build/sd`.
 
@@ -147,7 +171,7 @@ The CPU sees extended RAM through a 16 KiB window at `$8000-$BFFF`, one bank
 of 32 at a time. `BANK n` picks the bank that `BLOAD` and `BRUN` use there.
 The bootstrap sets it before the first PRG and whenever it changes.
 
-An assembly program linked at `$8000-$BFFF` must name its bank in
+Assembly linked at `$8000-$BFFF` must name its bank in
 `build.assembly.bank` (1-31), and one linked anywhere else must not. A load
 that runs past `$BFFF` continues at `$8000` of the next bank, so one file can
 fill several banks in a row. See [Extended

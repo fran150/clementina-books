@@ -1,162 +1,152 @@
 # Installing
 
-Until the first release, every tool is built from its repository. Put the
-checkouts side by side in one folder; Studio expects the SDK next to it, and
-the rest of this book assumes that layout:
+## With Homebrew
+
+On macOS, and on Linux with [Homebrew](https://brew.sh), one command per
+tool installs everything:
 
 ```text
-clementina/
-├── clementina-sdk/
-├── clementina-studio/
-├── clementina-6502/
-└── clementina-video-client/
+$ brew install fran150/clementina/clementina
+$ brew install fran150/clementina/clementina-emulator
+$ brew install fran150/clementina/clementina-video-client
+$ brew install --cask fran150/clementina/clementina-studio
 ```
 
-```text
-$ git clone https://github.com/fran150/clementina-sdk.git
-$ git clone https://github.com/fran150/clementina-studio.git
-$ git clone https://github.com/fran150/clementina-6502.git
-$ git clone https://github.com/fran150/clementina-video-client.git
-```
+- `clementina` is the `clementina` command. It installs cc65 with it.
+- `clementina-emulator` installs `clementina-emulator`, the interactive
+  emulator you play and debug in, and `clementina-automation`, the headless
+  one that `clementina run` and the debugger start on their own. Its sample
+  SD card is in `$(brew --prefix)/share/clementina-emulator/SD`.
+- `clementina-video-client` installs `clementina-video-client`, which shows
+  Clementina's screen, and `clementina-render`, which turns a saved screen
+  into a PNG.
+- `clementina-studio` installs Clementina Studio (macOS only).
 
-You need:
+`brew upgrade` updates them. The VS Code extension isn't in Homebrew: install
+it as in [The VS Code extension](#the-vs-code-extension) below. Then skip to
+[Checking the installation](#checking-the-installation).
 
-| What | For | Version |
+## From the releases pages
+
+On Windows, and on Linux without Homebrew, download the tools instead.
+Every tool comes as a ready-made download from its repository's GitHub
+releases page. Clementina is in alpha, so these are *prereleases*: GitHub
+lists them under **Releases** with a "Pre-release" label. Each release has a
+`SHA256SUMS` file to check the downloads against.
+
+| What | Release | Download |
 | --- | --- | --- |
-| Node.js | the SDK, Studio, the VS Code extension | 20 or later |
-| Go | the emulator and the video client | 1.23 or later |
-| cc65 | assembly programs | any recent release; the SDK needs ld65's debug format 2 |
-| VS Code | the debugger (optional) | any recent release |
+| The `clementina` command | [clementina-sdk](https://github.com/fran150/clementina-sdk/releases) | `clementina-<os>-<arch>` |
+| The VS Code extension | [clementina-sdk](https://github.com/fran150/clementina-sdk/releases) | `clementina-<version>.vsix` |
+| The emulator | [clementina-6502](https://github.com/fran150/clementina-6502/releases) | `clementina-emulator-<version>-<os>-<arch>.tar.gz` (`.zip` on Windows) |
+| The video client | [clementina-video-client](https://github.com/fran150/clementina-video-client/releases) | `clementina-video-client-<version>-<os>-<arch>.tar.gz` (`.zip` on Windows) |
+| Clementina Studio | [clementina-studio](https://github.com/fran150/clementina-studio/releases) | `.dmg` on macOS, `.AppImage` on Linux, `.exe` on Windows |
 
-## The SDK and the `clementina` command
+`<os>-<arch>` is `darwin-arm64` for an Apple Silicon Mac, `darwin-amd64` for
+an Intel Mac, `linux-amd64` or `linux-arm64` for Linux, and
+`windows-amd64` for Windows.
+
+You also need **cc65** to build assembly code, and **VS Code** if you want
+the debugger.
+
+### The command-line tools
+
+The `clementina` command, the emulator and the video client are plain
+executables. Put them all in one folder on your `PATH`, such as
+`~/.local/bin` on macOS and Linux:
+
+1. Download `clementina-<os>-<arch>` from the SDK release and rename it to
+   `clementina` (`clementina.exe` on Windows). It needs nothing else
+   installed, not even Node.js.
+2. Unpack the emulator archive. It holds `clementina-emulator`, the
+   interactive emulator you play and debug in, and `clementina-automation`,
+   the headless one that `clementina run`, the debugger and the MCP server
+   start on their own.
+3. Unpack the video client archive. It holds `clementina-video-client`,
+   which shows Clementina's screen, and `clementina-render`, which turns a
+   saved screen into a PNG.
+
+On macOS and Linux, make them executable with `chmod +x`. The downloads
+aren't signed, so macOS refuses to open them at first. Clear that once for
+each file:
 
 ```text
-$ cd clementina-sdk
-$ npm ci
-$ npm run build
+$ xattr -d com.apple.quarantine ~/.local/bin/clementina*
 ```
 
-`npm run build` compiles every package. The command-line tool is then
-`packages/cli/bin/clementina.mjs`. Inside the SDK checkout, `npx clementina`
-runs it; anywhere else, give it a short name. On macOS and Linux:
+On Linux the emulator's sound needs the ALSA library (`libasound2` on
+Debian, Ubuntu and Raspberry Pi OS), which most desktops already have.
 
-```text
-$ alias clementina="node $HOME/clementina/clementina-sdk/packages/cli/bin/clementina.mjs"
-```
+If `clementina-automation` isn't on your `PATH`, tell the SDK where it is
+with the `CLEMENTINA_EMULATOR` environment variable or the `--emulator`
+option.
 
-(put the line in your shell's startup file to keep it). The rest of the book
-writes the command as `clementina`.
+### cc65
 
-The CLI can also be built as a single executable that needs no Node.js. With
-[Bun](https://bun.sh) installed, `npm run build:binaries` writes one for
-every platform to `dist/bin/` (`clementina-linux-x64`, `clementina-darwin-arm64`,
-`clementina-windows-x64.exe` and so on). Rename yours to `clementina` and put
-it on your `PATH`. Releases will attach these executables, so this will be
-the usual way to install the CLI. macOS may quarantine a downloaded one;
-`xattr -d com.apple.quarantine clementina` clears that.
-
-After pulling new SDK commits, run `npm run build` again.
-
-## cc65
-
-Install cc65 with your system's package manager (`apt install cc65` on
-Debian and Ubuntu, `brew install cc65` on macOS), or from
+Install cc65 with your system's package manager (`brew install cc65` on
+macOS, `apt install cc65` on Debian and Ubuntu), or from
 [cc65.github.io](https://cc65.github.io) on Windows. The SDK runs `ca65`,
-`ld65` and `ar65` from your `PATH`. BASIC projects don't need it.
+`ld65` and `ar65` from your `PATH` whenever a project has assembly.
 
-## The emulator
+### Studio
 
-```text
-$ cd clementina-6502
-$ go build -o build/bin/clementina-emulator ./cmd
-$ go build -o build/bin/clementina-automation ./cmd/clementina-automation
-```
-
-This makes two programs in `build/bin/`:
-
-- `clementina-emulator`, the interactive emulator: a terminal debugger, the video and
-  input services for the video client, sound, and the SD card. You use it to
-  play your game.
-- `clementina-automation`, the headless emulator: no terminal, no video
-  service, no sound, controlled through a local HTTP endpoint. `clementina
-  run`, the debugger, the agent workflows and the MCP server start it.
-
-Put `build/bin` on your `PATH`, or tell the SDK where
-`clementina-automation` is with the `CLEMENTINA_EMULATOR` environment
-variable or the `--emulator` option.
-
-On Linux the emulator's sound needs a C compiler and the ALSA headers
-(`libasound2-dev` on Debian, Ubuntu and Raspberry Pi OS); without them the
-build fails. To build it without sound, put `CGO_ENABLED=0` before
-`go build`: it then runs silently. macOS and Windows need nothing extra.
-
-The emulator's own documentation calls the interactive emulator
-`clementina`, the name `make build` gives it. That is also the SDK's
-command, so this book builds it as `clementina-emulator` instead, and
-writes it that way throughout.
-
-The emulator's published releases (v0.3.0 and older) predate the Clementina
-model and only emulate Ben Eater's computer, so build it from source.
-
-## The video client
+Open the `.dmg` and drag Clementina Studio to Applications on macOS, run
+the `.AppImage` on Linux, or run the installer on Windows. Studio isn't
+signed either: on macOS clear the quarantine flag once,
 
 ```text
-$ cd clementina-video-client
-$ go build -o clementina-video-client ./cmd/clementina-video-client
+$ xattr -d com.apple.quarantine "/Applications/Clementina Studio.app"
 ```
 
-The client draws with [Ebitengine](https://ebitengine.org); on Linux that
-needs the X11 and OpenGL development packages Ebitengine's install guide
-lists. `go run ./cmd/clementina-video-client` builds and starts it in one
-step.
+and on Windows choose **More info** and then **Run anyway** when SmartScreen
+warns about it.
 
-The same repository has `clementina-render`, which turns a snapshot of MIA's
-video state into a PNG. The agent workflows use it to show what a game drew:
-
-```text
-$ go build -o clementina-render ./cmd/clementina-render
-```
-
-## Studio
-
-Studio is an Electron application. Build the SDK first, since Studio uses
-its packages from the checkout next to it:
-
-```text
-$ cd clementina-studio
-$ npm ci
-$ npm start
-```
-
-`npm start` builds Studio and opens it. Run it again after pulling new
-commits of Studio or the SDK.
+Studio runs and previews projects with `clementina-automation` and
+`clementina-render`, which it finds on your `PATH`. If you keep them
+elsewhere, it lets you choose each one yourself.
 
 ## The VS Code extension
 
-The extension is not on the Marketplace yet. With the SDK built:
+Download the `.vsix` from the SDK release and install it:
 
 ```text
-$ cd clementina-sdk/packages/vscode-extension
-$ npm run package
-$ code --install-extension clementina-*.vsix
+$ code --install-extension clementina-0.3.0-alpha.1.vsix
 ```
 
-`npm run package` bundles the extension with the SDK's debug adapter and
-BASIC language server, so it needs nothing else from the SDK; debugging still
-needs the emulator. Package it again after pulling new SDK commits, and add
-`--force` to `code --install-extension` to replace the one installed.
+or use **Extensions: Install from VSIX…** in VS Code's command palette. The
+extension isn't on the Marketplace, which doesn't take prerelease
+versions. It carries its own copy of the SDK's debugger and BASIC language
+server, so it needs nothing else from the SDK; debugging still needs the
+emulator. To update it, install the newer `.vsix` the same way.
 
-To work on the extension itself instead, open `packages/vscode-extension` in
-VS Code and press `F5`, which starts a second VS Code window with the
-extension loaded.
+The extension covers both languages. `.bas` files get BASIC
+highlighting and the language server, and `.s` and `.inc` files get
+Clementina Assembly highlighting (65C02 and ca65). You can set breakpoints
+from the gutter in both, so you don't need a third-party assembly extension.
+
+## The MCP server
+
+The MCP server, which lets an AI agent use the SDK, is part of the
+`clementina` command. An agent host starts it with:
+
+```text
+clementina mcp
+```
+
+[Automation and AI agents](../running/automation.md#the-mcp-server) shows how to add it to a host.
 
 ## Checking the installation
 
-`clementina doctor` checks Node.js and looks for each external tool:
+`clementina doctor` prints its own version, then looks for each external
+tool:
 
 ```text
 $ clementina doctor
-Node.js 22.22.0; ca65: ready, ld65: ready, ar65: ready, emulator: ready.
+clementina 0.3.0-alpha.1
+ca65: ready, /opt/homebrew/bin/ca65 (ca65 V2.19)
+ld65: ready, /opt/homebrew/bin/ld65 (ld65 V2.19)
+ar65: ready, /opt/homebrew/bin/ar65 (ar65 V2.19)
+emulator: ready, /Users/you/.local/bin/clementina-automation (clementina-automation v0.4.0-alpha.1 (commit abc1234))
 ```
 
 A missing tool is a warning, and `doctor` still succeeds, because a BASIC
