@@ -1,20 +1,29 @@
-# Your first assembly program
+# A program that is all assembly
 
-An assembly program is built by ca65 and ld65 into a PRG file, which BASIC's
-`BRUN` loads and starts. This chapter starts from the SDK's assembly
-template and makes it print a line.
+A program without BASIC is assembly code that takes over the machine: BASIC's
+`BRUN` loads it and jumps to it, and it never returns. This chapter starts
+from `clementina new` again, as [the previous chapter](first-basic.md) did,
+and turns the project into one that prints a line.
 
 ## Make the project
 
-```text
-$ clementina new ~/games/hello --template assembly --name "Hello"
-Created /home/you/games/hello from the assembly template.
+Start a new project and remove the BASIC part:
+
+```sh
+clementina new ~/games/hello --name "Hello"
 ```
 
-The folder holds `clementina.yaml`, `src/main.s`, `link.cfg` and
-`checks/code.json`. The project has no BASIC program, so the manifest has
-no `program` section, and its `build` section has `assembly` instead of
-`basic`:
+```text
+Created /home/you/games/hello.
+```
+
+```sh
+cd ~/games/hello
+rm src/main.cbas src/hello.s checks/smoke.json
+```
+
+In `clementina.yaml`, remove `program` and `build.basic`, and point
+`build.assembly` at a new source with a new entry symbol:
 
 ```yaml
 build:
@@ -23,56 +32,31 @@ build:
     sources:
       - src/main.s
     linkerConfig: link.cfg
-    outputName: game
-    loadAddress: 6144
+    outputName: code
+    loadAddress: 28672 # $7000
     entrySymbol: game_start
+  video:
+    paletteConfigId: palette-config:main
 ```
 
-- `sources` lists the assembly files, assembled in order and linked into
-  one program.
-- `linkerConfig` is ld65's configuration file, which places the program in
-  memory.
-- `loadAddress` is where the program loads, 6144 (`$1800`). The SDK does not
-  choose it: it checks that what ld65 linked really starts there.
-- `entrySymbol` is the label where the program starts. The source must
-  `.export` it.
+With no `program.entry`, the build starts the code at `entrySymbol` instead
+of a BASIC program. `link.cfg` stays as it is.
 
-## The linker configuration
+## Where the code goes
 
-`link.cfg` puts the program in one block of RAM from `$1800` to `$7FFF`,
-and its zero-page variables in `$98-$DF`:
-
-```text
-MEMORY {
-  ZP: start=$98, size=$48, type=rw;
-  RAM: start=$1800, size=$6800, type=rw, file=%O;
-}
-SEGMENTS {
-  ZEROPAGE: load=ZP, type=zp;
-  CODE: load=RAM, type=ro;
-  RODATA: load=RAM, type=ro;
-  DATA: load=RAM, type=rw;
-  BSS: load=RAM, type=bss, define=yes;
-}
-```
-
-These are the segments [the Clementina library](../building/runtime.md)
-uses, so the program can call it without changing the file.
-
-`$1800` is where the SDK's templates put programs, and the reason matters.
-Clementina has no ROM: at power-on MIA copies the kernel, WozMon and BASIC
-into RAM from `$0400` up to about `$63A0`, and BASIC's own workspace starts
-there. `BRUN` runs from the kernel, which ends below `$1600`, and may
-overwrite anything above it. A program at `$1800` therefore loads over BASIC
-itself. That is what a game wants (the whole machine, BASIC's memory
-included), but it means the program can never return to BASIC. *Mapping
-Clementina* has the details: [The resident
+`BRUN` runs from the kernel, which ends below `$1600`, and the program may
+use anything above it. Clementina has no ROM: at power-on MIA copies the
+kernel, WozMon and BASIC into RAM from `$0400` up to about `$63A0`, and
+BASIC's own workspace follows. A program that takes over can load over all
+of that, so it can never return to BASIC. To give it more room, lower
+`RAM`'s start in `link.cfg` and `loadAddress` together, down to `$1800`.
+*Mapping Clementina* has the details: [The resident
 image](../../../mapping/src/cpu/image.md) and [BASIC's
 workspace](../../../mapping/src/cpu/basic-workspace.md#where-machine-code-can-go).
 
 ## The program
 
-Replace `src/main.s` with this:
+Write `src/main.s`:
 
 ```asm
 ; Hello: print a line through the kernel, then keep the machine.
@@ -104,31 +88,20 @@ page, the VIA, and every MIA register, command and memory layout
 
 ## Build
 
-```text
-$ cd ~/games/hello
-$ clementina build
-Built build/game.prg and build/load-plan.json. SD card: ..
+```sh
+clementina build
 ```
 
-The build runs ca65 on every source, links with ld65, checks the result
-against `loadAddress`, and writes:
+```text
+Built the SD card in build/sd. Start it with RUN "BOOT.BAS".
+```
 
-| File | What it is |
-| --- | --- |
-| `build/game.prg` | The program: a 2-byte load address, then the code. `BRUN` loads it. |
-| `build/game.bin` | The same code without the header. |
-| `build/game.dbg`, `.lbl`, `.map` | ld65's debug information, labels and memory map. The debugger reads the first. |
-| `build/000-main.o`, `.lst` | ca65's object file and listing, one pair per source. |
-| `build/include/` | `clementina.inc` and `mia.inc`. |
-| `build/lib/` | The Clementina library, which every program with assembly links. |
-| `build/bootstrap.bas` | The BASIC line that starts the program, as text. |
-| `build/load-plan.json` | The same steps as data. |
-| `build/memory-layout.json` | Where each part sits in CPU memory and MIA RAM. |
-
-The bootstrap is one line:
+The output is the same as the previous chapter's, without `GAME.BAS`. The
+bootstrap, `build/boot.cbas`, now ends with `BRUN`:
 
 ```basic
-10 BANK 0:BRUN "build/game.prg"
+10 MIALOAD "asset-palette.bin",256
+20 BANK 0:BRUN "CODE.PRG"
 ```
 
 `BANK 0` makes sure a load into `$8000-$BFFF` would go to bank 0. `BRUN`
@@ -136,19 +109,18 @@ loads the PRG at the address in its header and jumps to its first byte.
 
 ## Run it
 
-As with BASIC, start the emulator with the project folder as its card, and
-the video client:
+As before, start the emulator with `build/sd` as its card, and the video
+client:
 
-```text
-$ clementina-emulator --sd ~/games/hello
-$ clementina-video-client
+```sh
+clementina-emulator --sd ~/games/hello/build/sd
+clementina-video-client
 ```
 
-Then type the bootstrap line and `RUN`, or just the command without a line
-number:
+Then start it:
 
 ```basic
-BANK 0:BRUN "build/game.prg"
+RUN "BOOT.BAS"
 ```
 
 The program prints `HELLO FROM ASSEMBLY` and keeps the machine. To get BASIC
@@ -157,14 +129,13 @@ Reset, and a reset makes MIA load the kernel and BASIC into RAM again.
 
 ## Check it
 
-`checks/code.json` says which bytes of memory the program should have
-written:
+Write `checks/code.json` with the byte the program writes:
 
 ```json
 {
   "format": "clementina-code-check",
   "version": 1,
-  "settleCycles": 500000,
+  "settleCycles": 3000000,
   "memory": [{"address": 512, "bytes": [42]}]
 }
 ```
@@ -172,12 +143,20 @@ written:
 `clementina check` builds the program, runs it headless for `settleCycles`
 cycles, and compares memory:
 
+```sh
+clementina check
+```
+
 ```text
-$ clementina check
 Checks passed for /home/you/games/hello.
-CPU: PC=$...., cycles=...
+CPU: PC=$7012, cycles=7002307
 Screen:
-  ...
+             CLEMENTINA V1.0 BASIC V2
+               2026 PACHISOFT
+               1977 MICROSOFT BASIC
+  READY.
+  RUN "BOOT.BAS"
+  HELLO FROM ASSEMBLY
 Report: /home/you/games/hello/build/inspection/report.json
 ```
 

@@ -8,9 +8,9 @@ board, and the one this book uses throughout.
 
 ## Starting it
 
-```text
-$ clementina-emulator --sd ~/games/catch
-$ clementina-video-client
+```sh
+clementina-emulator --sd ~/games/catch/build/sd
+clementina-video-client
 ```
 
 Start each in its own terminal. The emulator's terminal shows its debugger.
@@ -22,15 +22,12 @@ other with no options, and either can start first.
 ## The SD card
 
 `--sd` mounts a folder of your computer as MIA's SD card. Without it the
-slot is empty. Which folder to give it:
-
-| Project | Folder |
-| --- | --- |
-| BASIC, assembly, or both, without assets | The project folder: the load plan's paths start with `build/`. |
-| Assembly with assets | `build/sd`, which holds `BOOT.BAS`, the program and `ASSETS/`. |
+slot is empty. For a project, give it `build/sd`, the card folder every
+build writes, then type `RUN "BOOT.BAS"` ([How a program reaches the
+machine](../building/loading.md)).
 
 The emulator reads and writes the folder directly, so a `clementina build`
-in another terminal changes the card at once: load the program again and
+in another terminal changes the card at once: type `RUN "BOOT.BAS"` again and
 the new build runs. `SAVE` and the other BASIC file statements write into
 the folder too.
 
@@ -49,8 +46,8 @@ Clementina, except the client's own keys:
 | Ctrl+M | Switches between normal and control mode. |
 | F1 | Back to normal mode from control mode. |
 
-Pasting is the quick way to enter a load plan: copy its lines, paste them,
-and they arrive as if typed. Only printable ASCII is sent, and a line break
+Pasting is the quick way to enter a program or a long line: copy its lines,
+paste them, and they arrive as if typed. Only printable ASCII is sent, and a line break
 is Return.
 
 In control mode, Escape quits, F11 toggles full screen, F3 shows the
@@ -112,9 +109,8 @@ Code](debugging.md)).
 ## Sound
 
 The emulator plays MIA's four voices through your computer's sound output.
-On Linux that needs the ALSA headers when the emulator is built
-([Installing](../start/installing.md#the-command-line-tools)); built with
-`CGO_ENABLED=0` instead, it runs silently.
+On Linux that needs the ALSA library
+([Installing](../start/installing.md#what-it-installs)).
 
 ## MIA's console
 
@@ -123,9 +119,9 @@ On the board, MIA has a USB console with commands to inspect and control it
 MIA's console to a serial port. Without hardware, `socat` makes a pair of
 linked virtual ports:
 
-```text
-$ socat -d -d pty,raw,echo=0,link=/tmp/ttyComputer pty,raw,echo=0,link=/tmp/ttyTerminal
-$ clementina-emulator --sd ~/games/catch -p /tmp/ttyComputer
+```sh
+socat -d -d pty,raw,echo=0,link=/tmp/ttyComputer pty,raw,echo=0,link=/tmp/ttyTerminal
+clementina-emulator --sd ~/games/catch/build/sd -p /tmp/ttyComputer
 ```
 
 Then open `/tmp/ttyTerminal` with any terminal program, at 115200 baud. The
@@ -156,8 +152,11 @@ service, no sound and no serial port. It is controlled through an HTTP
 endpoint on your computer, and it is what `clementina run`, the VS Code
 debugger, the agent workflows and the MCP server start.
 
+```sh
+clementina run
+```
+
 ```text
-$ clementina run
 Running at http://127.0.0.1:38695/v1. Press Ctrl-C to stop.
 ```
 

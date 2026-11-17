@@ -6,8 +6,8 @@
 
 - [The toolchain at a glance](start/toolchain.md)
 - [Installing](start/installing.md)
-- [Your first BASIC program](start/first-basic.md)
-- [Your first assembly program](start/first-assembly.md)
+- [Your first project](start/first-basic.md)
+- [A program that is all assembly](start/first-assembly.md)
 
 # Part II: Projects and assets
 

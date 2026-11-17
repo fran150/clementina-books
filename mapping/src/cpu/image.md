@@ -49,8 +49,7 @@ so the region's spare bytes don't go to waste.
 
 The boundary matters to programs that replace BASIC. `KERN_LOAD`, the loader
 behind `BLOAD` and `BRUN`, runs from the kernel, so a file may overwrite
-anything from `$1600` up, BASIC included, but nothing below it. The SDK's
-templates load programs at `$1800`.
+anything from `$1600` up, BASIC included, but nothing below it.
 
 ## `DIR_NAME_BUF`
 

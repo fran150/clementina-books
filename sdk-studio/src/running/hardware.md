@@ -9,19 +9,14 @@ something goes wrong.
 The build's output is what the card needs. Nothing else has to change.
 
 1. Use a FAT32 card, as for any Clementina program.
-2. Copy the files:
-   - without an asset build: the project's `build` folder, keeping its name;
-   - with an asset build (`build.assets`): the **contents** of `build/sd`,
-     into any folder of the card.
+2. Copy the **contents** of `build/sd` into any folder of the card.
 3. Put the card in MIA's slot and power on.
 4. Connect the video client to MIA, as in the *User's Manual*,
    [The Clementina board](../../../users-manual/src/setup/board.md).
-5. In BASIC, change to the project's folder and type the load plan, as in the
-   emulator: `LOAD "BOOT.BAS"` and `RUN` for an asset build. When the project
-   has a BASIC program, the bootstrap ends by loading it, so type `RUN` a
-   second time to start it.
+5. In BASIC, change to that folder and type `RUN "BOOT.BAS"`, as in the
+   emulator.
 
-FAT doesn't care about case, so `boot.bas` finds `BOOT.BAS` on the card, as
+FAT doesn't care about case, so `RUN "boot.bas"` finds `BOOT.BAS` on the card, as
 it wouldn't in the emulator on Linux. Long file names work. Keep names to
 plain ASCII.
 
@@ -95,8 +90,8 @@ kind a broken interrupt handler causes. That costs the bus loop a little
 time, so the normal firmware leaves it out. Build and flash the
 diagnostic firmware from the MIA repository:
 
-```text
-$ make flash-diag
+```sh
+make flash-diag
 ```
 
 Run the program until it fails, then type `trace` on the console. It lists

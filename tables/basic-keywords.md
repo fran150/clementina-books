@@ -13,7 +13,7 @@
 | `READ` | statement | `READ variable[,variable...]` | Assigns the next DATA items, in program order, to the listed variables. |
 | `LET` | statement | `[LET] variable=expression` | Assigns an expression to a variable; the word LET is optional. Assigning TI sets the 60 Hz clock. |
 | `GOTO` | statement | `GOTO line` | Jumps to the given line number. |
-| `RUN` | statement | `RUN [line]` | Clears variables, arrays, strings, the DATA pointer and the FOR/GOSUB stack, then runs the program from its start or from the given line. |
+| `RUN` | statement | `RUN [line]`, `RUN path` | Clears variables, arrays, strings, the DATA pointer and the FOR/GOSUB stack, then runs the program from its start or from the given line. With a path, first loads that program from the SD card, keeping the memory top; works inside a program too. |
 | `IF` | statement | `IF condition THEN line\|statement \| IF condition GOTO line` | Tests a condition: when true it jumps to a line or runs the rest of the line, otherwise it continues with the next line. |
 | `RESTORE` | statement | `RESTORE` | Resets the DATA pointer so the next READ starts at the first DATA item; it takes no line number (RESTORE 10 is a SYNTAX ERROR). |
 | `GOSUB` | statement | `GOSUB line` | Calls the subroutine at the given line; RETURN resumes after the GOSUB. Nesting too deep gives OUT OF MEMORY. |

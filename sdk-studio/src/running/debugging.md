@@ -2,7 +2,7 @@
 
 The Clementina extension ([Installing](../start/installing.md#the-vs-code-extension))
 debugs a project in the headless emulator, by source line: breakpoints in
-your `.s` or `.bas` files, stepping, the CPU's registers, and for BASIC the
+your `.s` or `.cbas` files, stepping, the CPU's registers, and for BASIC the
 program's variables. This chapter shows how to start a session and what each
 part of VS Code's debugger shows.
 
@@ -124,8 +124,8 @@ listens on a local endpoint, and anything that speaks its protocol can type
 into it. Give the configuration a fixed `port`, say 47000, then from a
 terminal:
 
-```text
-$ curl -s http://127.0.0.1:47000/v1 -d '{"version":1,"method":"input","data":[65]}'
+```sh
+curl -s http://127.0.0.1:47000/v1 -d '{"version":1,"method":"input","data":[65]}'
 ```
 
 types `A` (65). `data` is a list of up to 64 bytes. Appendix E lists the

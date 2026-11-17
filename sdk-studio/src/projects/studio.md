@@ -14,7 +14,7 @@ Studio can keep a project in two kinds of file:
 - **A `.cstudio` file**: Studio's own single-file format, holding every
   asset in one JSON document. It suits sketching before there is a project.
 
-To work on an SDK project, make the project with the SDK first (a template,
+To work on an SDK project, make the project with the SDK first (`clementina new`,
 as in Part I), then open it in Studio:
 
 1. **File ▸ Open Project…** (Ctrl/Cmd+O) and choose the project's
@@ -46,8 +46,8 @@ project.
 
 To turn a `.cstudio` sketch into a project folder, import it with the SDK:
 
-```text
-$ clementina project import sketch.cstudio my-game --name "My Game"
+```sh
+clementina project import sketch.cstudio my-game --name "My Game"
 ```
 
 This writes a new project with assembly: each asset in its own file under

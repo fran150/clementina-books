@@ -12,10 +12,13 @@ an AI agent the same tools.
 Every command takes `--json` and then prints one JSON object on standard
 output, and nothing else:
 
+```sh
+clementina build --json
+```
+
 ```text
-$ clementina build --json
 {"version":1,"ok":true,"diagnostics":[],"exitCode":0,
- "message":"Built build/game.prg and build/load-plan.json. ...",
+ "message":"Built the SD card in build/sd. Start it with RUN \"BOOT.BAS\".",
  "data":{"sdRoot":"...","loadPlan":"...","bootstrap":"...","memoryLayout":"...",
          "assembly":{"prg":"...","entryAddress":6144}}}
 ```
@@ -50,9 +53,9 @@ keys to type.
 ```json
 {
   "settleCycles": 3000000,
-  "beforeText": "PRESS A TO CATCH IT",
+  "beforeText": "HELLO FROM ASSEMBLY",
   "input": "A",
-  "afterText": "CAUGHT! SCORE 1"
+  "afterText": "YOU PRESSED A"
 }
 ```
 
@@ -88,7 +91,7 @@ the board: the headless emulator runs as fast as your computer allows.
 
 | Command | Does |
 | --- | --- |
-| `clementina new DIR [--template basic\|assembly] [--name NAME]` | Makes a project from a template. |
+| `clementina new DIR [--name NAME]` | Makes a project with a BASIC program and an assembly routine it calls. |
 | `clementina check [DIR]` | Validates, builds, runs, and checks everything in `checks/`. |
 | `clementina debug [DIR] --line N [--source FILE] [--memory ADDR:COUNT]` | Stops at a source line and records what it finds. |
 
@@ -114,14 +117,17 @@ A video snapshot is MIA's video memory, not a picture: tables, tiles,
 sprites, palettes and the registers. `clementina-render` composes it the way
 the video client would. To draw any snapshot, pass it to the renderer:
 
-```text
-$ clementina-render build/inspection/debug.video.bin > frame.png
+```sh
+clementina-render build/inspection/debug.video.bin > frame.png
 ```
 
 ### Stopping at a line
 
+```sh
+clementina debug ~/games/walker --line 61 --memory 640:4
+```
+
 ```text
-$ clementina debug ~/games/walker --line 61 --memory 640:4
 Stopped at clementina-lib.inc:… (PC=$....).
 Memory $0280: .. .. .. ..
 Report: .../build/inspection/debug-report.json
@@ -138,12 +144,18 @@ Underneath all of this is the headless emulator's endpoint: HTTP POST
 requests to `/v1` on your own computer, each a JSON object with a `version`
 and a `method`.
 
+```sh
+clementina-automation -sd ~/games/catch -port 47000
+```
+
 ```text
-$ clementina-automation -sd ~/games/catch -port 47000
 http://127.0.0.1:47000/v1
-$ curl -s http://127.0.0.1:47000/v1 -d '{"version":1,"method":"run"}'
-$ curl -s http://127.0.0.1:47000/v1 -d '{"version":1,"method":"input","data":[65]}'
-$ curl -s http://127.0.0.1:47000/v1 -d '{"version":1,"method":"readMemory","address":512,"count":4}'
+```
+
+```sh
+curl -s http://127.0.0.1:47000/v1 -d '{"version":1,"method":"run"}'
+curl -s http://127.0.0.1:47000/v1 -d '{"version":1,"method":"input","data":[65]}'
+curl -s http://127.0.0.1:47000/v1 -d '{"version":1,"method":"readMemory","address":512,"count":4}'
 ```
 
 The methods:
@@ -162,7 +174,7 @@ Appendix E lists every method, its arguments and its limits. The endpoint
 has no authentication. It accepts only requests from your own computer and
 refuses requests from web pages.
 
-`clementina run` starts the emulator, types the load plan into it, and
+`clementina run` starts the emulator, types `RUN "BOOT.BAS"` into it, and
 prints the endpoint, so a script can take over from there. The SDK's
 `@clementina/emulator-client` package is a JavaScript client for the same
 protocol, for scripts written in JavaScript.
@@ -177,7 +189,7 @@ The SDK's MCP server offers the SDK:
 | `project_validate` | Validates the project. |
 | `asset_validate` | Validates one asset. |
 | `project_build` | Builds it; returns the files and the load plan. |
-| `emulator_launch` | Builds, starts the headless emulator and runs the load plan. |
+| `emulator_launch` | Builds, starts the headless emulator and types `RUN "BOOT.BAS"`. |
 | `emulator_state`, `emulator_control`, `emulator_step` | Reads the state; pauses, resumes or resets; runs some cycles. |
 | `emulator_input` | Types text. |
 | `emulator_read_memory` | Reads CPU memory. |

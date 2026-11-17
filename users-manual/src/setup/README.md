@@ -32,11 +32,7 @@ your keyboard, mouse and gamepads. Pick a path, follow its section, then read
 - A computer to copy MIA's firmware to the Pico once (it can be the same
   one).
 
-Everything you install comes from the **Releases** page of its GitHub
-repository, which the next two sections walk through.
-
-| Repository | What it is |
-| --- | --- |
-| [clementina-6502](https://github.com/fran150/clementina-6502) | The emulator |
-| [clementina-video-client](https://github.com/fran150/clementina-video-client) | The video client |
-| [clementina-mia](https://github.com/fran150/clementina-mia) | MIA's firmware, with the kernel and BASIC inside |
+One command installs the emulator and the video client ([The
+emulator](emulator.md#get-the-emulator-and-the-video-client)). MIA's
+firmware for the board is a file you download ([The Clementina
+board](board.md)).

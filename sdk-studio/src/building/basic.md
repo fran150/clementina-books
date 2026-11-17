@@ -9,8 +9,10 @@ graphics, and the editor support. The language itself is in the
 
 ## The source file
 
-`program.entry` names one `.bas` file; a BASIC program is one file. The
-rules are BASIC's own:
+`program.entry` names one `.cbas` file; a BASIC program is one file. The
+source is text, so it gets its own extension: `.BAS` is for tokenized
+programs, the binary files that `SAVE` writes and `LOAD` reads. The rules
+are BASIC's own:
 
 - Every line starts with a line number, 0 to 63999.
 - A line is at most 80 characters, line number included.
@@ -37,7 +39,7 @@ program builds them at run time instead.
 ## What the build makes
 
 `build.basic.outputName` names the output: `game` makes
-`build/game.bas`. `build.basic.memoryTop`, optional, lowers BASIC's top of
+`GAME.BAS` in the card folder, `build/sd`. `build.basic.memoryTop`, optional, lowers BASIC's top of
 memory to leave room for assembly ([Code that returns to
 BASIC](assembly.md#code-that-returns-to-basic)). The file is exactly what `SAVE` writes: the program's
 lines from the start of BASIC's program area to the start of its variables,
@@ -50,15 +52,17 @@ file must therefore go through `LOAD` before it runs.
 
 `clementina basic compile` does the same for any file, outside a project:
 
-```text
-$ clementina basic compile src/hello.bas build/HELLO.BAS
-Compiled src/hello.bas to build/HELLO.BAS (22 bytes).
+```sh
+clementina basic compile src/hello.cbas build/HELLO.BAS
 ```
 
-Copy the result to a card and `LOAD "HELLO.BAS"`. Never write the output
-over the source: the compiled file is binary. On macOS and Windows, where
-file names ignore case, `hello.bas` and `HELLO.BAS` in the same folder are
-the same file, so keep them in different folders.
+```text
+Compiled src/hello.cbas to build/HELLO.BAS (22 bytes).
+```
+
+Copy the result to a card and `LOAD "HELLO.BAS"`. The `.cbas` source and
+the tokenized `.BAS` file have different names, so the compiled file never
+replaces the source, even on macOS and Windows, where file names ignore case.
 
 ## Graphics in a BASIC program
 
@@ -110,7 +114,7 @@ BASIC](assembly.md#code-that-returns-to-basic).
 ## Editing BASIC in VS Code
 
 The Clementina extension ([Installing](../start/installing.md#the-vs-code-extension))
-recognizes `.bas` files as Clementina BASIC and runs the SDK's BASIC
+recognizes `.cbas` files as Clementina BASIC and runs the SDK's BASIC
 language server. It knows the ROM's exact keyword tables, so what it reports
 is what the machine would do:
 

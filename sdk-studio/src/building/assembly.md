@@ -4,8 +4,8 @@ A project's assembly is ca65 code. The SDK runs ca65 on each source and
 ld65 on the result, then checks the linked
 program against what the manifest says and writes the PRG and its load
 plan. This chapter covers the build settings, the linker configuration, the
-include files the SDK provides, and the rules a program that owns the
-machine lives by.
+include files the SDK provides, the rules a program that owns the
+machine lives by, and the editor support.
 
 ## The build settings
 
@@ -132,7 +132,7 @@ subject of the *Programmer's Reference Guide*, Part III.
 
 | File | What it is |
 | --- | --- |
-| `NAME.prg` | The program, with its 2-byte load address. |
+| `NAME.prg` | The program, with its 2-byte load address. The card folder, `sd/`, gets a copy as `NAME.PRG`. |
 | `NAME.bin` | The same bytes without the header. |
 | `NAME.dbg` | ld65's debug information: every source line's address. The debugger reads it. |
 | `NAME.lbl` | Every label and its address, in VICE's label format. |
@@ -140,7 +140,7 @@ subject of the *Programmer's Reference Guide*, Part III.
 | `NNN-source.o`, `.lst` | ca65's object and listing for each source, numbered in link order. |
 | `include/` | `clementina.inc` and `mia.inc`. |
 | `lib/` | [The Clementina library](runtime.md): `clementina-lib.inc`, `clementina.lib`, and `code-sizes.json`. |
-| `bootstrap.bas`, `load-plan.json` | How to load it ([How a program reaches the machine](loading.md)). |
+| `boot.cbas`, `load-plan.json` | How to load it; `sd/BOOT.BAS` is the same bootstrap, tokenized ([How a program reaches the machine](loading.md)). |
 
 The `.lst` listings show each source line with the bytes it assembled to,
 the quickest way to see what a macro became.
@@ -230,7 +230,7 @@ bank 0, set `build.basic.memoryTop`:
 
 ```yaml
 program:
-  entry: src/main.bas
+  entry: src/main.cbas
 build:
   outputDirectory: build
   basic:
@@ -254,3 +254,52 @@ at the bottom of its area, so code at `$1800` still lands on it.
 The build checks none of this for you. It writes `memory-layout.json`, a
 map of every part, and warns when two overlap, but it never stops on an
 overlap: where each part goes is your decision.
+
+## Editing assembly in VS Code
+
+The Clementina extension ([Installing](../start/installing.md#the-vs-code-extension))
+opens `.s` and `.inc` files as Clementina Assembly and runs the SDK's
+assembly language server. It reads the project the way a build does, with
+the Clementina library included:
+
+- **Errors as you type.** The extension runs ca65 on the file you are
+  editing, saved or not, with the include directories and defines from
+  `clementina.yaml`, and shows its errors and warnings on their lines. An
+  error in an included file shows in that file. A word that isn't an
+  instruction or a macro is named as such, where ca65 would only say `':'
+  expected`. The checks need cc65, which `clementina install` installs.
+- **Hover** on an instruction shows what it does, the flags it changes and
+  each addressing mode with its opcode, size and cycles, with the mode your
+  line uses in bold. On a directive it shows the syntax. On a symbol it shows
+  the line that defines it, its value (`SCORE = $0280` shows `$0280 (640)`),
+  a structure field's offset, and the comment above it or after it, so the
+  library's macros explain themselves. After a build, a label also shows
+  its address.
+- **Completion** of instructions and macros where an instruction goes, of
+  labels, constants and library symbols in an operand (the current `.proc`'s
+  own labels first), of cheap locals after `@`, and of directives after `.`.
+- **Signature help** while typing a macro's arguments, such as `DrawShape`'s.
+- **Go to definition** and **Find All References** across the project and
+  the library: labels, `.proc` names and the labels inside them
+  (`start::loop`), cheap locals, constants, macros, structure fields and
+  unnamed labels (`:-`, `:+`). On an imported name it goes to the source
+  that exports it, and on a library macro it opens the library's source.
+  An `.include` file name is a link.
+- **Rename** a symbol everywhere it is used. The library's symbols can't be
+  renamed.
+- **The outline** lists procedures, structures and macros with what they
+  contain, and `.proc`, `.macro`, `.if` and long comments fold.
+
+Two settings change the checks. **Clementina › Assembly: Diagnostics**
+(`clementina.assembly.diagnostics`) runs ca65 as you type (`onType`), on
+save (`onSave`), or not at all (`off`). **Clementina › Assembly: Ca65 Path**
+(`clementina.assembly.ca65Path`) names another ca65; by default the
+extension uses the one `clementina install` installed, then the one on the
+`PATH`.
+
+Other editors can use the same server: it is `clementina-asm-lsp`, in the
+SDK's `packages/asm-lsp`, and it speaks the Language Server Protocol over
+standard input and output.
+
+[Debugging in VS Code](../running/debugging.md) covers breakpoints and
+stepping through assembly.

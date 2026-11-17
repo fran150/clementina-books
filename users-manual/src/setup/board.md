@@ -98,7 +98,7 @@ Now start the video client on any computer on the same network, giving it
 that address and the video port, 6502:
 
 ```bash
-./clementina-video-client --server 192.168.1.50:6502
+clementina-video-client --server 192.168.1.50:6502
 ```
 
 Clementina's blue screen and `READY.` appear in the window. The client finds

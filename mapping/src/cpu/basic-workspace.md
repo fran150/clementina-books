@@ -138,8 +138,7 @@ doesn't protect any region, and choosing a safe place is the programmer's job.
   ([Extended RAM](extended-ram.md)), or above a lowered `MEMSIZ`.
 - **Code that takes over the machine** (started with `BRUN`) may overwrite
   BASIC: anything from `$1600` up. Below `$1600` is the kernel, which holds
-  the loader itself, so a load there crashes in the middle of the copy. The
-  SDK's templates use `$1800`.
+  the loader itself, so a load there crashes in the middle of the copy.
 
 ## A known problem
 
