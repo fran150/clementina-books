@@ -6,18 +6,12 @@ message in `code` style is what the SDK prints; the code after `error` or
 
 ## Installing
 
-**`clementina build` starts the emulator, or `clementina --sd` says it
-doesn't know the command.** The SDK's command and the emulator's
-`make build` output are both called `clementina`. Build the emulator as
-`clementina-emulator` ([Installing](../start/installing.md#the-command-line-tools)).
+**`clementina doctor` warns that a tool is missing.** Open a new terminal
+so it picks up the `PATH` that `clementina install` set, or run
+`clementina install` again.
 
-**`clementina doctor` warns that `ca65` is missing.** cc65 isn't installed,
-or isn't on the `PATH`. Only a project with assembly (`build.assembly`)
-needs it.
-
-**The emulator won't build on Linux: `Package alsa was not found`.**
-Install the ALSA headers (`libasound2-dev`), or build with `CGO_ENABLED=0`
-for an emulator without sound.
+**The emulator has no sound on Linux.** Install the ALSA library
+(`libasound2` on Debian, Ubuntu and Raspberry Pi OS).
 
 **`clementina run` can't find the emulator.** Put `clementina-automation`
 on the `PATH`, set `CLEMENTINA_EMULATOR` to its path, or pass `--emulator`.
@@ -66,6 +60,16 @@ sequencer reads only MIA RAM: `Relocate` the song into MIA RAM before
 MIA keeps the SD card's own state. Something else in the plan has gone wrong;
 check the tileset banks.
 
+**VS Code says `ca65 was not found`, and assembly errors don't show as you
+type.** The extension looks for the ca65 that `clementina install`
+installed, then for one on the `PATH`. Run `clementina install cc65`, or
+set **Clementina › Assembly: Ca65 Path** to your ca65. Hover, completion and
+go to definition work without it.
+
+**VS Code shows `Cannot open include file 'assets.inc'`.** The asset build
+writes `assets.inc` into the output directory. Run `clementina build` once,
+and the error goes away.
+
 **An edit to `clementina.yaml` lost its comments.** Studio rewrote it when it
 saved. Keep notes elsewhere ([The project
 folder](../projects/project-folder.md#editing-the-manifest)).
@@ -86,10 +90,10 @@ mode, Ctrl+M or F1 goes back to normal mode.
 
 **`?FILE NOT FOUND` (or a load fails) in the emulator on Linux.** File names
 on the emulated card are case-sensitive. Type them as they are on disk:
-`BOOT.BAS`, not `boot.bas`.
+`RUN "BOOT.BAS"`, not `RUN "boot.bas"`.
 
 **The game's assets fail to load (`cl_error` 3).** The library loads from
-the current folder. Start the game from its own folder (`build/sd` in the
+the current folder. Start the game from its own folder (`--sd build/sd` in the
 emulator), and copy the contents of `build/sd`, not the folder, to the card.
 
 **An assembly program crashes when it ends.** A program at `$1800` has

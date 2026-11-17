@@ -16,20 +16,46 @@ steps, run in order:
 | `mia` | Loads a file into MIA RAM at an address. | `MIALOAD "path",address` |
 | `prg` | Loads a PRG file into CPU RAM; the last one also starts it. | `BANK n:BLOAD "path"`, or `BANK n:BRUN "path"` |
 | `memoryTop` | Lowers BASIC's top of memory, first. | `POKE 63,lo:POKE 64,hi:CLEAR` |
-| `basic` | Loads a tokenized BASIC program, last. | `LOAD "path"`, then `RUN` |
+| `basic` | Loads a tokenized BASIC program and runs it, last. | `RUN "path"` |
 
 The plan ends with exactly one *terminal* step, the one that starts the
 program: a `prg` step with a run address, or a `basic` step. Nothing after
 it could run, because the program takes over. Appendix B has the plan's
 format.
 
-Paths in the plan are relative to the folder that is the SD card when the
-plan runs. That folder is the project folder, except with an asset build, whose card
-is `build/sd`.
+Paths in the plan are relative to the SD card: the folder `build/sd`, which
+every build writes.
 
-The same plan drives everything that starts a program: `clementina run`, the
-debugger, the agent workflows, the MCP server and Studio type its commands
-into the emulator's BASIC, as you would.
+## The card folder and `BOOT.BAS`
+
+`build/sd` holds everything the machine needs, and nothing else:
+
+```text
+build/sd/
+├── BOOT.BAS            the load plan as a BASIC program, tokenized
+├── GAME.BAS            the BASIC program, tokenized
+├── CODE.PRG            the assembly code
+└── asset-palette.bin   the palette config, and any CHR banks
+```
+
+`BOOT.BAS` is the plan as a numbered BASIC program, the *bootstrap*. To start the project,
+make `build/sd` the card (the emulator's `--sd`, or its contents copied to a
+real card) and type:
+
+```basic
+RUN "BOOT.BAS"
+```
+
+`RUN "path"` loads a program and runs it. `BOOT.BAS` loads the files and then
+starts the program: its last line is either `RUN "GAME.BAS"`, which loads
+the BASIC program in its place and runs it, or `BRUN`, which starts the
+machine code. The build also writes the same program as text in
+`build/boot.cbas`, to read.
+
+`clementina run`, `clementina check` and the MCP server start a project the
+same way, by typing `RUN "BOOT.BAS"` into the emulator's BASIC. The
+debugger types the plan's steps directly instead, so the bootstrap's own
+line numbers can't stop at a breakpoint meant for the program's lines.
 
 ## Before the program: `build.video`
 
@@ -56,70 +82,54 @@ can use all eight.
 
 ## BASIC only
 
-For a BASIC program on its own the plan is typed directly, with no line numbers:
+For a BASIC program on its own, with a palette and a tileset, `boot.cbas` is:
 
 ```basic
-MIALOAD "build/asset-palette.bin",256
-MIALOAD "build/asset-chr-2.bin",12800
-LOAD "build/game.bas"
-RUN
+10 MIALOAD "asset-palette.bin",256
+20 MIALOAD "asset-chr-2.bin",12800
+30 RUN "GAME.BAS"
 ```
 
-`LOAD` replaces whatever program was in memory, so the loading can't be a
-BASIC program itself. In the emulator, with the project folder as the card,
-type these lines as they are. On a real card, copy the project's `build`
-folder to the card, keeping its name, and type the same lines from the
-folder that holds it.
-
-The build also writes the same steps as a numbered program,
-`build/bootstrap.bas`, whose last line is the `LOAD`. A `LOAD` ends at
-`READY.` even inside a program, so running the bootstrap leaves your program
-loaded, and a second `RUN` starts it. On a card, that is `LOAD` of the
-bootstrap, `RUN`, then `RUN` again.
-
+`RUN "GAME.BAS"` replaces the bootstrap with your program and starts it.
 A program that needs more than its palettes and tilesets loads the rest
 itself, with BASIC's statements
 ([Programming in BASIC with the SDK](basic.md)).
 
 ## Assembly only
 
-For assembly on its own the plan becomes a small numbered BASIC program, the
-*bootstrap*, written as text to `build/bootstrap.bas`:
+For assembly on its own the bootstrap ends with `BRUN`:
 
 ```basic
-10 MIALOAD "build/asset-palette.bin",256
-20 MIALOAD "build/asset-chr-2.bin",12800
-30 BANK 0:BRUN "build/game.prg"
+10 MIALOAD "asset-palette.bin",256
+20 MIALOAD "asset-chr-2.bin",12800
+30 BANK 0:BRUN "GAME.PRG"
 ```
 
-Type it (or just its last line, if there is nothing to load first) and
-`RUN`. The bootstrap can be a program because `BRUN` never returns: by the
-time BASIC would need it again, the game owns the machine.
+`BRUN` never returns: by the time BASIC would need the bootstrap again, the
+game owns the machine.
 
 ## BASIC and assembly
 
 A project with both parts loads the assembly first, without running it, and
 then the BASIC program, which calls it with `SYS`. With `memoryTop` set to
-`$A000` and the routines linked there, the plan is typed directly, as for a
-BASIC program:
+`$A000` and the routines linked there:
 
 ```basic
-POKE 63,0:POKE 64,160:CLEAR
-MIALOAD "build/asset-palette.bin",256
-BANK 0:BLOAD "build/routines.prg"
-LOAD "build/game.bas"
-RUN
+10 POKE 63,0:POKE 64,160:CLEAR
+20 MIALOAD "asset-palette.bin",256
+30 BANK 0:BLOAD "ROUTINES.PRG"
+40 RUN "GAME.BAS"
 ```
 
 The first line lowers BASIC's top of memory to `$A000`, so BASIC leaves
 `$A000-$BFFF` alone. Only a cold start resets it, so it survives `LOAD`,
-`RUN` and `CLEAR`. [Code that returns to
-BASIC](assembly.md#code-that-returns-to-basic) has the manifest.
+`RUN` and `CLEAR`, and the routines `BLOAD`ed there survive `RUN "GAME.BAS"`.
+[Code that returns to BASIC](assembly.md#code-that-returns-to-basic) has the
+manifest.
 
 ## With an asset build
 
-With `build.assets`, the build makes a complete SD card folder in
-`build/sd`:
+With `build.assets`, the card folder also holds every included asset:
 
 ```text
 build/sd/
@@ -134,21 +144,15 @@ build/sd/
     └── JUMP.SFX
 ```
 
-Copy the **contents** of `build/sd` to a folder on the card. On Clementina,
-change to that folder, then:
-
-```basic
-LOAD "BOOT.BAS"
-RUN
-```
-
-`BOOT.BAS` is already tokenized, so `LOAD` reads it directly. Its paths are
-relative to the current folder, so the game can live in any folder of the
-card. The bootstrap only starts the program; the game loads its assets
-itself, through the Clementina library, when it wants them
+The bootstrap only starts the program; the game loads its assets itself,
+through the Clementina library, when it wants them
 ([The asset build](asset-build.md)).
 
-In the emulator, start it with `--sd` pointing at `build/sd`.
+## On a real card
+
+Copy the **contents** of `build/sd` to a folder on the card. On Clementina,
+change to that folder, then `RUN "BOOT.BAS"`. Its paths are relative to the
+current folder, so the game can live in any folder of the card.
 
 ## Why `BRUN`
 

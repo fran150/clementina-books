@@ -14,8 +14,9 @@ what the build makes, and how to run, debug and test what it made.
 
 ## How the book is organized
 
-- **Part I** installs the tools and takes one BASIC program and one assembly
-  program from a template to the screen.
+- **Part I** installs the tools and takes a first project, a BASIC program
+  with an assembly routine, and then a program that is all assembly, to the
+  screen.
 - **Part II** covers the project: the `clementina.yaml` manifest, the asset
   files, and Studio's editors that make them.
 - **Part III** covers the build: how a program gets onto the machine, what
@@ -57,8 +58,11 @@ decimal when it saves a manifest.
 Commands you type in a terminal on your computer start with `$`, and what
 they print follows without it:
 
+```sh
+clementina project validate
+```
+
 ```text
-$ clementina project validate
 Validation passed.
 ```
 

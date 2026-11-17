@@ -117,7 +117,8 @@ See also: [RUN](r.md#run), [NEW](n.md#new),
 Replaces the program in memory with a program saved on the SD card by
 `SAVE`. All variables are cleared, as by `NEW`, and BASIC goes to `READY.`.
 This also happens when a running program uses `LOAD`: the new program is
-loaded, but it does not start until `RUN` is typed.
+loaded, but it does not start until `RUN` is typed. To load a program and
+start it at once, use `RUN` *path*.
 
 | Argument | Range | Meaning |
 | --- | --- | --- |
@@ -137,7 +138,9 @@ LIST
 
 A file that does not exist gives `?FILE I/O ERROR` and leaves the program in
 memory alone. A program too large for BASIC's memory also gives
-`?FILE I/O ERROR`. `LOAD` uses file number 16 itself, so leave it closed.
+`?FILE I/O ERROR`. `LOAD` keeps the top of BASIC's memory, so a memory top
+lowered with `POKE 63`, `POKE 64` and `CLEAR` stays lowered. `LOAD` uses file
+number 16 itself, so leave it closed.
 
 See also: [SAVE](s.md#save), [RUN](r.md#run), [BLOAD](b.md#bload),
 [Files and the SD card](../basic/files.md).

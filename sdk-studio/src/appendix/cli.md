@@ -8,6 +8,7 @@ Run without a command, or with `--help`, it prints this list.
 
 | Command | Does |
 | --- | --- |
+| `new FOLDER [--name NAME]` | Makes a project with a BASIC program and an assembly routine it calls ([Your first project](../start/first-basic.md)). The folder must be new or empty. The name defaults to the folder's. |
 | `project import SESSION FOLDER [--name NAME]` | Writes a new project, with assembly, from a Studio `.cstudio` session: its assets, its Builder settings as `build.assets`, and a starter `src/main.s` and `link.cfg`. Refuses to overwrite any file. |
 | `project validate [folder]` | Validates the manifest, every asset it lists, the references between them, and that the program's sources exist. The folder defaults to the current one. |
 | `asset validate FILE` | Validates one asset file of any kind against its format and its own rules. References to other assets aren't checked: use `project validate`. |
@@ -15,7 +16,12 @@ Run without a command, or with `--help`, it prints this list.
 | `animation validate FILE` | Validates an animation file. |
 | `basic compile SOURCE OUTPUT` | Compiles a numbered BASIC text file into the file `SAVE` writes. `OUTPUT` must not be `SOURCE`. |
 | `build [folder]` | Validates and builds the project. Writes only inside the build folder. |
-| `run [folder] [--emulator PATH] [--port N]` | Builds, starts the headless emulator with the right SD card, types the load plan, prints the endpoint and stays running until Ctrl-C. |
+| `run [folder] [--emulator PATH] [--port N]` | Builds, starts the headless emulator with `build/sd` as its SD card, types `RUN "BOOT.BAS"`, prints the endpoint and stays running until Ctrl-C. |
+| `check [folder] [--emulator PATH] [--renderer PATH]` | Builds, runs the project headless and tests `checks/smoke.json` and `checks/code.json` ([Automation and AI agents](../running/automation.md)). |
+| `debug [folder] --line N [--source FILE] [--memory ADDR:COUNT] [--emulator PATH] [--timeout MS]` | Builds, runs the project headless until it reaches a source line, and saves the CPU state, memory and screen. |
+| `install [TOOL[@VERSION] ...]` | Installs cc65, the emulator, the video client and Studio, or the tools named, in `~/.clementina` ([Installing](../start/installing.md)). |
+| `update [TOOL ...] [--check]` | Moves the `clementina` command and every installed tool to its newest release; `--check` only lists the newer ones. |
+| `mcp` | Runs the MCP server over standard input and output. |
 | `doctor [--strict] [--emulator PATH]` | Checks Node.js, `ca65`, `ld65`, `ar65` and the headless emulator. |
 
 ## Options
@@ -49,8 +55,8 @@ Run without a command, or with `--help`, it prints this list.
 
 `message` appears where a person would have been told something; `data`
 appears for `build` and `run`. For `build`, `data.sdRoot` is the folder to
-use as the SD card, `loadPlan`, `bootstrap` and `memoryLayout` are the
-paths of those files, and `assembly` (`prg`, `entryAddress`) and `basic`
+use as the SD card (`build/sd`), `loadPlan`, `bootstrap` (`build/boot.cbas`)
+and `memoryLayout` are the paths of those files, and `assembly` (`prg`, `entryAddress`) and `basic`
 (`program`, `lines`) appear for the parts the project has. `run` reports
 `assembly.entryAddress` and `basic.program`.
 
@@ -66,7 +72,7 @@ FILE/POINTER: SEVERITY CODE: MESSAGE
 
 | Program | From | Does |
 | --- | --- | --- |
-| `clementina-emulator` | `clementina-6502` | The interactive emulator ([The emulator](../running/emulator.md)), built under that name ([Installing](../start/installing.md#the-command-line-tools)). |
+| `clementina-emulator` | `clementina-6502` | The interactive emulator ([The emulator](../running/emulator.md), [Installing](../start/installing.md#what-it-installs)). |
 | `clementina-automation -sd FOLDER [-port N]` | `clementina-6502` | The headless emulator. |
 | `clementina-video-client [--server HOST:PORT]` | `clementina-video-client` | The screen and input devices. |
 | `clementina-render` | `clementina-video-client` | A video snapshot, as a JSON array on standard input, to a PNG on standard output. |

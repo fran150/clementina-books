@@ -4,12 +4,12 @@ The video client is Clementina's monitor and keyboard. It keeps a copy of
 MIA's video memory, asks MIA for whatever changed many times a second, draws
 the 320 × 200 picture, and sends your keyboard, mouse and gamepads back.
 
-Start it from the folder you unpacked it into ([The
-emulator](emulator.md#get-the-emulator-and-the-video-client) shows where to
-download it):
+Start it from a terminal ([The
+emulator](emulator.md#get-the-emulator-and-the-video-client) shows how to
+install it):
 
 ```bash
-./clementina-video-client
+clementina-video-client
 ```
 
 With no options it connects to `127.0.0.1:6502`, the emulator on the same
@@ -32,7 +32,7 @@ computer. For a board, add `--server` with MIA's address, as in
 For example, a full-screen window at a lower request rate:
 
 ```bash
-./clementina-video-client --server 192.168.1.50:6502 --fullscreen --fps 30
+clementina-video-client --server 192.168.1.50:6502 --fullscreen --fps 30
 ```
 
 ## Normal mode and control mode

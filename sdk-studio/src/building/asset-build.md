@@ -152,7 +152,7 @@ Warnings don't:
 
 ## What the build makes
 
-On the card, in `build/sd`:
+On the card, in `build/sd`, next to the palette and CHR files that every build puts there:
 
 | File | Contents |
 | --- | --- |
@@ -238,7 +238,7 @@ The build assembles `assets.s` with the game's sources and links them with
 [the Clementina library](runtime.md), as it does for any project with
 assembly. ld65 takes only the routines the game calls, and the routines they
 call. The library uses four segments, so the linker configuration needs them
-all; the assembly template's `link.cfg` already has them:
+all; the `link.cfg` that `clementina new` writes already has them:
 
 ```text
 MEMORY {

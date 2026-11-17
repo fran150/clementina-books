@@ -50,8 +50,7 @@ This gives `$B000-$BFFF`, 4 KiB, to machine code until the next cold start.
 
 Code that **takes over the machine** and never returns to BASIC can use
 everything from `$1600` up: BASIC's code and memory included. The kernel below
-`$1600` must stay, because it does the loading. The SDK's templates load
-programs at `$1800`. Such a program is started with `BRUN`. Once it has
+`$1600` must stay, because it does the loading. Such a program is started with `BRUN`. Once it has
 overwritten BASIC, there is no BASIC to return to. It runs until the machine
 is switched off: a reset of the 6502 restarts the kernel and BASIC already in
 RAM, which the program has overwritten. Only MIA, when it starts, copies them

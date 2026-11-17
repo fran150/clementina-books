@@ -17,11 +17,11 @@ has the full details.
 Put the checkouts side by side in one folder; Studio expects the SDK next
 to it:
 
-```text
-$ git clone https://github.com/fran150/clementina-sdk.git
-$ git clone https://github.com/fran150/clementina-studio.git
-$ git clone https://github.com/fran150/clementina-6502.git
-$ git clone https://github.com/fran150/clementina-video-client.git
+```sh
+git clone https://github.com/fran150/clementina-sdk.git
+git clone https://github.com/fran150/clementina-studio.git
+git clone https://github.com/fran150/clementina-6502.git
+git clone https://github.com/fran150/clementina-video-client.git
 ```
 
 You need:
@@ -40,10 +40,10 @@ Windows need nothing extra.
 
 ## Building into the dev folder
 
-```text
-$ cd clementina-sdk && npm ci && npm run dev:install
-$ cd ../clementina-6502 && make dev-install
-$ cd ../clementina-video-client && make dev-install
+```sh
+cd clementina-sdk && npm ci && npm run dev:install
+cd ../clementina-6502 && make dev-install
+cd ../clementina-video-client && make dev-install
 ```
 
 - The SDK's `dev:install` builds every package and writes `clementina` and
@@ -55,42 +55,52 @@ $ cd ../clementina-video-client && make dev-install
   change.
 
 `CLEMENTINA_DEV_BIN` picks another folder. On Windows the launchers are
-`.cmd` files, and you add the folder to your `PATH` yourself.
+`.cmd` files.
 
 ## Switching between dev and released tools
 
-`dev:install` also copies a shell switch to
-`~/.clementina/dev/clementina-dev.sh`. Load it from your shell's startup file
-(bash or zsh):
-
-```text
-. ~/.clementina/dev/clementina-dev.sh
+```sh
+clementina dev on
 ```
 
-Then, in any terminal:
-
 ```text
-$ clementina-dev on
-$ clementina-dev status
-clementina: dev, /Users/you/.clementina/dev/bin/clementina
-clementina-automation: dev, /Users/you/.clementina/dev/bin/clementina-automation
-...
-$ clementina-dev off
+Dev mode is on in every terminal. Commands use the dev builds in /Users/you/.clementina/dev/bin: ...
 ```
 
-`on` affects only that terminal, so one terminal can run your builds while
-another runs the released tools. `clementina run`, the debugger and the MCP
-server find `clementina-automation` on the `PATH`, so they use whichever
-copy is switched on.
+```sh
+clementina dev
+clementina dev off
+```
+
+`on` holds in every terminal, even after a restart, until you run `off`.
+While it's on, the installed `clementina` hands each command to your
+checkout's build, and on macOS and Linux the `clementina-emulator`,
+`clementina-automation` and video-client commands run your builds too.
+`clementina run`, the debugger and the MCP server start your emulator on
+every system. Each command reminds you on stderr that dev mode is on, and
+`clementina doctor` says so, so you won't mistake your build for a release.
+
+`clementina dev` and `clementina update` always run the installed CLI, so
+`clementina dev off` works even when your checkout doesn't build. A tool you
+haven't built stays on its released copy.
 
 ## Knowing which copy you're running
 
 Every tool says where it came from:
 
+```sh
+clementina --version
+```
+
 ```text
-$ clementina --version
 clementina 0.3.0-alpha.1 (dev build, commit 9071659, /Users/you/clementina/clementina-sdk)
-$ clementina-automation --version
+```
+
+```sh
+clementina-automation --version
+```
+
+```text
 clementina-automation dev (commit c8147de)
 ```
 
@@ -112,10 +122,14 @@ To try a change, open `clementina-sdk/packages/vscode-extension` in VS Code
 and press `F5`: a second VS Code window opens with your build of the
 extension. To install your build instead:
 
-```text
-$ cd clementina-sdk/packages/vscode-extension
-$ npm run package
-$ code --install-extension --force clementina-*.vsix
+```sh
+cd clementina-sdk/packages/vscode-extension
+rm -f clementina-*.vsix
+npm run package
+code --install-extension clementina-*.vsix --force
 ```
+
+The `rm` clears packages from earlier builds, so the last line installs only
+the one just built.
 
 Installing the release `.vsix` again goes back to the released extension.

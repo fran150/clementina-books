@@ -196,16 +196,21 @@ See also: [INT](i.md#int), [TICKS](t.md#ticks).
 
 ## RUN
 
-**Statement** · `RUN [line]`
+**Statement** · `RUN [line]` · `RUN path`
 
-Starts the program in memory. `RUN` first clears all variables, arrays and
-strings, sets the `DATA` position back to the start and forgets open `FOR`
-loops and `GOSUB`s. Then it runs the program from its first line, or from
+Starts a program. `RUN` first clears all variables, arrays and strings, sets
+the `DATA` position back to the start and forgets open `FOR` loops and
+`GOSUB`s. Then it runs the program in memory from its first line, or from
 *line*.
+
+`RUN` *path* first loads the program saved in *path*, as `LOAD` does, and then
+runs it from its first line. It works at the prompt and inside a running
+program, which it replaces, so one program can start the next.
 
 | Argument | Range | Meaning |
 | --- | --- | --- |
 | *line* | 0-63999 | The line to start at; the first line if left out. |
+| *path* | | The program file to load and run. |
 
 A *line* that does not exist gives `?UNDEF'D STATEMENT ERROR`. To start at a
 line without clearing the variables, use `GOTO` as a direct command.
@@ -221,5 +226,22 @@ RUN 20
 SECOND 0
 ```
 
+Anything after `RUN` that is not a line number is the *path*, so a string
+variable works too. A file that does not exist gives `?FILE I/O ERROR` and
+leaves the program in memory alone.
+
+Like `LOAD`, `RUN` *path* keeps the top of BASIC's memory. A memory top lowered
+with `POKE 63`, `POKE 64` and `CLEAR`, and the machine code loaded above it, are
+still there when the new program starts. That makes a short loader program
+possible: it sets up memory, loads the code and the graphics, and ends by
+running the game.
+
+```basic
+10 POKE 63,0:POKE 64,176:CLEAR
+20 BLOAD "ROUTINES.PRG"
+30 CHRLOAD "GAME.CHR",2
+40 RUN "GAME.BAS"
+```
+
 See also: [GOTO](g.md#goto), [CONT](c.md#cont), [CLEAR](c.md#clear),
-[END](e.md#end), [Programming rules](../basic/rules.md).
+[END](e.md#end), [LOAD](l.md#load), [Programming rules](../basic/rules.md).

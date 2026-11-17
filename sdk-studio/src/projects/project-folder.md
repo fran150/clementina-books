@@ -6,7 +6,7 @@ to build them.
 
 ## Layout
 
-The SDK doesn't impose folder names beyond the manifest, but its templates
+The SDK doesn't impose folder names beyond the manifest, but `clementina new`
 and Studio use this layout, and the book does too:
 
 ```text
@@ -14,7 +14,7 @@ my-game/
 ├── clementina.yaml
 ├── link.cfg                     (assembly only)
 ├── src/
-│   └── main.bas  or  main.s
+│   └── main.cbas  or  main.s
 ├── assets/
 │   ├── palettes/
 │   ├── palette-configs/
@@ -90,7 +90,7 @@ speed itself if it wants to.
 
 ### `program`
 
-`program.entry` names the project's BASIC program, such as `src/main.bas`.
+`program.entry` names the project's BASIC program, such as `src/main.cbas`.
 It is one file. A project with only assembly leaves `program` out; its
 sources are listed under `build.assembly`, as in the example above.
 
@@ -152,7 +152,7 @@ Every asset is one JSON file that says what it is:
   its own.
 - `id` is how other assets and the build refer to it: a palette config names
   palettes by id, a shape names its tileset by id. Ids are case-sensitive and
-  only need to be unique among assets of the same kind. The templates write
+  only need to be unique among assets of the same kind. `clementina new` writes
   them as `kind:name` (`palette:main`, `tileset:player`); Studio sometimes
   makes them random, like `e4f5a6b7-c8d9-4e0f-9a1b-2c3d4e5f6a7b`. Either is
   fine. Up to 64 characters: letters, digits, `.`, `_`, `:` and `-`.
