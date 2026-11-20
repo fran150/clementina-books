@@ -70,7 +70,7 @@ screen moves nothing and returns with the carry set. A is preserved.
 
 This routine prints a hex byte at row 2, column 30, in yellow:
 
-<!-- example: org=$0280 prg=PLOT.PRG run="BLOAD \"PLOT.PRG\"|CLS: SYS 640" -->
+<!-- example: org=$0280 prg=PLOT.PRG run="BLOAD \"PLOT.PRG\"|CLS: SYS $0280" -->
 ```asm
 .include "clementina.inc"
 TEXT_ATTR = $0302
@@ -113,7 +113,7 @@ the arrows `$11`, `$91`, `$1D` and `$9D`.
 Returns at once. If a key is waiting, the carry is set and A holds it;
 otherwise the carry is clear. A game loop calls it once a frame:
 
-<!-- example: org=$0280 prg=KEY.PRG run="BLOAD \"KEY.PRG\"|SYS 640" keys="Q" -->
+<!-- example: org=$0280 prg=KEY.PRG run="BLOAD \"KEY.PRG\"|SYS $0280" keys="Q" -->
 ```asm
 .include "clementina.inc"
 

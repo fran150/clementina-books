@@ -231,13 +231,13 @@ variable works too. A file that does not exist gives `?FILE I/O ERROR` and
 leaves the program in memory alone.
 
 Like `LOAD`, `RUN` *path* keeps the top of BASIC's memory. A memory top lowered
-with `POKE 63`, `POKE 64` and `CLEAR`, and the machine code loaded above it, are
+with `POKE $3F`, `POKE $40` and `CLEAR`, and the machine code loaded above it, are
 still there when the new program starts. That makes a short loader program
 possible: it sets up memory, loads the code and the graphics, and ends by
 running the game.
 
 ```basic
-10 POKE 63,0:POKE 64,176:CLEAR
+10 POKE $3F,$00:POKE $40,$B0:CLEAR
 20 BLOAD "ROUTINES.PRG"
 30 CHRLOAD "GAME.CHR",2
 40 RUN "GAME.BAS"

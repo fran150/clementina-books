@@ -48,13 +48,13 @@ and lets the kernel's run after it. This is called **chaining**:
 This program installs a handler that adds one to the byte at `$98` on every
 interrupt, and returns to BASIC with the handler running:
 
-<!-- example: org=$0280 prg=TICK.PRG run="BLOAD \"TICK.PRG\"|SYS 640|A=PEEK(152): DELAY 100: PRINT PEEK(152)<>A|SYS 643" -->
+<!-- example: org=$0280 prg=TICK.PRG run="BLOAD \"TICK.PRG\"|SYS $0280|A=PEEK($98): DELAY 100: PRINT PEEK($98)<>A|SYS $0283" -->
 ```asm
 .include "clementina.inc"
 COUNT = $98
 
-        jmp install             ; SYS 640
-        jmp remove              ; SYS 643
+        jmp install             ; SYS $0280
+        jmp remove              ; SYS $0283
 install:
         sei
         lda #<handler
@@ -80,7 +80,7 @@ handler:
 -1
 ```
 
-`SYS 640` installs it, and BASIC can watch `PEEK(152)` change. `SYS 643` puts
+`SYS $0280` installs it, and BASIC can watch `PEEK($98)` change. `SYS $0283` puts
 the kernel's handler back. The handler lives at `$0280`, where BASIC never
 writes, so it is safe to leave it running while BASIC works. A handler in
 memory that BASIC might reuse must be removed before returning to BASIC.

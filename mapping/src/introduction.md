@@ -23,8 +23,9 @@ Clementina has two memories, and the book maps both:
   endpoints. The paragraphs below it explain what the bytes hold, how the
   machine uses them, and what a program can safely do with them.
 - Other addresses and values are hexadecimal, written with `$`, unless they
-  are marked as decimal. BASIC uses decimal addresses, so an entry such as
-  `49152  $C000  VIA_ORB` gives both forms for `PEEK` and `POKE`.
+  are marked as decimal. BASIC takes `$` hexadecimal, so an entry's
+  hexadecimal address works in `PEEK` and `POKE` as it is (`PEEK($C000)`);
+  an entry such as `49152  $C000  VIA_ORB` gives the decimal too.
 - A 6502 address has four hex digits (`$FFE0`); a MIA RAM address has five
   (`$14000`).
 - A range includes both ends: `$8000-$BFFF` is 16,384 bytes.

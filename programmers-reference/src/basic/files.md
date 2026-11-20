@@ -164,11 +164,11 @@ load address, low byte first, then the data.
 | `BANK n` | Choose which of the 32 RAM banks the statements above, `PEEK` and `POKE` use at `$8000-$BFFF`. |
 
 ```basic
-10 FOR I=0 TO 15: POKE 640+I,I*2: NEXT
-20 BSAVE "TABLE.PRG",640,16
-30 FOR I=0 TO 15: POKE 640+I,0: NEXT
+10 FOR I=0 TO 15: POKE $0280+I,I*2: NEXT
+20 BSAVE "TABLE.PRG",$0280,16
+30 FOR I=0 TO 15: POKE $0280+I,0: NEXT
 40 BLOAD "TABLE.PRG"
-50 PRINT PEEK(640+15)
+50 PRINT PEEK($0280+15)
 ```
 
 ```text

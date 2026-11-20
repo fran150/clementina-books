@@ -266,7 +266,7 @@ edge. If the two edges meet, BASIC collects unused strings and then reports
 `OUT OF MEMORY` if there is still no room.
 
 To read this 16-bit address from BASIC, combine its bytes as
-`PEEK(57)+256*PEEK(58)`. This tells you where the current free area starts;
+`PEEK($39)+256*PEEK($3A)`. This tells you where the current free area starts;
 it does not tell you its size without the string boundary.
 
 ### 59–60　　$3B–$3C　　FRETOP
@@ -296,7 +296,7 @@ This pointer sets the upper limit of memory BASIC may use. At cold start it
 contains `$C000`, one byte beyond `$BFFF`; BASIC's strings grow downward
 from just below that limit. You can lower the limit to reserve a safe area
 above it for your own data or machine code. For example,
-`POKE 63,0:POKE 64,176:CLEAR` sets the limit to `$B000`, reserving
+`POKE $3F,$00:POKE $40,$B0:CLEAR` sets the limit to `$B000`, reserving
 `$B000-$BFFF` in extended RAM bank 0. `CLEAR` discards existing variables
 and strings so none of their addresses still point into the reserved area.
 Cold start restores the original limit.

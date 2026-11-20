@@ -120,7 +120,7 @@ attributes when the line runs.
 BASIC, as `POKE 55/56` does on the C64:
 
 ```basic
-POKE 63,0:POKE 64,176:CLEAR
+POKE $3F,$00:POKE $40,$B0:CLEAR
 ```
 
 frees `$B000-$BFFF` (4 KiB) until the next cold start. The keyword is

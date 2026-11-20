@@ -18,9 +18,9 @@ Ctrl-C does not stop `WAIT`. If the bits never change, the machine has to
 be reset.
 
 ```basic
-10 POKE 700,6
-20 WAIT 700,4: PRINT "BIT 2 IS SET"
-30 WAIT 700,1,1: PRINT "BIT 0 IS CLEAR"
+10 POKE $02BC,6
+20 WAIT $02BC,4: PRINT "BIT 2 IS SET"
+30 WAIT $02BC,1,1: PRINT "BIT 0 IS CLEAR"
 ```
 
 ```text

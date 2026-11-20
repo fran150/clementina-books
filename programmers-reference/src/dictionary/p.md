@@ -385,8 +385,8 @@ memory, use `MPEEK`.
 | *address* | 0-65535 | The CPU address. |
 
 ```basic
-10 POKE 640,200: PRINT PEEK(640)
-20 PRINT "ABC";PEEK(768)
+10 POKE $0280,200: PRINT PEEK($0280)
+20 PRINT "ABC";PEEK($0300)
 ```
 
 ```text
@@ -444,9 +444,9 @@ free for programs; the rules for the rest are in
 [Mixing BASIC and machine language](../ml/mixing.md).
 
 ```basic
-10 BANK 5: POKE 32768,77
-20 BANK 0: PRINT PEEK(32768)<>77
-30 BANK 5: PRINT PEEK(32768): BANK 0
+10 BANK 5: POKE $8000,77
+20 BANK 0: PRINT PEEK($8000)<>77
+30 BANK 5: PRINT PEEK($8000): BANK 0
 ```
 
 ```text

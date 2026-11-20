@@ -58,8 +58,8 @@ The keys are not case-sensitive. The cursor shows the pen: it takes the pen's
 color and flips, and changes shape for reverse and for the glyph set. The pen
 stays as set until Esc Space or a cold start.
 
-A program can set the editor pen too. It is the byte `TEXT_ATTR` at `$0302`
-(770), so `POKE 770,5` makes what the user types next cyan. That is handy
+A program can set the editor pen too. It is the byte `TEXT_ATTR` at `$0302`,
+so `POKE $0302,5` makes what the user types next cyan. That is handy
 before an `INPUT`.
 
 ### Glyph sets

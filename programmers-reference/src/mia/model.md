@@ -96,7 +96,7 @@ window's port then holds the byte at the new address, so a read right after
 gives the right value. This routine sets index `$00` up to write at `$20000`,
 stepping one byte each write, and writes three bytes:
 
-<!-- example: org=$0280 prg=INDEX.PRG run="BLOAD \"INDEX.PRG\"|SYS 640|PRINT MPEEK($20000);MPEEK($20001);MPEEK($20002)" -->
+<!-- example: org=$0280 prg=INDEX.PRG run="BLOAD \"INDEX.PRG\"|SYS $0280|PRINT MPEEK($20000);MPEEK($20001);MPEEK($20002)" -->
 ```asm
 .include "clementina.inc"
 
@@ -158,7 +158,7 @@ Wait like this before using what a command produces. This routine resets
 index `$B8`, MIA's index for the text screen's characters, to the start of the
 screen and writes two characters in the top-left corner:
 
-<!-- example: org=$0280 prg=CMD.PRG run="BLOAD \"CMD.PRG\"|SYS 640" -->
+<!-- example: org=$0280 prg=CMD.PRG run="BLOAD \"CMD.PRG\"|SYS $0280" -->
 ```asm
 .include "clementina.inc"
 

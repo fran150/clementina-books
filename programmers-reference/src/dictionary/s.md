@@ -553,9 +553,9 @@ A routine at `$8000-$BFFF` runs with the bank chosen by `BANK`, and bank 0
 is mapped again when it returns.
 
 ```basic
-10 FOR I=0 TO 5: READ B: POKE 640+I,B: NEXT
+10 FOR I=0 TO 5: READ B: POKE $0280+I,B: NEXT
 20 DATA 169,65,32,6,4,96
-30 SYS 640: SYS 640: PRINT
+30 SYS $0280: SYS $0280: PRINT
 40 PRINT "BACK IN BASIC"
 ```
 

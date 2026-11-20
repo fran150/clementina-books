@@ -95,7 +95,7 @@ bank, puts sprite 0 near the middle of the screen in palette 4, whose color 1
 is green, and turns the sprite layer on. The ball uses only plane 0, so its
 pixels have color index 1; the other planes of bank 2 are zero at power-on.
 
-<!-- example: org=$0280 prg=BALL.PRG run="BLOAD \"BALL.PRG\"|SYS 640|A=$10850: PRINT MPEEK(A);MPEEK(A+1);MPEEK(A+2)|PRINT MPEEK(A+3);MPEEK($21)" -->
+<!-- example: org=$0280 prg=BALL.PRG run="BLOAD \"BALL.PRG\"|SYS $0280|A=$10850: PRINT MPEEK(A);MPEEK(A+1);MPEEK(A+2)|PRINT MPEEK(A+3);MPEEK($21)" -->
 ```asm
 .include "clementina.inc"
 

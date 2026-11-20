@@ -68,7 +68,7 @@ next sound tick, 1/24,000 of a second later.
 This routine plays the A above middle C on voice 0, a square wave with a
 quick attack, and leaves it sounding:
 
-<!-- example: org=$0280 prg=BEEP.PRG run="BLOAD \"BEEP.PRG\"|SYS 640|PRINT MPEEK($12017);PEEK(65515) AND 1" -->
+<!-- example: org=$0280 prg=BEEP.PRG run="BLOAD \"BEEP.PRG\"|SYS $0280|PRINT MPEEK($12017);PEEK($FFEB) AND 1" -->
 ```asm
 .include "clementina.inc"
 
@@ -173,7 +173,7 @@ starts it. It is too long for `$0280-$02F7`, so it is assembled for `$B000`,
 above a lowered top of BASIC's memory
 ([Mixing BASIC and machine language](../ml/mixing.md)):
 
-<!-- example: org=$B000 prg=TUNE.PRG run="POKE 63,0: POKE 64,176: CLEAR|BLOAD \"TUNE.PRG\"|SYS 45056|PRINT PLAYING(0)" -->
+<!-- example: org=$B000 prg=TUNE.PRG run="POKE $3F,$00: POKE $40,$B0: CLEAR|BLOAD \"TUNE.PRG\"|SYS $B000|PRINT PLAYING(0)" -->
 ```asm
 .include "clementina.inc"
 TRACK = $020000

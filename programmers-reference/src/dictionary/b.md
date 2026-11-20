@@ -48,10 +48,10 @@ its strings in bank 0.
 | *bank* | 0-31 | The bank. 0 at power-on and after a warm start. |
 
 ```basic
-10 BANK 3: POKE 32768,42
-20 BANK 4: POKE 32768,7
-30 BANK 3: PRINT PEEK(32768)
-40 BANK 4: PRINT PEEK(32768)
+10 BANK 3: POKE $8000,42
+20 BANK 4: POKE $8000,7
+30 BANK 3: PRINT PEEK($8000)
+40 BANK 4: PRINT PEEK($8000)
 50 BANK 0
 ```
 
@@ -305,10 +305,10 @@ itself. A file whose own address is `$C000` or above gives
 `?FILE I/O ERROR`.
 
 ```basic
-10 FOR I=0 TO 7: POKE 640+I,I*3: NEXT
-20 BSAVE "T.PRG",640,8
-30 BLOAD "T.PRG",648
-40 PRINT PEEK(648+7)
+10 FOR I=0 TO 7: POKE $0280+I,I*3: NEXT
+20 BSAVE "T.PRG",$0280,8
+30 BLOAD "T.PRG",$0288
+40 PRINT PEEK($0288+7)
 ```
 
 ```text
@@ -392,8 +392,8 @@ data. An existing file is replaced.
 | *length* | 0-65535 | The bytes to save. A save past `$BFFF` continues at `$8000` of the next bank. |
 
 ```basic
-10 FOR I=0 TO 15: POKE 640+I,I*2: NEXT
-20 BSAVE "TABLE.PRG",640,16
+10 FOR I=0 TO 15: POKE $0280+I,I*2: NEXT
+20 BSAVE "TABLE.PRG",$0280,16
 30 FSTAT "TABLE.PRG",S,A,D,T
 40 PRINT S
 ```
