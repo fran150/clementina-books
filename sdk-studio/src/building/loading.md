@@ -1,10 +1,12 @@
 # How a program reaches the machine
 
-Clementina loads programs from its SD card with BASIC: `LOAD` for a BASIC
-program, `BRUN` for machine code, `MIALOAD` for data that goes into MIA RAM.
-The build writes the files, and then the BASIC commands that load them, in
-a *load plan*. This chapter explains the plan and the shape it takes for
-each combination of parts.
+Clementina uses BASIC commands to load files from an SD card. `LOAD` reads a
+BASIC program, `BRUN` loads and starts machine code, and `MIALOAD` puts data
+in MIA RAM.
+
+The SDK builds the files and writes the commands that load them. Together,
+those commands form a *load plan*. This chapter shows what the plan looks
+like for a BASIC program, an assembly program, or both.
 
 ## The load plan
 
@@ -15,13 +17,13 @@ steps, run in order:
 | --- | --- | --- |
 | `mia` | Loads a file into MIA RAM at an address. | `MIALOAD "path",address` |
 | `prg` | Loads a PRG file into CPU RAM; the last one also starts it. | `BANK n:BLOAD "path"`, or `BANK n:BRUN "path"` |
-| `memoryTop` | Lowers BASIC's top of memory, first. | `POKE 63,lo:POKE 64,hi:CLEAR` |
+| `speed` | Sets the CPU clock to the project's `target.phi2Hz`, first. Only when it isn't 1.2 MHz. | `POKE $FFE2,$20:POKE $FFE3,lo:...`, on two lines |
+| `memoryTop` | Lowers BASIC's top of memory, before any loads. | `POKE $3F,lo:POKE $40,hi:CLEAR` |
 | `basic` | Loads a tokenized BASIC program and runs it, last. | `RUN "path"` |
 
-The plan ends with exactly one *terminal* step, the one that starts the
-program: a `prg` step with a run address, or a `basic` step. Nothing after
-it could run, because the program takes over. Appendix B has the plan's
-format.
+The last step starts the program. It is either a `prg` step with a run
+address or a `basic` step. The plan has no steps after it. [Appendix
+B](../appendix/schemas.md) has the file format.
 
 Paths in the plan are relative to the SD card: the folder `build/sd`, which
 every build writes.
@@ -35,27 +37,26 @@ build/sd/
 ├── BOOT.BAS            the load plan as a BASIC program, tokenized
 ├── GAME.BAS            the BASIC program, tokenized
 ├── CODE.PRG            the assembly code
-└── asset-palette.bin   the palette config, and any CHR banks
+└── asset-palette.bin   the palette config
 ```
 
-`BOOT.BAS` is the plan as a numbered BASIC program, the *bootstrap*. To start the project,
-make `build/sd` the card (the emulator's `--sd`, or its contents copied to a
-real card) and type:
+`BOOT.BAS` is the plan as a numbered BASIC program, the *bootstrap*. Point
+the emulator's `--sd` at `build/sd`, or copy the folder's contents to a real
+card. Then type:
 
 ```basic
 RUN "BOOT.BAS"
 ```
 
-`RUN "path"` loads a program and runs it. `BOOT.BAS` loads the files and then
-starts the program: its last line is either `RUN "GAME.BAS"`, which loads
-the BASIC program in its place and runs it, or `BRUN`, which starts the
-machine code. The build also writes the same program as text in
-`build/boot.cbas`, to read.
+`BOOT.BAS` loads the needed files before it starts your program. For a BASIC
+program, its last line is `RUN "GAME.BAS"`, which replaces the bootstrap
+with the program and runs it. For assembly, its last line uses `BRUN`.
+The build also writes readable bootstrap source at `build/boot.cbas`.
 
-`clementina run`, `clementina check` and the MCP server start a project the
-same way, by typing `RUN "BOOT.BAS"` into the emulator's BASIC. The
-debugger types the plan's steps directly instead, so the bootstrap's own
-line numbers can't stop at a breakpoint meant for the program's lines.
+`clementina run`, `clementina check` and the MCP server also start
+`BOOT.BAS` in the emulator. The debugger enters the plan's steps directly
+so the bootstrap's line numbers do not trigger breakpoints set in your
+program.
 
 ## Before the program: `build.video`
 
@@ -85,8 +86,8 @@ can use all eight.
 For a BASIC program on its own, with a palette and a tileset, `boot.cbas` is:
 
 ```basic
-10 MIALOAD "asset-palette.bin",256
-20 MIALOAD "asset-chr-2.bin",12800
+10 MIALOAD "asset-palette.bin",$00100
+20 MIALOAD "asset-chr-2.bin",$03200
 30 RUN "GAME.BAS"
 ```
 
@@ -100,8 +101,8 @@ itself, with BASIC's statements
 For assembly on its own the bootstrap ends with `BRUN`:
 
 ```basic
-10 MIALOAD "asset-palette.bin",256
-20 MIALOAD "asset-chr-2.bin",12800
+10 MIALOAD "asset-palette.bin",$00100
+20 MIALOAD "asset-chr-2.bin",$03200
 30 BANK 0:BRUN "GAME.PRG"
 ```
 
@@ -115,15 +116,16 @@ then the BASIC program, which calls it with `SYS`. With `memoryTop` set to
 `$A000` and the routines linked there:
 
 ```basic
-10 POKE 63,0:POKE 64,160:CLEAR
-20 MIALOAD "asset-palette.bin",256
-30 BANK 0:BLOAD "ROUTINES.PRG"
-40 RUN "GAME.BAS"
+10 REM MOVE BASIC MEMORY TOP
+20 POKE $3F,$00:POKE $40,$A0:CLEAR
+30 MIALOAD "asset-palette.bin",$00100
+40 BANK 0:BLOAD "ROUTINES.PRG"
+50 RUN "GAME.BAS"
 ```
 
-The first line lowers BASIC's top of memory to `$A000`, so BASIC leaves
-`$A000-$BFFF` alone. Only a cold start resets it, so it survives `LOAD`,
-`RUN` and `CLEAR`, and the routines `BLOAD`ed there survive `RUN "GAME.BAS"`.
+Line 20 lowers BASIC's top of memory to `$A000`. BASIC then leaves
+`$A000-$BFFF` for the assembly routines. The limit survives `LOAD`, `RUN`
+and `CLEAR`, so the routines remain available after `RUN "GAME.BAS"`.
 [Code that returns to BASIC](assembly.md#code-that-returns-to-basic) has the
 manifest.
 
@@ -156,17 +158,15 @@ current folder, so the game can live in any folder of the card.
 
 ## Why `BRUN`
 
-`BRUN "FILE.PRG"` loads a PRG at the address in its 2-byte header and jumps
-to its first byte. The build always starts a program this way, and puts the
-entry symbol at the start of the image (or gives `BRUN` the entry address as
-a second argument when it is elsewhere).
+`BRUN "FILE.PRG"` loads a PRG at the address in its two-byte header and
+jumps to its first byte. If the entry symbol is elsewhere in the file, the
+build gives `BRUN` that address as a second argument.
 
-`BLOAD` followed by `SYS` looks equivalent but isn't. `BLOAD` returns to
-BASIC, so a program loaded over BASIC (anything from `$1600` up, which is
-where programs go) has just overwritten the interpreter that would run the
-`SYS`. `SYS` is right only for a machine-code routine that returns to BASIC
-and was loaded where BASIC doesn't live: `$0280-$02F7`, a bank from 1 to 31,
-or above a lowered top of memory. *Mapping Clementina* lists those places in
+`BLOAD` returns to BASIC after loading. If the PRG replaced BASIC in memory,
+the interpreter cannot run a following `SYS`. Use `SYS` for a routine that
+returns to BASIC and sits outside BASIC's memory: at `$0280-$02F7`, in a
+bank from 1 to 31, or above a lowered top of memory. *Mapping Clementina*
+shows these places in
 [BASIC's workspace](../../../mapping/src/cpu/basic-workspace.md#where-machine-code-can-go).
 
 ## Banks
@@ -176,9 +176,22 @@ of 32 at a time. `BANK n` picks the bank that `BLOAD` and `BRUN` use there.
 The bootstrap sets it before the first PRG and whenever it changes.
 
 Assembly linked at `$8000-$BFFF` must name its bank in
-`build.assembly.bank` (1-31), and one linked anywhere else must not. A load
-that runs past `$BFFF` continues at `$8000` of the next bank, so one file can
-fill several banks in a row. See [Extended
+`build.assembly.bank` (1-31), and one linked anywhere else must not. Code in
+several banks ([`build.assembly.banks`](assembly.md#code-in-several-banks))
+makes one PRG per bank, and the bootstrap loads each into its bank before
+the main image:
+
+```basic
+10 REM MOVE BASIC MEMORY TOP
+20 POKE $3F,$00:POKE $40,$70:CLEAR
+30 BANK 1:BLOAD "CODE.BANK1.PRG"
+40 BANK 2:BLOAD "CODE.BANK2.PRG"
+50 BANK 0:BLOAD "CODE.PRG"
+60 RUN "ROOMS.BAS"
+```
+
+A load that runs past `$BFFF` continues at `$8000` of the next bank, so one
+file can fill several banks in a row. See [Extended
 RAM](../../../mapping/src/cpu/extended-ram.md).
 
 ## What the plan checks

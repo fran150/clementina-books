@@ -103,12 +103,15 @@ export const SCHEMAS = [
   ['song', 'song.schema.json'], ['load-plan', 'load-plan.schema.json'],
 ];
 
+/** The pattern of an address written as hex in clementina.yaml (`$7000`, `0x7000`). */
+const HEX_ADDRESS = '^(\\$|0[xX])[0-9A-Fa-f]{1,5}$';
+
 /** A schema node's type, as words: `string`, `integer or null`, `array of object`. */
 function schemaType(node) {
   if ('const' in node) return typeof node.const === 'number' ? 'integer' : typeof node.const;
   if (node.enum) return [...new Set(node.enum.map(v => (typeof v === 'number' ? 'integer' : typeof v)))].join(' or ');
   const alts = node.anyOf ?? node.oneOf;
-  if (alts && !node.type) return [...new Set(alts.map(schemaType))].join(' or ');
+  if (alts && !node.type) return alts.some(a => a.pattern === HEX_ADDRESS) ? 'integer or hex' : [...new Set(alts.map(schemaType))].join(' or ');
   if (node.type === 'array') return node.items ? `array of ${schemaType(node.items)}` : 'array';
   return Array.isArray(node.type) ? node.type.join(' or ') : node.type ?? 'any';
 }
@@ -131,7 +134,11 @@ function schemaRule(node) {
   if (node.uniqueItems) out.push('no duplicates');
   if (node.type === 'array' && node.items && node.items.type !== 'object' && node.items.type !== 'array') { const r = schemaRule(node.items); if (r) out.push(`each ${r}`); }
   const alts = node.anyOf ?? node.oneOf;
-  if (alts && !node.type && alts.every(a => !a.properties)) for (const a of alts) { const r = schemaRule(a); if (r) out.push(`${schemaType(a)}: ${r}`); }
+  if (alts && !node.type && alts.every(a => !a.properties)) for (const a of alts) {
+    // A manifest address: a number, or hex text the SDK turns into one.
+    if (a.type === 'string' && a.pattern === HEX_ADDRESS) continue;
+    const r = schemaRule(a); if (r) out.push(alts.some(b => b.pattern === HEX_ADDRESS) ? r : `${schemaType(a)}: ${r}`);
+  }
   if (node.propertyNames?.pattern) out.push(`names match ${code(node.propertyNames.pattern)}`);
   return out.join('; ');
 }

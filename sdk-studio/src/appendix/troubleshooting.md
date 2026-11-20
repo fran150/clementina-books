@@ -70,10 +70,6 @@ go to definition work without it.
 writes `assets.inc` into the output directory. Run `clementina build` once,
 and the error goes away.
 
-**An edit to `clementina.yaml` lost its comments.** Studio rewrote it when it
-saved. Keep notes elsewhere ([The project
-folder](../projects/project-folder.md#editing-the-manifest)).
-
 ## Running
 
 **The video client's window stays black.**
@@ -125,8 +121,8 @@ loaded. `LoadAnimationShapes` loads them.
 **BASIC's text is garbage after a game ran.** The game loaded tiles into
 CHR banks 0 or 1, where the console font lives. Reset to get it back.
 
-**No sound in the emulator.** On Linux, it was built without ALSA. Rebuild
-it with the headers installed.
+**No sound in the emulator on Linux.** Install the ALSA runtime library
+(`libasound2` on Debian, Ubuntu and Raspberry Pi OS), then restart it.
 
 **Timing differs between computers, or from Studio's preview.** The game
 counts loops or cycles. Time it with MIA's clock (`KERN_RDTIM`), and tick
@@ -142,8 +138,8 @@ a label alone, a constant, `.res`). Move it to a line with an instruction.
 
 **The program waits for a key and the session can't give one.** The headless
 emulator has no window. Give the launch configuration a fixed `port` and
-send the key to the endpoint ([Debugging in VS
-Code](../running/debugging.md#typing-into-a-session)).
+send the key to the endpoint ([Debugging without a
+screen](../running/debugging.md#debugging-without-a-screen)).
 
 **Step Over goes into a subroutine.** Only `JSR` counts as a call. A
 subroutine reached by `JMP`, or an interrupt, is stepped into.

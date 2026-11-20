@@ -6,8 +6,8 @@ to build them.
 
 ## Layout
 
-The SDK doesn't impose folder names beyond the manifest, but `clementina new`
-and Studio use this layout, and the book does too:
+The manifest can name files in any folders inside the project. `clementina
+new`, Studio and this book use this layout:
 
 ```text
 my-game/
@@ -30,9 +30,9 @@ my-game/
 └── build/                       (output; made by the build)
 ```
 
-Every path in the manifest is relative to the project folder and uses `/`,
-on Windows too. Absolute paths, `..`, empty path parts, backslashes and
-symbolic links are rejected, so a project can't reach outside its folder.
+Paths in the manifest start at the project folder and use `/`, even on
+Windows. They cannot point outside the project. The SDK rejects absolute
+paths, `..`, empty path parts, backslashes and symbolic links.
 
 ## The manifest
 
@@ -72,21 +72,42 @@ build:
       - src/player.s
     linkerConfig: link.cfg
     outputName: temple
-    loadAddress: 0x1800
+    loadAddress: $1800
     entrySymbol: game_start
 ```
 
 ### `format`, `version`, `name`, `description`
 
-`format` is always `clementina-project` and `version` is 1. `name` (up to 80 characters) is the project's display name.
-`description` (up to 500) is optional.
+`format` is always `clementina-project`, and `version` is 1. `name` is the
+display name, up to 80 characters. `description` is optional and can hold up
+to 500 characters.
 
 ### `target`
 
-`machine` is always `clementina-6502`. `phi2Hz`, the CPU clock, is optional
-and defaults to 1,200,000 (1.2 MHz). The SDK can't yet start a program at
-another speed, so validation rejects any other value; a program changes the
-speed itself if it wants to.
+`machine` is always `clementina-6502`. The optional `phi2Hz` sets the CPU
+clock in hertz, from 1 to 8,000,000. The default is 1,200,000 (1.2 MHz),
+the board's startup speed.
+
+If you set another speed, the build puts commands at the start of
+`BOOT.BAS` to change it before loading the program:
+
+```yaml
+target:
+  machine: clementina-6502
+  phi2Hz: 2000000
+```
+
+```basic
+10 REM SET CPU SPEED
+20 POKE $FFE2,$20:POKE $FFE3,$80:POKE $FFE2,$21:POKE $FFE3,$84
+30 POKE $FFE2,$22:POKE $FFE3,$1E
+```
+
+The program runs at this speed on the board and in the emulator. A VS Code
+debug session uses it too. Changing the CPU speed affects the 6502, BASIC,
+the kernel's tick and `KJIFFY`. MIA's millisecond clock (`TI`), sound and
+key repeat keep their usual pace. The program can also change the speed
+while it runs.
 
 ### `program`
 
@@ -118,16 +139,24 @@ program. What reaches the SD card is decided by the `build` section.
 
 ### `build`
 
-`build` is optional for validation but needed to build. It always has an
-`outputDirectory`, where everything the build makes goes, and a section for
-each part the project has:
+You can validate a project without `build`, but you need it to make a card.
+`outputDirectory` names the folder for generated files. Add a section for
+each part of the project:
 
 | Section | For | Chapter |
 | --- | --- | --- |
-| `basic` | Needed with `program.entry`: `outputName`, the compiled program's file name, and `memoryTop`, where BASIC's memory ends | [Programming in BASIC with the SDK](../building/basic.md) |
-| `assembly` | The assembly: its sources, linker configuration, load address, entry symbol, bank, include folders, defines | [Programming in assembly with the SDK](../building/assembly.md) |
-| `video` | Any project: a palette config and tilesets the build loads before the program starts | [How a program reaches the machine](../building/loading.md) |
-| `assets` | Needs `assembly`: the assets the build writes to the SD card for the Clementina library, and where they go | [The asset build](../building/asset-build.md) |
+| `basic` | The BASIC program's output name and memory limit. | [Programming in BASIC with the SDK](../building/basic.md) |
+| `assembly` | Sources, linker settings and load address. | [Programming in assembly with the SDK](../building/assembly.md) |
+| `video` | Palettes and tilesets to load before the program. | [How a program reaches the machine](../building/loading.md) |
+| `assets` | Asset files and their placement for programs using the Clementina library. Requires `assembly`. | [The asset build](../building/asset-build.md) |
+
+Addresses and sizes accept hex (`$1800` or `0x1800`) or decimal (`6144`).
+These three examples mean the same thing, and neither hex form needs quotes.
+An invalid value produces an error naming the field:
+
+```text
+clementina.yaml/build/assembly/loadAddress: error schema.maximum: $C000 (49152) must be at most $BFFF (49151)
+```
 
 The build writes `memory-layout.json`, a map of every part in CPU memory
 and MIA RAM, and warns about each overlap.
@@ -150,25 +179,24 @@ Every asset is one JSON file that says what it is:
 
 - `format` and `version` name the file format, so a file can be checked on
   its own.
-- `id` is how other assets and the build refer to it: a palette config names
-  palettes by id, a shape names its tileset by id. Ids are case-sensitive and
-  only need to be unique among assets of the same kind. `clementina new` writes
-  them as `kind:name` (`palette:main`, `tileset:player`); Studio sometimes
-  makes them random, like `e4f5a6b7-c8d9-4e0f-9a1b-2c3d4e5f6a7b`. Either is
-  fine. Up to 64 characters: letters, digits, `.`, `_`, `:` and `-`.
-- `name` is for people, and the asset build turns it into assembly labels
-  and file names (`Level1` becomes `BG_LEVEL1` and `LEVEL1.BG`). Names must
-  be unique among assets of a kind, ignoring case. A palette's or palette
-  config's name is any text up to 64 characters; every other kind's starts
-  with a letter and holds letters, digits and `_` (tilesets, backgrounds and
-  overlays also allow `-`).
+- `id` is how other assets and the build refer to the file. A palette config
+  names palettes by id; a shape names its tileset by id. Ids are
+  case-sensitive and unique within each asset kind. They can use letters,
+  digits, `.`, `_`, `:` and `-`, up to 64 characters. Both `palette:main` and
+  a Studio-generated ID such as `e4f5a6b7-c8d9-4e0f-9a1b-2c3d4e5f6a7b`
+  work.
+- `name` is for people and also becomes part of assembly labels and built
+  file names: `Level1` becomes `BG_LEVEL1` and `LEVEL1.BG`. Names are unique
+  within each kind, ignoring case. Palette and palette-config names can be
+  any text up to 64 characters. Other names start with a letter and use
+  letters, digits and `_`; tilesets, backgrounds and overlays also allow `-`.
 
 The file's own name doesn't matter to the SDK; the manifest lists it by
 path. Studio names a file it creates after the asset's id.
 
-## What is not in the project
+## Local settings
 
-The manifest holds nothing that depends on one computer:
+Keep settings tied to your computer outside the manifest:
 
 - where `clementina-automation` is installed and which port it uses
   (`--emulator`, `--port`, `CLEMENTINA_EMULATOR`);
@@ -182,13 +210,11 @@ The manifest holds nothing that depends on one computer:
 writing anything:
 
 - the manifest against its format;
-- every listed asset against its format, then against the hardware's limits
-  (Appendix C), then its references: every id an asset names must exist,
-  every frame of an animation must come from one tileset, and so on;
+- each listed asset's format, [limits](../appendix/limits.md) and references
+  to other assets;
 - that every source file exists and is a regular file;
-- the `build` section: the right settings for the parts the project has,
-  slots that fit, every included asset known. Overlapping slots are a
-  warning, not an error.
+- the `build` settings, including asset placement and included assets.
+  Overlapping slots produce a warning.
 
 A problem is printed as the file, the place in it as a JSON pointer, its
 severity, a code and a message:
@@ -207,13 +233,30 @@ reference to a missing asset only shows up in `project validate`.
 
 ## Editing the manifest
 
-`clementina.yaml` is a text file; edit it with any editor. Two tools also
-write it:
+`clementina.yaml` is a text file; edit it with any editor. In VS Code, the
+Clementina extension helps while you type, so you rarely need this chapter
+open:
+
+- **Completion.** The editor offers fields that fit where you are typing.
+  For a path, it offers suitable project files: `.palette.json` files under
+  `palettes:`, `.s` files under `sources:`, and `.cbas` files for `entry:`.
+- **Hover.** Point at a field to see what it is for and the values it takes,
+  such as `memoryTop`'s `$1600`-`$C000`.
+- **Problems as you type.** The editor underlines invalid fields and values.
+  It also reports missing files, broken asset references and invalid memory
+  placement. The same problems appear in the **Problems** panel.
+
+The field help and completion come from Red Hat's YAML extension, which VS
+Code installs with the Clementina extension, reading the project format the
+SDK publishes.
+
+Two tools also write the manifest:
 
 - **Studio**, when you save a project you opened from its `clementina.yaml`
   ([Making assets in Studio](studio.md)).
 - **The SDK's `saveProject`**, which Studio and other tools use.
 
-Both write the manifest from scratch. YAML comments and your formatting are
-not kept, and numbers come back in decimal. Keep notes about the project in
-a README, not in comments in the manifest.
+Both change only the values that changed. Your comments stay, and so do
+addresses you wrote in hex; an address they add is written in hex too, such as
+`$7000` or `$14000`. The spacing around a changed value may be tidied, such as
+the spaces before a `#` comment.

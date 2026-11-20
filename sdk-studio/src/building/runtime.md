@@ -1,28 +1,26 @@
 # The Clementina library
 
-The Clementina library is the SDK's 6502 routines your assembly can call
-to load and use the asset build's files, play sound, keep time and read
-input.
+The Clementina library provides 6502 routines for loading assets, drawing,
+playing sound, keeping time and reading input. Assembly programs call them
+through macros.
 
-Every build with `build.assembly` links it. The build puts it in
-`build/lib/`: `clementina.lib`, archived for ld65, with its ca65 sources,
-objects, listings, and `code-sizes.json`, each module's code size. The
-whole library is about 6.4 KiB, and ld65 links only what a program calls.
+Every build with `build.assembly` links the library. Its files go in
+`build/lib/`, including `clementina.lib` and `code-sizes.json`. ld65 includes
+only the routines the program uses.
 
-`build.assembly.checks` (default `true`) says whether the routines check
-their arguments. With checks, a call with a location that isn't loaded, an
-item number out of range or a shape that isn't there fails with an error
-code instead of drawing garbage. Without them the routines are smaller and
-faster.
+By default, library routines check their arguments. A call with an unloaded
+asset or an invalid item number returns an error. Set
+`build.assembly.checks: false` to make the routines smaller and faster once
+the program is ready for that tradeoff.
 
 This chapter walks through *Walker*, the game from the previous chapter,
 then covers each group of routines. Appendix D lists them all.
 
 ## Calling a routine
 
-Every routine has a macro of the same name in `clementina-lib.inc`.
-`.include` it, or `assets.inc`, which includes it. The macro puts the arguments where the routine wants
-them and calls it:
+Every routine has a macro of the same name in `clementina-lib.inc`. Include
+that file, or include `assets.inc`, which includes it for you. The macro
+passes the arguments and calls the routine:
 
 ```asm
         DrawScreen BG_LEVEL1, #0, #0, #0
@@ -45,14 +43,12 @@ them and calls it:
 | 5 | `CL_ERR_MISSING` | A shape an animation uses isn't loaded. |
 | 6 | `CL_ERR_ARGUMENT` | An argument is out of range. |
 
-With `checks: false` the library skips most of these checks: smaller and
-faster, but a mistake draws garbage instead of failing.
+The routines use 42 bytes of zero page for arguments and scratch space.
+They also use MIA index descriptors `$40` and `$41`, both index windows,
+`CFG_SELECT` and the command registers. A call leaves these changed.
 
-The routines pass their arguments in a 42-byte block of zero page
-(`cl_a0` to `cl_a11` and scratch bytes), and use MIA's index descriptors
-`$40` and `$41`, both index windows, `CFG_SELECT` and the command registers.
-They leave all of these changed. A game that drives MIA itself as well uses
-other descriptors, and sets up its windows again after a library call.
+If your code also drives MIA directly, use other descriptors and restore
+your index-window settings after a library call.
 
 Before sending a command to MIA, each routine waits for MIA's previous
 command and any copy still running. A routine that starts a copy returns
@@ -60,11 +56,13 @@ without waiting for it.
 
 ## Walker
 
-Walker loads its assets, draws the level, starts the player's animation and
-the music, and then loops once per 60 Hz tick: it advances the animation,
-plays the jump sound if one is running, and reads the controls. Left and
-right walk (A and D, the arrow keys or a gamepad), A jumps (Space, Z or the
-gamepad's A button; only the sound), Q stops the music.
+Walker first loads its assets, draws the level, and starts the player's
+animation and music. It then loops once per 60 Hz tick to advance the
+animation, update any jump sound and read the controls.
+
+A and D, the arrow keys or a gamepad move the player. Space, Z or the
+gamepad's A button play the jump sound. Q stops the music. The project is in
+[`examples/walker`](https://github.com/fran150/clementina-sdk/tree/main/examples/walker).
 
 ```asm
 ; Walker: a level, a walking player, background music and a jump sound.
@@ -291,11 +289,12 @@ table.
 | `GetCell bg, col, row` | Reads a cell of the loaded map: A = tile, X = attribute. |
 | `SetCell bg, col, row, tile, attr` | Changes a cell of the loaded map. Draw it to show it. |
 
-Map coordinates are 16-bit, so maps can be large. From MIA RAM, each draw
-costs about 4,400 cycles whatever its size, because MIA's DMA does the
-copying. From a CPU bank, the CPU copies each byte: a whole screen takes
-about 78,000 cycles. `GetCell` and `SetCell` are the way to keep game state
-in the map (a collected coin, an opened door).
+Map coordinates are 16-bit, so maps can be large. A screen drawn from MIA
+RAM costs about 4,400 CPU cycles because MIA copies it. From a CPU bank,
+the CPU copies each byte; a whole screen takes about 78,000 cycles.
+
+Use `GetCell` and `SetCell` to keep game state in the map, such as a
+collected coin or an opened door.
 
 ### Maps bigger than their slot
 
@@ -448,13 +447,13 @@ tick. It remembers the last tick in BSS, so call it from one place.
 | `$40` | `CL_PAD_SELECT` | Select (Back) | Tab |
 | `$80` | `CL_PAD_START` | Start (Menu) | Enter |
 
-A gamepad that isn't connected reads as 0. The other buttons, the right
-stick and the analog values aren't in the bits. The keyboard's keys are the
-library's choice; for any other key, `KeyHeld` takes its USB HID usage:
-`$04`-`$1D` A to Z, `$28` Enter, `$2C` Space, `$4F`-`$52` the right, left,
-down and up arrows. *Mapping Clementina*'s [Input
-state](../../../mapping/src/mia/input.md) chapter has the key bitmap and
-the gamepad records behind them.
+A disconnected gamepad reads as 0. `ReadPad` does not include the right
+stick, other buttons or analog values. For a key outside its keyboard
+mapping, use `KeyHeld` with the USB HID usage: `$04`-`$1D` for A-Z, `$28`
+for Enter, `$2C` for Space, and `$4F`-`$52` for the arrows.
+
+*Mapping Clementina*'s [Input state](../../../mapping/src/mia/input.md)
+shows the full key bitmap and gamepad records.
 
 Both read what is held now, not typed text: `KERN_GETKEY_NB` still returns
 the characters typed, and neither affects the other.
@@ -478,10 +477,10 @@ routines, if it protects what the main loop was in the middle of:
 6. Write `MIA_CTX_POP` to `MIA_CTX`.
 7. Restore the registers.
 
-Saving and restoring cost about 1,100 cycles together. **Loads are never
-safe in a handler**: MIA runs one SD job at a time, and its state lives in
-MIA RAM. And if the main loop and the handler both touch the same animation
-or voice, keeping them apart is the game's job.
+Saving and restoring cost about 1,100 cycles together. **Do not load assets
+in a handler.** MIA runs one SD job at a time, using state in MIA RAM.
+Coordinate access if the handler and main loop use the same animation or
+voice.
 
 Taking over the IRQ vector and chaining to the kernel's handler are in
 *Mapping Clementina*, [Taking over the

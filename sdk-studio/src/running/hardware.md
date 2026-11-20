@@ -22,13 +22,11 @@ plain ASCII.
 
 ## What differs from the emulator
 
-**Time.** In the emulator, MIA's commands, its DMA copies and SD card loads
-finish at once; on the board they take real time. A program that waits for
-MIA properly (the library always does, and so does the kernel) works the
-same. One that assumes a command is done without checking may work in the
-emulator and fail on the board. Loads from the card run at a few hundred
-KB/s at best, so a level that loads instantly in the emulator may take a
-noticeable moment.
+**Time.** MIA commands, copies and card loads finish immediately in the
+emulator. On the board they take time. The kernel and Clementina library
+wait when needed. If your own code starts a command, check that it has
+finished before using its result. A level that loads instantly in the
+emulator may pause briefly on the board.
 
 **Speed.** The emulator runs at the clock you ask for, if your computer
 keeps up. On the board, MIA accepts any speed from 1 Hz to 8 MHz; above
@@ -49,10 +47,8 @@ works in both.
 
 ## Looking inside MIA
 
-When a program misbehaves on the board, MIA's USB console can show what MIA
-holds right now, without changing how the program runs. These commands run
-on the core that serves the console, not on the one that answers the 6502,
-so they don't slow the bus:
+When a program misbehaves on the board, MIA's USB console can show its
+current state while the program runs:
 
 | Command | Shows |
 | --- | --- |
@@ -74,32 +70,20 @@ start it again:
 > exec resume
 ```
 
-Add a file name to save to the SD card instead of the screen.
-`dump ram 14000 100 LEVEL.BIN` writes those bytes raw. `dump all SNAP.BIN`
-writes a snapshot of everything, all 256 KiB of MIA RAM included, to read
-later on your computer. The format is in MIA's `docs/diagnostics.md`. A name
-without a leading `/` goes in the folder BASIC's `CD` last changed to. MIA refuses with `SD busy`
-while the program is loading or saving.
+Add a file name to save a dump on the SD card. For example,
+`dump ram 14000 100 LEVEL.BIN` saves those bytes, while `dump all SNAP.BIN`
+saves a full snapshot for inspection on your computer. A relative name goes
+in BASIC's current folder. MIA reports `SD busy` if the program is using
+the card. The snapshot format is in [MIA's diagnostic
+guide](https://github.com/fran150/clementina-mia/blob/main/docs/diagnostics.md).
 
 ### The bus trace
 
-Some bugs only show up as the order of things: what the program wrote to
-MIA just before an error. MIA's diagnostic firmware also records the last
-64 register accesses. It freezes them at the first `MIA_CTX` error, the
-kind a broken interrupt handler causes. That costs the bus loop a little
-time, so the normal firmware leaves it out. Build and flash the
-diagnostic firmware from the MIA repository:
-
-```sh
-make flash-diag
-```
-
-Run the program until it fails, then type `trace` on the console. It lists
-the accesses oldest first, each one a read (`R`) or a write (`W`) of a
-register, with its value. `trace clear` starts again. The diagnostic
-firmware also adds a `busy` line to `status sys`: the share of time the bus
-core spends on the program's register accesses. When you are done,
-`make flash` puts the normal firmware back.
+MIA's diagnostic firmware can record the last 64 register accesses. After
+an error, `trace` lists those reads and writes in order; `trace clear`
+starts a new recording. See [MIA's diagnostic
+guide](https://github.com/fran150/clementina-mia/blob/main/docs/diagnostics.md)
+for using that firmware.
 
 The emulator has the same commands. There the trace is always on,
 `status pio` only says that the emulator has no state machines, and

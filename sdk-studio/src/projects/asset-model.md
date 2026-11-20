@@ -1,9 +1,9 @@
 # The asset model
 
-Each kind of asset is one thing MIA draws or plays, and an asset that
-validates is one the machine can show. This chapter explains each kind and
-the hardware fact behind it. Appendix B lists every field of every file, and
-Appendix C every limit.
+This chapter explains the asset files used for graphics and sound. It shows
+what each one holds and how the pieces fit together. For field names and
+limits, use [Appendix B](../appendix/schemas.md) and
+[Appendix C](../appendix/limits.md).
 
 The video hardware itself (the layers, CHR banks, palette RAM, OAM and their
 addresses in MIA RAM) is in *Mapping Clementina*,
@@ -12,13 +12,14 @@ addresses in MIA RAM) is in *Mapping Clementina*,
 
 ## The one fact to remember: tiles have no color
 
-Clementina draws everything from 8×8 tiles. A tile's pixels are color
-*indices*, 0 to 7, not colors. The color comes from a palette chosen where
-the tile is *placed*: in a background cell, an overlay cell or a sprite.
-Every asset below follows from that. A tileset records pixels; a background,
-an overlay or a shape records which tile goes where and with which palette;
-a palette config says which colors those palettes hold. Change the palette
-config and everything drawn against it changes color, with no tile touched.
+Clementina draws graphics from 8×8 tiles. Each pixel holds a color *index*,
+0 to 7. The actual color comes from the palette chosen when the tile is
+placed in a background, overlay or sprite.
+
+That gives each asset a job. A tileset holds pixels. A background, overlay or
+shape places tiles and chooses palette banks. A palette config fills those
+banks with colors. Change the config, and the artwork changes color without
+changing the tiles.
 
 ## Palettes and palette configs
 
@@ -51,11 +52,11 @@ All three layers (background, sprites, overlay) share the sixteen banks.
 16×16 grid of 256 tiles. MIA has eight CHR banks, at `$00200-$0C1FF`, and a
 tileset maps onto exactly one of them, with no packing.
 
-A tileset is either 3 bits per pixel (256 tiles of eight colors) or 1 bit
-per pixel. At 1 bpp the same 6,144 bytes hold three independent *planes* of
-256 two-color tiles each, and each layer picks which plane it reads. The
-`bpp` field says which; MIA's `CHR_1BPP_MASK` says it per bank, and the
-library's `UseTileset` sets it from the tileset.
+A tileset uses either 3 bits per pixel (eight color indices) or 1 bit per
+pixel (two indices). In 1 bpp mode, the same 6,144 bytes hold three
+independent *planes* of 256 tiles. Each layer chooses a plane to read.
+The tileset's `bpp` field records the mode; the library's `UseTileset`
+sets MIA's `CHR_1BPP_MASK` for that bank.
 
 `chr` holds the 6,144 bytes exactly as MIA stores them. `authoring` holds
 what Studio and other editors need but the machine doesn't:
@@ -87,29 +88,29 @@ attributes:
 `tilesetId` and `altTilesetId` name the two tilesets the map is drawn with;
 naming the same one twice uses only one.
 
-The background layer itself is smaller than most maps. MIA has eight
-background tables of 40×25 cells, in two sets of four, and `BGMODE` arranges
-one set into a plane of 40×25, 80×25, 40×50, 160×25, 40×100 or 80×50 cells
-that scrolls and wraps. A map bigger than the plane streams through it: the game copies the
-columns or rows about to scroll into view. The library's `DrawColumn`,
-`DrawRow` and the partial loads do exactly that
-([The Clementina library](../building/runtime.md)).
+The visible background is smaller than most maps. MIA has eight tables of
+40×25 cells, in two sets of four. `BGMODE` arranges one set into a plane
+that can be 40×25, 80×25, 40×50, 160×25, 40×100 or 80×50 cells. The plane
+scrolls and wraps.
+
+For a larger map, the game copies new columns or rows into the plane as it
+scrolls. The library's `DrawColumn`, `DrawRow` and partial-load routines help
+with this ([The Clementina library](../building/runtime.md)).
 
 Color 0 of a background tile is a real color, drawn in the cell's palette.
 
 ## The overlay
 
-**An overlay** is the top layer: always exactly 40×25 cells, the size of the
-screen, never scrolled. Its cells are the same as a background's. BASIC's
-text console is an overlay; a game uses it for a score, lives, a message
-box. Color 0 is transparent, so the layers below show through.
+**An overlay** is the top layer. It has exactly 40×25 cells, the size of the
+screen, and does not scroll. Its cells work like background cells, except
+color 0 is transparent. A game can use the overlay for scores, lives or
+messages; BASIC's text console uses it too.
 
-An overlay can have **placeholders**: named rectangles where the game will
-write tiles while it runs. The score's digits, a player's name. A
-placeholder holds no tiles of its own: what is painted under it is the
-overlay's starting content, and the library's `FillPlaceholder` overwrites
-the tile numbers inside it at run time, keeping the colors and flips.
-Placeholders can't overlap.
+An overlay can have **placeholders**, named rectangles for content the game
+will change while it runs, such as score digits or a player's name. The
+painted tiles beneath a placeholder are its starting content.
+`FillPlaceholder` replaces the tile numbers inside it at run time while
+keeping their colors and flips. Placeholders cannot overlap.
 
 ## Shapes
 
@@ -192,33 +193,34 @@ in one of two ways, and the two kinds of sound asset match them:
 | `sustain` | 0-15 | The level the note holds after its decay. |
 | `volume` | 0-255 | The voice's volume after the envelope. |
 
-**A song** is four voices of notes on a grid of steps. It has a tempo
-(`bpm`, 20-400), a number of steps per beat (1, 2, 3, 4, 6 or 8), beats per
-bar (for the grid only), a length in steps (up to 4,096), and an optional
-`loopStart`, the step it repeats from. Each voice has a pan (-64 left to 63
-right) and its notes. A note has a start step, a length, a pitch (0-95,
-semitones from C0 to B7) and an instrument. A voice plays one note at a
-time, so its notes can't overlap. A `legato` note carries on the note before
-it at a new pitch without a new attack. A voice with no notes compiles to
-nothing and stays free for sound effects.
+**A song** has four voices of notes arranged on a grid of steps. Its tempo
+(`bpm`) ranges from 20 to 400. You choose 1, 2, 3, 4, 6 or 8 steps per beat,
+a length of up to 4,096 steps, and optionally a `loopStart` step. Beats per
+bar arrange the editor's grid.
 
-The build compiles a song into one sequencer track per voice, the bytes MIA
-plays: the tempo becomes sample counts, each instrument change becomes the
-sequencer's `SET_*` instructions, each note a `NOTE` (or a `TIE` when it is
-legato), and the loop a `JUMP`. The voices stay together through every pass
-of the loop.
+Each voice has its own pan (-64 left to 63 right) and notes. A note names an
+instrument and has a start step, length and pitch (0-95, from C0 to B7).
+Notes on one voice cannot overlap. A `legato` note changes pitch without a
+new attack. A voice with no notes stays free for sound effects.
 
-**A sound effect** is one voice's registers for each frame of 1/60 second,
-1 to 600 frames, under one envelope and pan. Each frame holds a frequency,
-a volume, a pulse width, a waveform and the gate (on while the sound plays;
-when it goes off the release starts). Frequencies are in Hz × 16 (`freq`
-4000 is 250 Hz). The build stores, for each frame, only the registers that
-change, and the library's `TickSound` writes one frame per call.
+The build compiles one sequencer track per voice. It turns the tempo into
+sample counts, instrument changes into `SET_*` instructions, notes into
+`NOTE` or `TIE` instructions, and the loop into a `JUMP`. The voices stay
+together through each pass of the loop.
 
-## What an asset doesn't hold
+**A sound effect** describes one voice over 1 to 600 frames, at 60 frames
+per second. It has one envelope and pan setting. Each frame can set the
+frequency, volume, pulse width, waveform and gate. Turning the gate off
+starts the envelope's release.
 
-Assets hold what the program loads. They don't hold how the machine is set
-up to show them: which CHR bank a tileset goes in, which bank the sprites
-read, which tables a background is drawn into, the background mode, the
-scroll position, the layers that are on. Those are the program's decisions,
-made at run time (or, for the simple cases, in the manifest's `build.video`).
+Frequencies use Hz × 16, so `freq` 4000 means 250 Hz. The build stores only
+registers that change from one frame to the next. The library's `TickSound`
+writes one frame per call.
+
+## Placing assets on the machine
+
+Asset files hold the graphics and sound. The program chooses how to show
+them: which CHR bank sprites read, where a background goes, its scroll
+position and which layers are visible. The manifest's `build.video` can load
+the initial palettes and tilesets; the program makes the other choices while
+it runs.

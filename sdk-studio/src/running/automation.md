@@ -1,11 +1,11 @@
 # Automation and AI agents
 
-Everything the SDK does can run without a person at the keyboard: validate,
-build, start the program in the headless emulator, type into it, and look
-at its memory and its screen. This chapter covers the pieces: the CLI's JSON
-output, the checks a project can carry, `clementina check` and
-`clementina debug`, the emulator's endpoint, and the MCP server that gives
-an AI agent the same tools.
+The SDK can validate, build and run a project without someone at the
+keyboard. Its headless emulator accepts input and lets tools inspect memory
+and video state.
+
+This chapter covers command output for scripts, project checks, the
+emulator's endpoint and the MCP server for AI agents.
 
 ## The CLI in scripts
 
@@ -47,8 +47,7 @@ field), then the severity and a code that scripts can match on.
 A project can say what it should do in files under `checks/`. They aren't
 part of the manifest; `clementina check` reads them.
 
-**`checks/smoke.json`** (BASIC): text that should be on the screen, and
-keys to type.
+**`checks/smoke.json`** checks text on the screen before and after input.
 
 ```json
 {
@@ -78,10 +77,9 @@ the overlay, where BASIC prints.
 ```
 
 Addresses are CPU addresses; each check reads up to 256 bytes. A check with
-`"phase": "after"` is made after `smoke.json`'s input has been typed. A game
-that writes its state to a known address (a score, a level number, an error
-code) can be checked this way. The library demo in the SDK writes the number
-of the last check it passed to `$0280`, for exactly this reason.
+`"phase": "after"` runs after the input in `smoke.json`. Use a known memory
+address to check game state, such as a score or level number. The SDK's
+library demo writes a progress number to `$0280` for this purpose.
 
 `settleCycles` is how long the emulator runs before looking, in CPU cycles.
 It is a budget for the test, not a statement about how fast anything is on
@@ -133,10 +131,10 @@ Memory $0280: .. .. .. ..
 Report: .../build/inspection/debug-report.json
 ```
 
-Line 61 of `src/main.s` is `TickAnimation player`. `debug` builds, sets
-the breakpoint before the program loads, waits for the stop, and saves the
-registers, the source location, the four bytes at 640 and the video state.
-As in VS Code, a line that makes no code is refused rather than moved.
+Line 61 of `src/main.s` calls `TickAnimation player`. `debug` builds the
+project, stops before that line and saves the registers, source location,
+four bytes at address 640 and video state. Choose a line that assembles
+instructions; comments and labels alone cannot hold a breakpoint.
 
 ## The emulator's endpoint
 
@@ -145,7 +143,7 @@ requests to `/v1` on your own computer, each a JSON object with a `version`
 and a `method`.
 
 ```sh
-clementina-automation -sd ~/games/catch -port 47000
+clementina-automation -sd ~/games/catch/build/sd -port 47000
 ```
 
 ```text
@@ -203,10 +201,9 @@ Configure the assistant to start it with:
 clementina mcp
 ```
 
-How to add an MCP server depends on the assistant; most take the command in
-a settings file. The server runs on your computer, works on paths on your
-computer, and owns at most one emulator at a time. To step, the agent
-pauses first (`emulator_control`), then steps.
+Add that command to the assistant's MCP settings. The server works on local
+project paths and controls one emulator at a time. To step, the agent pauses
+the emulator with `emulator_control`, then calls `emulator_step`.
 
 An agent works on a game in the same loop a person does: edit, validate,
 build, check and look. `clementina check` and `clementina debug` leave their

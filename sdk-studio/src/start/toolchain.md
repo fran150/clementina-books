@@ -1,10 +1,9 @@
 # The toolchain at a glance
 
-A Clementina project is a folder on your computer.
-[The project folder](../projects/project-folder.md) shows what a typical one
-contains. You write the code in an editor such as VS Code, with the
-Clementina extension, and make the assets in Clementina Studio. The SDK's
-then builds the project into files Clementina can run.
+A Clementina project is a folder on your computer. You can write its code in
+VS Code with the Clementina extension, and make its assets in Clementina
+Studio. The SDK builds the project into files Clementina can run.
+[The project folder](../projects/project-folder.md) shows a typical layout.
 
 ## The tools
 
@@ -20,7 +19,8 @@ then builds the project into files Clementina can run.
 
 ### The Clementina library
 
-The SDK comes with the [Clementina library](../building/runtime.md), 6502
-routines your assembly can call to load and use assets, play sound, keep
-time and read input. Every project with assembly links it, and the program gets only the
-routines it calls. Its chapter and Appendix D list what it has.
+The SDK comes with the [Clementina library](../building/runtime.md). Its 6502
+routines load assets, play sound, keep time and read input. Every project with
+assembly links the library; the finished program includes the routines it
+uses. The library chapter and [Appendix D](../appendix/runtime-index.md) list
+them.

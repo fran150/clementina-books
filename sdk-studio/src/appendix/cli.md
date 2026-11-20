@@ -29,7 +29,8 @@ Run without a command, or with `--help`, it prints this list.
 | Option | Commands | Meaning |
 | --- | --- | --- |
 | `--json` | all | Print one JSON object on standard output and nothing else. |
-| `--emulator PATH` | `run`, `doctor` | The `clementina-automation` executable. Default: `CLEMENTINA_EMULATOR`, then the one on the `PATH`. |
+| `--emulator PATH` | `run`, `check`, `debug`, `doctor` | The `clementina-automation` executable. Default: `CLEMENTINA_EMULATOR`, then the one on the `PATH`. |
+| `--renderer PATH` | `check` | Add PNG images to the inspection report with `clementina-render`. |
 | `--port N` | `run` | The endpoint's port, 1-65535. 0, the default, picks a free one. |
 | `--strict` | `doctor` | Fail unless all four tools are present. |
 
@@ -53,12 +54,13 @@ Run without a command, or with `--help`, it prints this list.
 {"version": 1, "ok": true, "diagnostics": [], "exitCode": 0, "message": "...", "data": {}}
 ```
 
-`message` appears where a person would have been told something; `data`
-appears for `build` and `run`. For `build`, `data.sdRoot` is the folder to
-use as the SD card (`build/sd`), `loadPlan`, `bootstrap` (`build/boot.cbas`)
-and `memoryLayout` are the paths of those files, and `assembly` (`prg`, `entryAddress`) and `basic`
-(`program`, `lines`) appear for the parts the project has. `run` reports
-`assembly.entryAddress` and `basic.program`.
+`message` holds the human-readable result. `data` holds command-specific
+results for `build` and `run`.
+
+For `build`, `data.sdRoot` is the card folder (`build/sd`). `loadPlan`,
+`bootstrap` and `memoryLayout` give paths to generated files. The `assembly`
+and `basic` objects appear when the project has those parts. `run` reports
+the assembly entry address and BASIC program path when present.
 
 A diagnostic has a severity (`error` or `warning`), a code, a message, the
 file it is about and a JSON pointer into that file (`/build/assembly/entrySymbol`).

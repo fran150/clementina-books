@@ -1,9 +1,9 @@
 # Appendix E: Emulator automation methods
 
-The headless emulator's endpoint, from the SDK's
-`specs/emulator-automation.json`. Every request is an HTTP POST to `/v1` with
-a JSON object; every answer is `{"version":1,"ok":true,"result":...}` or
-`{"version":1,"ok":false,"error":"..."}`. [Automation and AI
-agents](../running/automation.md) shows it in use.
+These methods come from the SDK's emulator automation specification. Send
+each request as an HTTP POST to `/v1` with a JSON object. A successful
+response has `"ok":true` and a `result`; a failure has `"ok":false` and an
+`error`. [Automation and AI agents](../running/automation.md) shows the
+endpoint in use.
 
 {{#include ../../../tables/sdk-automation.md}}

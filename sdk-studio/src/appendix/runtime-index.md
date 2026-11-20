@@ -1,13 +1,12 @@
 # Appendix D: Library routine index
 
-Every macro of the Clementina library, from `clementina-lib.inc` in the
-SDK's `packages/lib/asm`. [The Clementina library](../building/runtime.md)
-explains them.
+This index lists the macros in `clementina-lib.inc`. [The Clementina
+library](../building/runtime.md) explains how to use them.
 
-Arguments: an asset or an instance is its label. Any other argument is
-`#value` or the memory that holds it. A *byte* takes one byte, a *word*
-two, a *location* three. Every routine returns carry clear on success, and
-carry set with the reason in `cl_error` on failure.
+Pass an asset or instance by its label. Other arguments use `#value` for an
+immediate value or a name for the memory that holds it. A *byte* takes one
+byte, a *word* two and a *location* three. Routines return carry clear on
+success. On failure, they set carry and put the reason in `cl_error`.
 
 ## Every asset
 

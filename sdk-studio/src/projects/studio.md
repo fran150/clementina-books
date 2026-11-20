@@ -24,11 +24,13 @@ as in Part I), then open it in Studio:
 3. Edit, add and delete assets.
 4. **File ▸ Save Project** (Ctrl/Cmd+S) writes them back into the folder.
 
-Saving writes each asset to the path the manifest already gives it, and a
-new asset to `assets/<kind>/<id>.json`. It updates the manifest's asset
-lists and leaves `program` and `build` as they were. It never touches your
-source files. Saving checks the whole project first and refuses to write one
-that wouldn't validate.
+Before saving, Studio validates the project. If validation fails, it does
+not write the changes. A successful save writes existing assets to their
+listed paths and new ones to `assets/<kind>/<id>.json`. It updates the
+manifest's asset lists too.
+
+Your source files and the manifest's `program` and `build` settings stay as
+they were.
 
 Two things to know about saving:
 
@@ -37,8 +39,8 @@ Two things to know about saving:
   while Studio was open), saving asks before taking it out of
   `clementina.yaml`. Cancel is the default. The file itself stays in the
   folder either way.
-- **The manifest is rewritten from scratch**, so comments and formatting
-  in it are lost ([The project folder](project-folder.md#editing-the-manifest)).
+- **Studio changes only what changed in the manifest**, so your comments and
+  hex addresses stay ([The project folder](project-folder.md#editing-the-manifest)).
 
 **Save Project As…** always writes a `.cstudio` file, and the window stops
 being connected to the folder. **New Project** starts an empty `.cstudio`
@@ -60,12 +62,12 @@ recover the unsaved work the next time it starts.
 
 ## The layout
 
-The tabs along the top are the editors, in the order a game is usually made:
-Palettes, Tilesets, Overlays, Backgrounds, Shapes, Animations, Sounds,
-Music. Ctrl/Cmd+1 to 9 switch between them. Beside the tabs is the **Config
-picker**: the palette config every editor previews with. Switching it
-recolors everything on screen and changes nothing in the project, so switch
-freely.
+The tabs along the top open the editors: Palettes, Tilesets, Overlays,
+Backgrounds, Shapes, Animations, Sounds and Music. Ctrl/Cmd+1 to 9 switch
+between tabs.
+
+Beside them, the **Config picker** chooses the palette config used for
+preview. Switching it recolors the previews without changing the project.
 
 Every editor is laid out the same way:
 
@@ -109,40 +111,41 @@ Painting tools have the same letter in every editor:
 | V | select and move (shapes) |
 
 With a painting tool, the right button paints color 0, which erases. With
-any other tool it opens the edit menu. Shift+H and Shift+V flip the
-selection. Ctrl/Cmd+C, X and V copy, cut and paste through one clipboard
-that holds one kind of thing at a time (pixels, cells, sprites, frames, a
-palette, a color, sound frames or notes), so a paste only lands where it
-fits. Ctrl/Cmd+D duplicates sprites and frames.
+another tool, it opens the edit menu. Shift+H and Shift+V flip the selection.
 
-One undo history covers the whole project: Ctrl/Cmd+Z and
-Ctrl/Cmd+Shift+Z (or Ctrl/Cmd+Y) step through every edit in every editor,
-and the Undo and Redo buttons name the step they would take. Deleting
-anything undo can bring back asks no question.
+Ctrl/Cmd+C, X and V copy, cut and paste. The clipboard holds one kind of
+item at a time, such as pixels, cells, sprites, frames or notes. Paste is
+available where that item fits. Ctrl/Cmd+D duplicates sprites and frames.
+
+One undo history covers the whole project. Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z
+(or Ctrl/Cmd+Y) step through edits across all editors. The Undo and Redo
+buttons show the name of the next step. You can undo deletions.
 
 **?**, Ctrl/Cmd+/ or **Help ▸ Keyboard Shortcuts** lists every key that
 works everywhere and in the editor on screen.
 
 ## Palettes
 
-The palette library on the left, the eight colors of the selected palette in
-the middle, the palette configs on the right. A config shows all sixteen
-banks, each with a picker for the palette it holds. Deleting a palette that
-configs use asks which palette those banks should hold instead, or offers to
-empty them.
+The palette library is on the left, the selected palette's eight colors in
+the middle, and palette configs on the right. Each config shows its sixteen
+banks with a palette picker for each one.
+
+If you delete a palette used by a config, Studio asks which palette should
+replace it in those banks. You can also leave the banks empty.
 
 Make one config for every palette RAM layout the game loads, and pick the
 one to preview with in the Config picker.
 
 ## Tilesets
 
-A 16×16 map of the tileset's tiles, a zoomable pixel canvas over the part of
-the map you select, and palette RAM as the active config arranges it.
+The editor shows a 16×16 map of the tileset's tiles. Select part of the map
+to edit it on a zoomable pixel canvas. The color picker shows palette RAM
+as the active config arranges it.
 
-Painting records the selected color's palette bank on the tile: that is the
-bank the tile defaults to when you place it later. A 1 bpp tileset shows a
-plane selector for its three pages, and its color picker offers only colors
-0 and 1.
+When you paint, Studio records the selected color's palette bank on the
+tile. That becomes the tile's default bank when you place it. A 1 bpp
+tileset has three pages, selected with the plane picker, and offers only
+colors 0 and 1.
 
 The **Objects** list holds named selections of tiles (a 2×2 tree, a 4×4
 house), the tileset's compositions. The background and overlay editors list
@@ -159,26 +162,25 @@ them too, to pick the whole group as one stamp.
 3. **Place at tile**: the column and row of the tileset where the image's
    top-left tile goes, and whether to make an Object of it.
 
-The dialog previews the source, the converted image as Clementina would show
-it, and where it lands in the tileset, and changes nothing until **Import
-image**.
+The dialog previews the source, the converted image and its destination in
+the tileset. It changes nothing until you choose **Import image**.
 
 Raw tile data (`.CHR`, `.BIN` or `.PRG` files of CHR bytes) imports into a
 new tileset.
 
 ## Overlays
 
-The fixed 40×25 overlay, with a primary and an alternate tileset. The tile
-picker on the left shows either tileset; clicking a tile sets the stamp's
-tile and which tileset it reads in one go, and dragging picks a rectangle of
-tiles. The pencil stamps; fill, rectangle and the eraser work one tile at a
-time. The palette dock sets the stamp's bank.
+The overlay editor shows the fixed 40×25 grid and its primary and alternate
+tilesets. The tile picker on the left shows either tileset. Click a tile to
+make it the stamp, or drag to select a rectangle of tiles.
 
-The **Placeholder** tool drags out a placeholder; the Placeholders panel
-lists them by name, and the Placeholder panel on the right edits the
-selected one's column, row, width and height. Placeholders can't overlap or
-leave the grid. They show as labeled dashed outlines that don't block
-painting.
+The pencil places the stamp. Fill, rectangle and eraser work one tile at a
+time. The palette dock chooses the stamp's bank.
+
+Use the **Placeholder** tool to draw a placeholder. The Placeholders panel
+lists them by name; the panel on the right edits the selected one's position
+and size. Placeholders cannot overlap or leave the grid. Their dashed
+outlines do not block painting.
 
 ## Backgrounds
 
@@ -192,20 +194,23 @@ Two rectangles over the map preview the hardware, each with its own handle:
 - **Yellow**: the 320×200 screen, placed in the plane by the scroll
   position. It wraps at the plane's edges, as the hardware does.
 
-The **Status** panel explains the two colors and shows the register-level
-detail: `BGMODE`, `BGSET`, the plane's origin in the map, `SCROLL_X` and
-`SCROLL_Y`, and which physical tables the screen touches. Use it to plan how
-a level scrolls. **Toggle overlay** draws an overlay over the screen
-rectangle, to check a level with its HUD. None of this is saved in the
+The **Status** panel explains the rectangles and shows `BGMODE`, `BGSET`,
+the plane's origin, `SCROLL_X`, `SCROLL_Y` and the tables touched by the
+screen. Use it to plan a scrolling level.
+
+**Toggle overlay** draws an overlay over the screen rectangle so you can
+check the level with its HUD. These preview settings are not saved in the
 background.
 
 ## Shapes
 
-Create a shape, pick its tileset, then pick tiles in the tile map and place
-them around the origin (the Place tiles tool). Drag to move sprites, arrows
-nudge them a pixel, and the right rail flips and reorders the selected
-sprites: up and down one OAM record, or to the front or the back. The list
-order is OAM order, so a later sprite draws on top.
+Create a shape and choose its tileset. Pick tiles from the map, then place
+them around the origin with the Place tiles tool. Drag sprites to move them,
+or use the arrow keys to nudge them one pixel.
+
+The right rail flips and reorders selected sprites. You can move them one
+OAM record at a time or send them to the front or back. Later sprites in
+the list draw on top.
 
 Each sprite's palette bank starts as its tile's bank; change it per sprite.
 A shape's tileset can be switched at any time; the sprites keep their tile
@@ -213,12 +218,12 @@ numbers and show those tiles of the new tileset.
 
 ## Animations
 
-Select shapes in the library (Ctrl/Cmd-click or Shift-click) and append them
-as frames. The editor only offers shapes on the animation's tileset. The
-frame strip reorders by dragging or Alt+←/→. The Frame panel on the right
-edits the selected frame's shape, ticks and offset; dragging on the preview
-offsets the pose too. Shift+H and Shift+V flip a frame; a flipped frame's
-card is marked ↔ or ↕.
+Select shapes in the library with Ctrl/Cmd-click or Shift-click, then append
+them as frames. The editor offers only shapes on the animation's tileset.
+
+Drag frames in the strip to reorder them, or use Alt+←/→. The Frame panel
+edits a frame's shape, duration and offset. You can also drag the preview
+to move the pose. Shift+H and Shift+V flip it; ↔ and ↕ mark flipped frames.
 
 Space plays and pauses, the arrows step frames. The preview is the native
 320×200 screen at 60 ticks a second, and it loops.
@@ -229,11 +234,13 @@ A library of sound effects on the left. The frames run across five lanes:
 pitch (on a log scale that snaps to semitones while Snap is on), volume,
 pulse width (dimmed on frames that aren't pulse waves), waveform and gate.
 
-The pencil (B) draws values, the line (L) drags an even ramp (a pitch sweep,
-a fade), and the eraser (E) writes 0. The Select tool (S) takes a range of
-frames to copy, cut, paste, duplicate or delete. The right rail reverses
-(Shift+H), inverts the pitch (Shift+V) and transposes (↑ and ↓, Shift for an
-octave), on the selection or on the whole sound.
+The pencil (B) draws values. The line tool (L) makes an even ramp, such as a
+pitch sweep or fade. The eraser (E) writes 0. Select (S) picks frames to
+copy, cut, paste, duplicate or delete.
+
+The right rail can reverse frames (Shift+H), invert pitch (Shift+V), or
+transpose with ↑ and ↓ (hold Shift for an octave). These actions work on the
+selection or the whole sound.
 
 The **Sound** panel holds the envelope with its curve, the pan, the length,
 and the **Generate** buttons: blip, coin, jump, laser, explosion, hit,
@@ -246,18 +253,21 @@ strip (pick the voice to draw on, 1 to 4, and mute voices in the preview), a
 piano roll where the other voices show dimmed, and a transport.
 
 The pencil adds a note of the last length; drag to size it. Drag a note to
-move it and its end to resize it; right-click erases. A note placed over
-another on the same voice cuts it, since a voice plays one note at a time.
-With the Select tool (S): ← and → move notes a step, ↑ and ↓ transpose
-(Shift for an octave), Shift+H reverses them in time, Shift+V inverts them,
-and L makes them legato. Clicking an instrument gives it to the selected
-notes.
+move it, or drag its end to resize it. Right-click erases. Placing a note
+over another on the same voice cuts the existing note, since a voice plays
+one at a time.
 
-The ruler sets where playing and pasting start; its right-click menu plays
-from there or sets the loop. The **Song** panel holds the tempo, steps per
-beat, meter, length, loop, each voice's pan and how many bytes each voice's
-track takes in MIA RAM. The **Instrument** panel holds the waveform, pulse
-width, volume and envelope; click the roll's keyboard to hear it.
+With Select (S), ← and → move notes by a step, and ↑ and ↓ transpose them
+(hold Shift for an octave). Shift+H reverses time, Shift+V inverts pitch, and
+L makes notes legato. Click an instrument to assign it to selected notes.
+
+The ruler sets where playing and pasting start. Right-click it to play from
+that position or set the loop.
+
+The **Song** panel holds the tempo, steps per beat, meter, length, loop and
+pan for each voice. It also shows how much MIA RAM each voice's track uses.
+The **Instrument** panel holds the waveform, pulse width, volume and
+envelope. Click the piano roll's keyboard to hear it.
 
 Space plays and stops when tapped, and pans while held.
 
@@ -266,9 +276,8 @@ Space plays and stops when tapped, and pans while held.
 - **Graphics** are drawn the way the video client draws them: the same layer
   order, color 0 transparent on sprites and the overlay and a real color on
   the background, and palettes from the active config.
-- **Sound** plays on a port of MIA's own audio code that produces the same
-  samples as the firmware, checked sample for sample against it. What it
-  doesn't model is the board's output stage.
+- **Sound** uses the same audio samples as MIA's firmware. The board's output
+  stage can change how they sound through speakers or headphones.
 
-What Studio can't preview yet is a whole scene: a background, sprites and an
-overlay together under one config, with sprite-against-background priority.
+Studio previews each asset. To see a background, sprites and an overlay
+together, including their priority, run the project in the emulator.
