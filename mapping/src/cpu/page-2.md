@@ -39,9 +39,9 @@ easy home for a short machine-language routine called from BASIC with `SYS`
 or `USR`:
 
 ```basic
-10 FOR I=0 TO 5:READ B:POKE 640+I,B:NEXT
-20 SYS 640
-30 PRINT PEEK(647)
+10 FOR I=0 TO 5:READ B:POKE $0280+I,B:NEXT
+20 SYS $0280
+30 PRINT PEEK($0287)
 40 DATA 169,42,141,135,2,96
 ```
 

@@ -287,18 +287,18 @@ added.
 3. Light the LEDs from BASIC:
 
    ```basic
-   POKE 49154,255
-   POKE 49152,85
+   POKE $C002,255
+   POKE $C000,85
    ```
 
    49154 is `$C002`, port B's direction register: 255 makes all eight pins
    outputs. 49152 is `$C000`, port B itself: 85 is `0101 0101`, so PB0, PB2,
-   PB4 and PB6 light. `POKE 49152,170` lights the other four.
+   PB4 and PB6 light. `POKE $C000,170` lights the other four.
 4. Make them count: type this program, then `RUN`.
 
    <!-- example: skip -->
    ```basic
-   10 FOR I=0 TO 255:POKE 49152,I:NEXT:GOTO 10
+   10 FOR I=0 TO 255:POKE $C000,I:NEXT:GOTO 10
    ```
 
    PB0 flickers fastest and PB7 slowest. Stop it with `Ctrl+C`.

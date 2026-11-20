@@ -29,9 +29,9 @@ This routine at 640 (`$0280`) returns 42. It loads 42 into `Y` and 0 into
 number in `A` (high byte) and `Y` (low byte) into `FAC` and returns:
 
 ```basic
-10 FOR I=0 TO 6: READ B: POKE 640+I,B: NEXT
+10 FOR I=0 TO 6: READ B: POKE $0280+I,B: NEXT
 20 DATA 160,42,169,0,108,8,0
-30 POKE 11,128: POKE 12,2
+30 POKE $0B,$80: POKE $0C,$02
 40 PRINT USR(0)
 ```
 

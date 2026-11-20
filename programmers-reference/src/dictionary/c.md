@@ -19,7 +19,7 @@ current directory as it was.
 ```basic
 MKDIR "LEVELS"
 CD "LEVELS"
-BSAVE "ONE.PRG",640,4
+BSAVE "ONE.PRG",$0280,4
 CD "/"
 DIR "LEVELS"
 ```

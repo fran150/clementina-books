@@ -77,7 +77,7 @@ If it fails early, before 4 MHz:
   low half shrinks (62.5 ns at 8 MHz). When it gets near 10 ns, the VIA is
   at its limit. That is about the smallest gap a 50 MHz scope can measure,
   so treat the last few nanoseconds as an estimate.
-- **The write strobe.** Run `10 POKE 640,0:GOTO 10`, put channel 1 on PHI2
+- **The write strobe.** Run `10 POKE $0280,0:GOTO 10`, put channel 1 on PHI2
   (U1.37, the CPU) and channel 2 on `~WE` (U4.27, the base RAM), and trigger on `~WE` rising. `~WE`
   must rise within about 10 ns of PHI2 falling at every speed. The scope
   shows about 7-10 ns even when the real gap is smaller: if it shows much

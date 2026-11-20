@@ -49,9 +49,9 @@ Port B starts as eight inputs. A program makes bits outputs by setting them
 in `VIA_DDRB`, then writes them in `VIA_ORB`. From BASIC:
 
 ```basic
-10 POKE 49154,255: REM DDRB: ALL OUTPUTS
-20 POKE 49152,170: REM ORB: %10101010
-30 PRINT PEEK(49152)
+10 POKE $C002,255: REM DDRB: ALL OUTPUTS
+20 POKE $C000,170: REM ORB: %10101010
+30 PRINT PEEK($C000)
 ```
 
 ```text
@@ -69,7 +69,7 @@ free for programs. Writing the high byte, `VIA_T2CH`, starts it, and when it
 reaches zero it sets bit 5 of `VIA_IFR`. This routine waits for 1,000 cycles
 with it:
 
-<!-- example: org=$0280 prg=T2.PRG run="BLOAD \"T2.PRG\"|SYS 640: PRINT \"DONE\"" -->
+<!-- example: org=$0280 prg=T2.PRG run="BLOAD \"T2.PRG\"|SYS $0280: PRINT \"DONE\"" -->
 ```asm
 .include "clementina.inc"
 
@@ -110,14 +110,14 @@ handler. `KERN_WARMSTART` turns every source but Timer 1 off.
 
 This program counts falling edges on CA1 in `$98`:
 
-<!-- example: org=$0280 prg=CA1.PRG run="BLOAD \"CA1.PRG\"|SYS 640: SYS 643: PRINT PEEK(152)" -->
+<!-- example: org=$0280 prg=CA1.PRG run="BLOAD \"CA1.PRG\"|SYS $0280: SYS $0283: PRINT PEEK($98)" -->
 ```asm
 .include "clementina.inc"
 CA1   = %00000010
 COUNT = $98
 
-        jmp ca1_on              ; SYS 640
-        jmp ca1_off             ; SYS 643
+        jmp ca1_on              ; SYS $0280
+        jmp ca1_off             ; SYS $0283
 ca1_on:
         sei
         lda #<ca1_irq

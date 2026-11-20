@@ -1,18 +1,17 @@
 # Programming in BASIC with the SDK
 
-A project's BASIC program is a text file of numbered lines, edited on your
-computer. The SDK compiles it into the same file Clementina's `SAVE` would
-write, and the program runs exactly as if it had been typed in. This chapter
-covers the source format, what the build does, how a BASIC program gets its
-graphics, and the editor support. The language itself is in the
-*Programmer's Reference Guide*.
+A project's BASIC program is a text file of numbered lines. The SDK compiles
+it into the same format Clementina's `SAVE` writes, so it runs as though you
+typed it on the machine.
+
+This chapter covers source files, build output, graphics and editor support.
+For the language itself, use the *Programmer's Reference Guide*.
 
 ## The source file
 
-`program.entry` names one `.cbas` file; a BASIC program is one file. The
-source is text, so it gets its own extension: `.BAS` is for tokenized
-programs, the binary files that `SAVE` writes and `LOAD` reads. The rules
-are BASIC's own:
+`program.entry` names one `.cbas` source file. The `.BAS` extension is for
+tokenized files that `SAVE` writes and `LOAD` reads. The source follows
+BASIC's rules:
 
 - Every line starts with a line number, 0 to 63999.
 - A line is at most 80 characters, line number included.
@@ -38,17 +37,17 @@ program builds them at run time instead.
 
 ## What the build makes
 
-`build.basic.outputName` names the output: `game` makes
-`GAME.BAS` in the card folder, `build/sd`. `build.basic.memoryTop`, optional, lowers BASIC's top of
-memory to leave room for assembly ([Code that returns to
-BASIC](assembly.md#code-that-returns-to-basic)). The file is exactly what `SAVE` writes: the program's
-lines from the start of BASIC's program area to the start of its variables,
-with no header. It is not a PRG, and `BLOAD` can't read it; `LOAD` can.
+`build.basic.outputName` names the compiled file: `game` makes `GAME.BAS`
+in `build/sd`. The optional `build.basic.memoryTop` leaves room for assembly
+above BASIC ([Code that returns to
+BASIC](assembly.md#code-that-returns-to-basic)).
 
-Each stored line starts with a link to the next line. The build doesn't know
-where BASIC's program area starts (it moves whenever the ROM changes), so it
-writes placeholder links, and `LOAD` rebuilds them as it reads the file. The
-file must therefore go through `LOAD` before it runs.
+The `.BAS` file contains the program's lines, with no PRG header. Clementina
+reads it with `LOAD` or `RUN "GAME.BAS"`.
+
+Each stored line links to the next. The compiled file has placeholder links;
+`LOAD` rebuilds them for the machine's current BASIC program area. Load the
+file before running it.
 
 `clementina basic compile` does the same for any file, outside a project:
 
@@ -102,14 +101,14 @@ build:
 renderer scan only sprite 0, and `SPRITE` sets sprite 0's tile, position,
 palette and flags.
 
-The other kinds of asset (backgrounds, overlays, shapes, animations, songs,
-sound effects) reach the card only through the asset build, which needs
-`build.assembly`, because the routines that use them are 6502 code. A BASIC
-program draws its backgrounds and plays its music with BASIC statements, and
-can load raw data it saved earlier with `NTLOAD`, `ATRLOAD`, `OAMLOAD`,
-`PALLOAD`, `CHRLOAD` and `MIALOAD`. A BASIC program can also call assembly
-routines built in the same project, with `SYS`: see [Code that returns to
-BASIC](assembly.md#code-that-returns-to-basic).
+Backgrounds, overlays, shapes, animations, songs and sound effects reach the
+card through the asset build. That build needs assembly because the library
+routines that use those assets are 6502 code.
+
+A BASIC program can draw backgrounds and play music with BASIC statements.
+It can also load raw data with `NTLOAD`, `ATRLOAD`, `OAMLOAD`, `PALLOAD`,
+`CHRLOAD` and `MIALOAD`. To call assembly built in the same project, use
+`SYS` ([Code that returns to BASIC](assembly.md#code-that-returns-to-basic)).
 
 ## Editing BASIC in VS Code
 
@@ -136,10 +135,6 @@ is what the machine would do:
   for a start and a step, renumbers every line and updates every static
   `GOTO`, `GOSUB` and `THEN` target. A target that doesn't exist is left
   alone, so its error stays visible.
-
-Other editors can use the same server: it is `clementina-basic-lsp`, in the
-SDK's `packages/basic-lsp`, and it speaks the Language Server Protocol over
-standard input and output.
 
 [Debugging in VS Code](../running/debugging.md) covers breakpoints and
 stepping through BASIC lines.

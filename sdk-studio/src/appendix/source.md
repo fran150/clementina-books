@@ -5,10 +5,9 @@ Studio, the emulator or the video client and trying the change before it is
 released. To make projects, install the released tools as in
 [Installing](../start/installing.md) instead.
 
-A development install sits beside the released tools; it doesn't replace
-them. Your own builds go into one folder, `~/.clementina/dev/bin`, and a
-shell switch puts that folder ahead of the released tools on your `PATH`, one
-terminal at a time. The SDK's
+A development install keeps your builds in `~/.clementina/dev/bin` beside
+the released tools. `clementina dev on` switches all terminals to the dev
+builds until you turn it off. The SDK's
 [docs/dev-install.md](https://github.com/fran150/clementina-sdk/blob/main/docs/dev-install.md)
 has the full details.
 
@@ -72,13 +71,14 @@ clementina dev
 clementina dev off
 ```
 
-`on` holds in every terminal, even after a restart, until you run `off`.
-While it's on, the installed `clementina` hands each command to your
-checkout's build, and on macOS and Linux the `clementina-emulator`,
-`clementina-automation` and video-client commands run your builds too.
-`clementina run`, the debugger and the MCP server start your emulator on
-every system. Each command reminds you on stderr that dev mode is on, and
-`clementina doctor` says so, so you won't mistake your build for a release.
+`on` applies to every terminal, even after a restart, until you run `off`.
+The installed `clementina` then passes commands to your checkout's build.
+On macOS and Linux, the emulator and video-client commands also run your
+builds. On every system, `clementina run`, the debugger and MCP server use
+your emulator.
+
+Commands remind you on standard error that dev mode is on, and
+`clementina doctor` reports it too.
 
 `clementina dev` and `clementina update` always run the installed CLI, so
 `clementina dev off` works even when your checkout doesn't build. A tool you

@@ -31,6 +31,10 @@
 - [Performance](running/performance.md)
 - [On the real machine](running/hardware.md)
 
+# Part V: Examples
+
+- [Worked examples](examples/examples.md)
+
 ---
 
 [A. CLI reference](appendix/cli.md)

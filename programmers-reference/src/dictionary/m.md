@@ -181,7 +181,7 @@ and RETURN goes back to BASIC's `READY.`, with the program and its variables
 kept.
 
 ```basic
-POKE 640,65: POKE 641,66
+POKE $0280,65: POKE $0281,66
 MON
 280.281
 Q

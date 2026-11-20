@@ -1,7 +1,7 @@
 # Installing
 
-One command installs everything: the `clementina` command, cc65, the
-emulator, the video client and Clementina Studio.
+The installer sets up the `clementina` command, cc65, the emulator, the
+video client and Clementina Studio.
 
 On macOS and Linux:
 
@@ -80,19 +80,23 @@ language servers; debugging uses the emulator, and checking assembly as you
 type uses cc65. To update it, install the newer `.vsix` the
 same way.
 
-The extension covers both languages. `.cbas` files get BASIC highlighting
-and the BASIC language server ([Editing BASIC in VS
-Code](../building/basic.md#editing-basic-in-vs-code)). `.s` and `.inc` files
-get Clementina Assembly highlighting (65C02 and ca65) and the assembly
-language server: ca65's errors as you type, instruction and symbol help on
+The extension covers both languages. For `.cbas` files, it provides BASIC
+highlighting and error checks ([Editing BASIC in VS
+Code](../building/basic.md#editing-basic-in-vs-code)). For `.s` and `.inc`
+files, it provides 65C02 and ca65 highlighting, errors as you type, help on
 hover, completion and go to definition ([Editing assembly in VS
 Code](../building/assembly.md#editing-assembly-in-vs-code)). You can set
-breakpoints from the gutter in both.
+breakpoints in the gutter for either language.
 
-Other extensions can claim `.s` files too; Go's calls them Go Assembly. A
-project made with `clementina new` has a `.vscode/settings.json` that opens
+`clementina.yaml` gets completion, hover help and the SDK's checks as you
+type ([Editing the manifest](../projects/project-folder.md#editing-the-manifest)).
+For that, VS Code also installs Red Hat's YAML extension, which the Clementina
+extension depends on.
+
+Other extensions can claim `.s` files; Go's, for example, calls them Go
+Assembly. Projects made with `clementina new` include a setting that opens
 them as Clementina Assembly. In another folder, click the language name at
-the right of the status bar and pick **Clementina Assembly**.
+the right of VS Code's status bar and choose **Clementina Assembly**.
 
 ## The MCP server
 

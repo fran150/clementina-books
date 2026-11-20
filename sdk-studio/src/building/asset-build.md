@@ -1,17 +1,20 @@
 # The asset build
 
-With an asset build, a project's levels, sprites and music go on the SD
-card as files, and its assembly loads them while it runs. The asset build makes those files,
-plus a description of each one the program's code can use: its size, its
-default place in memory, and its parts. This chapter covers the `build.assets`
-section and what it makes. The next one covers the library routines that
-load and use the files.
+An asset build puts levels, sprites, music and other assets on the SD card.
+It also gives the program a descriptor for each file: its size, default
+place in memory and any parts the program can load separately.
+
+This chapter covers `build.assets` and its output. [The Clementina
+library](runtime.md) covers the routines that load and use those files.
 
 ## An example
 
 The examples in this chapter and the next come from *Walker*, a small game:
-a level, a player that walks, background music and a jump sound. Its
-manifest lists the assets as usual, and adds:
+a level, a player that walks, background music and a jump sound. The
+whole project is in the SDK, in
+[`examples/walker`](https://github.com/fran150/clementina-sdk/tree/main/examples/walker)
+([Worked examples](../examples/examples.md#assets-music-and-sound-from-assembly)).
+Its manifest lists the assets as usual, and adds:
 
 ```yaml
 build:
@@ -21,14 +24,14 @@ build:
       - src/main.s
     linkerConfig: link.cfg
     outputName: walker
-    loadAddress: 6144
+    loadAddress: $1800
     entrySymbol: game_start
   assets:
     slots:
-      - {name: level,   mia: 0x14000, size: 0x1000}
-      - {name: actors,  mia: 0x15000, size: 0x0400}
-      - {name: effects, mia: 0x15400, size: 0x0400}
-      - {name: music,   mia: 0x15800, size: 0x0800}
+      - {name: level,   mia: $14000, size: $1000}
+      - {name: actors,  mia: $15000, size: $0400}
+      - {name: effects, mia: $15400, size: $0400}
+      - {name: music,   mia: $15800, size: $0800}
     include:
       - {kind: paletteConfig, id: palette-config:main, slot: palettes}
       - {kind: tileset, id: tileset:player, slot: chr2}
@@ -62,9 +65,9 @@ font is in `chr0` and `chr1`: a game that prints with the kernel keeps them.
 
 ```yaml
 slots:
-  - {name: maps,   mia: 0x14000, size: 32768}           # MIA RAM
-  - {name: actors, bank: 1, address: 0x8000, size: 16384} # CPU bank 1
-  - {name: world,  bank: 2, address: 0x8000, size: 65536} # banks 2 to 5
+  - {name: maps,   mia: $14000, size: $8000}           # MIA RAM
+  - {name: actors, bank: 1, address: $8000, size: $4000} # CPU bank 1
+  - {name: world,  bank: 2, address: $8000, size: $10000} # banks 2 to 5
 ```
 
 - A MIA slot lies in `$14000-$3FFFF`, the 176 KiB of MIA RAM that belongs to
@@ -76,26 +79,27 @@ slots:
 - Names start with a letter and hold letters, digits and `_`, are unique
   ignoring case, and can't be a built-in slot's name. Each becomes a
   `SLOT_NAME` constant.
-- Slots can't overlap each other. Up to 64 of them.
+- You can define up to 64 slots. The build warns if two overlap; loading
+  both at once would overwrite data.
 
 ### Several assets in one slot
 
-Assets that name the same slot are **alternatives**: level 1's map and level
-2's map, both loaded into `maps`, one at a time. The build sizes the slot
-for the largest of them, not their sum. Which one is there at any moment is
-the game's business: it loads the one it needs.
+Assets that name the same slot are **alternatives**. For example, two level
+maps can both use `maps` if the game loads one at a time. Make the slot large
+enough for the biggest map; the program loads whichever level it needs.
 
 ### Where to put what
 
 | Memory | Good for |
 | --- | --- |
-| MIA RAM | Anything used every frame. MIA copies from its own RAM by DMA, so drawing a background from MIA RAM costs the same whatever its size, about 4,400 cycles. Songs must be here: MIA's sequencer only reads MIA RAM. |
-| CPU banks | Data too big for MIA RAM (a 400 KiB world map); scattered data such as a scroll column; work that must take the same time every frame. Every byte goes through the CPU, at about 26 cycles a byte. |
-| The SD card | Everything else, loaded between levels or streamed ahead of need. |
+| MIA RAM | Assets used every frame, especially backgrounds and songs. The sequencer reads songs only from MIA RAM. |
+| CPU banks | Large or less frequently used data, such as a world map. Copies from a bank pass through the CPU. |
+| The SD card | Assets loaded between levels or streamed before they are needed. |
 
-MIA can't write CPU RAM, so a load from the card into a bank passes every
-byte through the CPU. A load from the card into MIA RAM is MIA's own work,
-and the CPU is free while it runs.
+Drawing a background from MIA RAM takes about 4,400 CPU cycles regardless
+of map size. A copy from a CPU bank costs about 26 cycles per byte. Card
+loads into MIA RAM run while the CPU is free; card loads into CPU banks pass
+every byte through the CPU.
 
 ## Included assets
 
@@ -132,16 +136,18 @@ One more field of `build.assets`:
 
 ## What the build checks
 
-Errors stop the build:
+These problems stop the build:
 
-- A slot that overlaps another or lies outside programs' memory.
+- A slot that overlaps reserved memory or lies outside programs' memory.
 - An asset bigger than its slot, except a background (below).
 - An unknown slot or asset, or an asset included twice.
 - Two files with the same name.
 - A song whose voices don't fit the library's 16-bit offsets.
 
-Warnings don't:
+These produce warnings:
 
+- **Two slots overlap.** The program must avoid loading conflicting assets
+  at the same time.
 - **A background bigger than its slot.** Only part of it fits, and only the
   partial loads (`LoadRows`, `LoadColumns`, `LoadRect`) can use the slot. A
   scrolling level is often exactly that.
@@ -152,7 +158,7 @@ Warnings don't:
 
 ## What the build makes
 
-On the card, in `build/sd`, next to the palette and CHR files that every build puts there:
+The card folder `build/sd` contains the program and its assets:
 
 | File | Contents |
 | --- | --- |
@@ -219,13 +225,13 @@ ANIM_PLAYER_IDLE = 0
 
 ### `assets.s` and descriptors
 
-A *descriptor* is a small record per asset, in the `DATA` segment, that the
-library reads and updates. It holds the asset's kind, its current location
-(where it is loaded now, or nowhere), its default location (its slot), its
-size and file path, and what the kind needs: a tileset's 1 bpp flag, a
-background's width and height and the part of it that is loaded, a song's
-track offsets, a sprite file's table of shapes and animations and where each
-is loaded.
+A *descriptor* is a small record for one asset in the `DATA` segment. The
+library reads and updates it. It holds the asset's kind, file path, size,
+default slot and current location.
+
+Some assets add more detail: a tileset's 1 bpp flag, a background's size and
+loaded area, a song's track offsets, or a sprite file's shapes and
+animations.
 
 The game passes the descriptor's label to every library call: `Load
 BG_LEVEL1`. A location is three bytes: `$000000-$03FFFF` is an address in

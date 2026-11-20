@@ -44,7 +44,7 @@ the low 16 bits, which is enough for waits up to 65 seconds, and subtracts
 the start from each reading, so it works even when the clock goes back to 0
 in between:
 
-<!-- example: org=$0280 prg=WAIT.PRG run="BLOAD \"WAIT.PRG\"|A=TICKS(0): SYS 640: B=TICKS(0)|PRINT B-A>=500;B-A<600" -->
+<!-- example: org=$0280 prg=WAIT.PRG run="BLOAD \"WAIT.PRG\"|A=TICKS(0): SYS $0280: B=TICKS(0)|PRINT B-A>=500;B-A<600" -->
 ```asm
 .include "clementina.inc"
 START = $98                     ; 2 bytes

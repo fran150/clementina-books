@@ -1,14 +1,12 @@
 # Performance
 
-A game runs once per frame, and a frame has a fixed number of CPU cycles.
-This chapter gives the budget, what the common operations cost, and how to
-spend less. Every figure is in CPU cycles, measured in the emulator. A
-65C02's cycle counts don't depend on its clock, so they hold at any speed;
-time is cycles divided by the clock.
+A game loop needs to finish its work before the next frame or tick. This
+chapter shows the CPU cycle budget, measured costs of common operations and
+ways to spend less. A 65C02 instruction takes the same number of cycles at
+any clock speed; a faster clock fits more cycles into a second.
 
-The figures were measured with the emulator at `b7ca75e` and the ROM at
-`1446d0f`, and come from the SDK's `docs/gamedev/performance.md`. The SDK's
-`scripts/measure-performance.mjs` measures them again.
+These measurements use the emulator and ROM versions recorded in this
+book's `manifest.json`.
 
 ## The budget
 
@@ -29,13 +27,13 @@ CPU at any clock, unless the game turns it off.
 
 ## What the emulator doesn't count
 
-MIA's own work takes no time in the emulator: its commands, its DMA copies
-and SD card transfers finish at once. On the board they take real time. A
-library routine that starts a copy returns without waiting, and the next
-call waits for it to finish, so on the board that wait comes on top of the
-figures here. Loads from the card aren't listed at all: the emulator's card
-has no real timing. MIA's SPI clock allows at most 1.5 MB/s from the card;
-expect a few hundred KB/s.
+The cycle tables measure CPU work. In the emulator, MIA commands, DMA copies
+and SD card transfers complete immediately. On the board, they take time.
+A library call may wait for a previous copy, adding time beyond the values
+shown here.
+
+Card-load times are not in the tables. MIA's SPI clock allows at most
+1.5 MB/s from a card; typical transfers are a few hundred KB/s.
 
 ## MIA and the kernel
 
@@ -57,10 +55,9 @@ the buffers a loop reads.
 
 ## The library
 
-Measured with a 40×25 background, a 6,144-byte tileset and a one-frame
-animation, its shape made of 1 and then of 4 sprites. A call's count runs
-from its `JSR` to the next instruction, so it includes the macro's argument
-setup.
+The measurements use a 40×25 background, a 6,144-byte tileset and an
+animation with a one-sprite or four-sprite shape. Counts include the macro's
+argument setup and run from its `JSR` to the next instruction.
 
 | Call | Cycles |
 | --- | ---: |
@@ -134,8 +131,8 @@ Cycles per statement, including the interpreter's step to the next one:
 | `IF A<0 THEN A=0`, false | 2,872 |
 | `GOSUB` / `RETURN` | 1,379 / 455 |
 | `FOR I=1 TO 3` / each `NEXT` | 3,392 / 816–959 |
-| `POKE 700,1` | 5,241 |
-| `B=PEEK(700)` | 4,918 |
+| `POKE $02BC,1` | 5,241 |
+| `B=PEEK($02BC)` | 4,918 |
 | `PRINT "A";` | 3,051 |
 | `X=INT(A/2)` | 6,128 |
 | `X=SIN(A)` | 25,947 |

@@ -110,7 +110,7 @@ To read a file a program:
 
 This routine reads up to 64 bytes of `GREETING.TXT` and prints them:
 
-<!-- example: org=$B000 prg=TYPE.PRG files=GREETING.TXT:48454c4c4f2046524f4d204d49410d run="POKE 63,0: POKE 64,176: CLEAR|BLOAD \"TYPE.PRG\"|SYS 45056" -->
+<!-- example: org=$B000 prg=TYPE.PRG files=GREETING.TXT:48454c4c4f2046524f4d204d49410d run="POKE $3F,$00: POKE $40,$B0: CLEAR|BLOAD \"TYPE.PRG\"|SYS $B000" -->
 ```asm
 .include "clementina.inc"
 BUF = $0280                     ; 64 bytes in the free page-2 area
@@ -212,7 +212,7 @@ name:   .byte "GREETING.TXT", 0
 ```
 
 ```text
-SYS 45056
+SYS $B000
 HELLO FROM MIA
 ```
 

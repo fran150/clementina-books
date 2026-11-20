@@ -38,7 +38,7 @@ To make room at the top of BASIC's memory, lower `MEMSIZ` (`$3F-$40`, 63-64)
 and run `CLEAR`, first thing in the program:
 
 ```basic
-10 POKE 63,0: POKE 64,176: CLEAR
+10 POKE $3F,$00: POKE $40,$B0: CLEAR
 20 PRINT FRE(0)
 ```
 
@@ -74,10 +74,10 @@ The code may change A, X and Y and the flags. It must:
 
 After `SYS` reads its address, BASIC's text pointer stays where it stopped, so
 the routine can read more arguments from the same statement with the `BAS_`
-entries of the kernel. This routine reads two numbers, `SYS 640,a,b`, and
+entries of the kernel. This routine reads two numbers, `SYS $0280,a,b`, and
 prints their sum:
 
-<!-- example: org=$0280 prg=ADD.PRG run="BLOAD \"ADD.PRG\"|SYS 640,20,22|SYS 640,250,6+1" -->
+<!-- example: org=$0280 prg=ADD.PRG run="BLOAD \"ADD.PRG\"|SYS $0280,20,22|SYS $0280,250,6+1" -->
 ```asm
 .include "clementina.inc"
 FIRST = $98
@@ -97,10 +97,10 @@ FIRST = $98
 ```
 
 ```text
-SYS 640,20,22
+SYS $0280,20,22
  42
 READY.
-SYS 640,250,6+1
+SYS $0280,250,6+1
  257
 READY.
 ```
@@ -133,7 +133,7 @@ of BASIC's routine that converts `FAC` to a 16-bit integer, and `GOGIVEAYF`
 (`$08-$09`) the address of the routine that converts the signed integer in A
 (high) and Y (low) into `FAC`. This function returns its argument times two:
 
-<!-- example: org=$0280 prg=TWICE.PRG run="BLOAD \"TWICE.PRG\"|POKE 11,128: POKE 12,2|PRINT USR(21);USR(20000)" -->
+<!-- example: org=$0280 prg=TWICE.PRG run="BLOAD \"TWICE.PRG\"|POKE $0B,$80: POKE $0C,$02|PRINT USR(21);USR(20000)" -->
 ```asm
 .include "clementina.inc"
 GOGIVEAYF = $08
@@ -151,7 +151,7 @@ VALUE = $98
  42 -25536
 ```
 
-`POKE 11,128: POKE 12,2` points the vector at `$0280`. `BAS_GETADR` accepts
+`POKE $0B,$80: POKE $0C,$02` points the vector at `$0280`. `BAS_GETADR` accepts
 0-65535 and gives `?ILLEGAL QUANTITY ERROR` for anything else. The result
 goes back as a signed 16-bit number, so 40000 comes out as -25536, as the
 second value shows.
@@ -160,7 +160,7 @@ second value shows.
 
 `BAS_PTRGET` finds a variable by its name in the program text and returns the
 address of its value, so a routine can read or change a BASIC variable
-directly: `SYS 640,A` lets the routine call `BAS_CHKCOM` and `BAS_PTRGET` to
+directly: `SYS $0280,A` lets the routine call `BAS_CHKCOM` and `BAS_PTRGET` to
 reach `A`. A floating-point variable's value is five bytes, an integer
 variable's two (high byte first), and a string variable's three: the length,
 then the address of the characters. How BASIC lays out its variables is in

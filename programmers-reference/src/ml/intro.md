@@ -98,7 +98,7 @@ to the files on the SD card.
 This program prints a message using the kernel. It is 19 bytes long, so it fits
 at `$0280` (640), a small area that is free while BASIC runs.
 
-<!-- example: org=$0280 prg=HELLO.PRG run="BLOAD \"HELLO.PRG\"|SYS 640" -->
+<!-- example: org=$0280 prg=HELLO.PRG run="BLOAD \"HELLO.PRG\"|SYS $0280" -->
 ```asm
 .include "clementina.inc"
 KPTR = $F0                      ; the kernel's string pointer
@@ -118,7 +118,7 @@ HELLO
 ```
 
 Assembled, saved on the SD card as `HELLO.PRG`, it loads with `BLOAD` and runs
-with `SYS 640`. `.include "clementina.inc"` brings in the SDK's names for the
+with `SYS $0280`. `.include "clementina.inc"` brings in the SDK's names for the
 kernel's entry points, MIA's registers and the rest of the machine; `KPTR` is
 defined here because the include file does not name the kernel's zero page.
 [Mixing BASIC and machine language](mixing.md) explains `BLOAD` and `SYS`,

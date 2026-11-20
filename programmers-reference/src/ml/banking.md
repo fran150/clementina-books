@@ -39,9 +39,9 @@ while it works there, and maps bank 0 back afterwards. The bank `BANK` chose
 is kept in `DATA_BANK` (`$0306`), so machine code can find it.
 
 ```basic
-10 BANK 7: POKE 32768,99: BANK 0
-20 PRINT PEEK(32768)
-30 BANK 7: PRINT PEEK(32768): BANK 0
+10 BANK 7: POKE $8000,99: BANK 0
+20 PRINT PEEK($8000)
+30 BANK 7: PRINT PEEK($8000): BANK 0
 ```
 
 ```text
@@ -55,7 +55,7 @@ Code can live in a bank and be called from BASIC: `BLOAD` puts it there, and
 `SYS` maps the bank before the call and bank 0 after the return. This routine,
 assembled for `$8000` and loaded into bank 2, prints the bank it runs in:
 
-<!-- example: org=$8000 prg=WHERE.PRG run="BANK 2: BLOAD \"WHERE.PRG\"|SYS 32768|BANK 0" -->
+<!-- example: org=$8000 prg=WHERE.PRG run="BANK 2: BLOAD \"WHERE.PRG\"|SYS $8000|BANK 0" -->
 ```asm
 .include "clementina.inc"
 
@@ -67,7 +67,7 @@ assembled for `$8000` and loaded into bank 2, prints the bank it runs in:
 ```
 
 ```text
-SYS 32768
+SYS $8000
 02
 ```
 
@@ -82,7 +82,7 @@ through RAM below `$8000`, a page at a time. This routine copies the first
 256 bytes of bank 1 to bank 2, through the free area at `$0280` and the
 programs' zero page:
 
-<!-- example: org=$0280 prg=COPY.PRG run="BLOAD \"COPY.PRG\"|BANK 1: POKE 32768+255,77: BANK 0|SYS 640|BANK 2: PRINT PEEK(32768+255): BANK 0" -->
+<!-- example: org=$0280 prg=COPY.PRG run="BLOAD \"COPY.PRG\"|BANK 1: POKE $8000+255,77: BANK 0|SYS $0280|BANK 2: PRINT PEEK($8000+255): BANK 0" -->
 ```asm
 .include "clementina.inc"
 SRC = $98

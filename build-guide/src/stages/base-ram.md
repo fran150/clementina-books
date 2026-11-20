@@ -280,7 +280,7 @@ that writes all the time, to a free byte at `$0280` (640), and `RUN` it:
 
 <!-- example: skip -->
 ```basic
-10 POKE 640,0:GOTO 10
+10 POKE $0280,0:GOTO 10
 ```
 
 (A `POKE` uses no strings, so it's safe at this stage.) Trigger on the

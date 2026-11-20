@@ -92,7 +92,7 @@ keys 80-87, and then reads it: bit 0 is Left (80), bit 1 Down (81), bit 2 Up
 (82), and bit 7 Right (79) is in byte 9, so it is not here. It stores the
 byte in `$98` for BASIC to look at:
 
-<!-- example: org=$0280 prg=ARROWS.PRG hold=80,82 run="BLOAD \"ARROWS.PRG\"|SYS 640: PRINT PEEK(152)" -->
+<!-- example: org=$0280 prg=ARROWS.PRG hold=80,82 run="BLOAD \"ARROWS.PRG\"|SYS $0280: PRINT PEEK($98)" -->
 ```asm
 .include "clementina.inc"
 

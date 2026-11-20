@@ -160,7 +160,7 @@ A program that wants a block of CPU RAM for machine code or data can move the
 top of the workspace down. `MEMSIZ` is at `$3F-$40` (63-64), low byte first:
 
 ```basic
-POKE 63,0: POKE 64,176: CLEAR
+POKE $3F,$00: POKE $40,$B0: CLEAR
 ```
 
 moves the top to `$B000`, leaving `$B000-$BFFF` (4 KiB) to the program until

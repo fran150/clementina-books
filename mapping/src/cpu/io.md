@@ -45,8 +45,8 @@ the pins have no current limit. To use Port B, set the direction of each pin
 in `DDRB` (1 is an output) and read or write `ORB`:
 
 ```basic
-10 POKE 49154,255:REM DDRB: ALL OUTPUTS
-20 FOR I=0 TO 255:POKE 49152,I:NEXT
+10 POKE $C002,255:REM DDRB: ALL OUTPUTS
+20 FOR I=0 TO 255:POKE $C000,I:NEXT
 ```
 
 ### Timer 1

@@ -1,10 +1,9 @@
 # The emulator
 
-The emulator, `clementina-emulator`, runs the whole machine on your computer: the
-65C02, its RAM and VIA, and MIA with its video, input, sound and SD card. It
-is cycle-accurate for the CPU, and it boots the same kernel and BASIC the
-board does. With the video client it is a way to play a game without the
-board, and the one this book uses throughout.
+`clementina-emulator` runs Clementina on your computer. It boots the same
+kernel and BASIC as the board, and models the CPU, memory, MIA and attached
+devices. Use it with the video client to play and test a game before copying
+it to a card.
 
 ## Starting it
 
@@ -13,11 +12,10 @@ clementina-emulator --sd ~/games/catch/build/sd
 clementina-video-client
 ```
 
-Start each in its own terminal. The emulator's terminal shows its debugger.
-The video client's window shows Clementina's screen and sends it the
-keyboard, the mouse and gamepads. Both default to the same addresses
-(`127.0.0.1:6502` for video, `127.0.0.1:6503` for input), so they find each
-other with no options, and either can start first.
+Start each command in its own terminal. The emulator's terminal shows its
+debugger. The video client shows Clementina's screen and sends keyboard,
+mouse and gamepad input. The two programs connect through their default
+local addresses, so either can start first.
 
 ## The SD card
 
@@ -46,9 +44,9 @@ Clementina, except the client's own keys:
 | Ctrl+M | Switches between normal and control mode. |
 | F1 | Back to normal mode from control mode. |
 
-Pasting is the quick way to enter a program or a long line: copy its lines,
-paste them, and they arrive as if typed. Only printable ASCII is sent, and a line break
-is Return.
+To enter a program quickly, copy its lines and paste them into the video
+client. They arrive as though typed. Only printable ASCII is sent, and each
+line break becomes Return.
 
 In control mode, Escape quits, F11 toggles full screen, F3 shows the
 client's connection and frame rate, and F5 captures the mouse (a program
@@ -69,14 +67,15 @@ The video client notices the reset and reconnects on its own.
 
 ## Speed
 
-`-s` sets the CPU's clock in MHz. The default is 1.2, MIA's default
-`PHI2`, the speed the board starts at; MIA keeps it between 1 Hz and 8 MHz,
-so `-s 8` is the fastest the board can be asked for. The Emulation menu's
-Speed entries raise and lower it while it runs, and a program that changes
-`PHI2` through MIA changes the emulator's speed too.
+`-s` sets the CPU clock in MHz. The default is 1.2, the board's startup
+speed. The allowed range is 1 Hz to 8 MHz, so `-s 8` requests the maximum.
+You can also change the speed from the Emulation menu while the emulator
+runs. A program that changes `PHI2` through MIA changes it too.
 
-Your computer may not keep up with a high setting. When the emulator quits
-it prints how many cycles it ran and the speed it reached.
+Your computer may not keep up with a high setting. When the emulator quits,
+it prints the cycles run and the speed it reached. The terminal debugger
+also uses CPU time; [headless mode](#without-the-terminal-screen) gives the
+emulator more room to run.
 
 Two consequences for games:
 
@@ -114,22 +113,31 @@ On Linux that needs the ALSA library
 
 ## MIA's console
 
-On the board, MIA has a USB console with commands to inspect and control it
-(`status`, `speed`, `exec pause` and the rest). `-p` connects the emulated
-MIA's console to a serial port. Without hardware, `socat` makes a pair of
-linked virtual ports:
+`-p` connects MIA's console to a serial port. For example, `socat` can make
+a pair of linked virtual ports on your computer:
 
 ```sh
 socat -d -d pty,raw,echo=0,link=/tmp/ttyComputer pty,raw,echo=0,link=/tmp/ttyTerminal
 clementina-emulator --sd ~/games/catch/build/sd -p /tmp/ttyComputer
 ```
 
-Then open `/tmp/ttyTerminal` with any terminal program, at 115200 baud. The
-commands are in MIA's README. The commands for looking inside MIA (`dump`,
-`status ctx` and `trace`) work here as on the board ([Looking inside
-MIA](hardware.md#looking-inside-mia)). In the emulator the bus trace is
-always on, with no special build, and `dump` files go to the `--sd`
-folder.
+Open `/tmp/ttyTerminal` with a terminal program at 115200 baud. The console
+commands for `dump`, `status ctx` and `trace` work as on the board
+([Looking inside MIA](hardware.md#looking-inside-mia)). The emulator always
+records the bus trace. Its `dump` files go to the `--sd` folder.
+
+## Without the terminal screen
+
+`--headless` runs the emulator with no terminal debugger and no output at
+all, which makes it faster. The video client works the same.
+
+```sh
+clementina-emulator --headless --sd ~/games/catch/build/sd
+```
+
+`-s` sets the speed, and `-s 0` runs as fast as your computer can. Press
+Ctrl-C to stop it. VS Code starts this mode and adds breakpoints, stepping,
+restart and speed controls ([Debugging in VS Code](debugging.md)).
 
 ## Other options
 
@@ -138,7 +146,7 @@ folder.
 | `--video-udp` | `127.0.0.1:6502` | Where the video service listens. `0.0.0.0:6502` lets a video client on another computer connect; empty turns it off. |
 | `--input-udp` | `127.0.0.1:6503` | Where the input service listens. |
 | `--charset` | `clascii` | The character set MIA loads at boot: `clascii` or `openroms`. |
-| `--palette` | `clementina-text` | The palette MIA loads at boot. It is the only one. |
+| `--palette` | `clementina-text` | The palette MIA loads at boot. |
 
 The video and input services have no authentication, as on the real MIA, so
 only open them on a network you trust. To run the client on another
@@ -148,9 +156,10 @@ computer, point it at the emulator's: `clementina-video-client --server
 ## The headless emulator
 
 `clementina-automation` is the same machine with no terminal, no video
-service, no sound and no serial port. It is controlled through an HTTP
-endpoint on your computer, and it is what `clementina run`, the VS Code
-debugger, the agent workflows and the MCP server start.
+service, no sound and no serial port. It runs as fast as it can rather than
+in real time. It is controlled through an HTTP endpoint on your computer,
+and it is what `clementina run`, `clementina check`, the agent workflows and
+the MCP server start.
 
 ```sh
 clementina run

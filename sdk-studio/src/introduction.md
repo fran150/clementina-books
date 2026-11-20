@@ -1,16 +1,16 @@
 # About this book
 
 The *Clementina SDK & Studio Guide* is for people who write games and
-programs for Clementina on a modern computer. You write the program in a text
-editor, draw the graphics and compose the music in Clementina Studio, and the
-SDK turns all of it into files that Clementina loads from its SD card. You
-test the result in the emulator, step through it in VS Code's debugger, and
-copy it to a card for the real machine.
+programs for Clementina on a modern computer. Write code in a text editor,
+and make graphics and music in Clementina Studio. The SDK builds the files
+Clementina loads from an SD card.
 
-You need to know some Clementina BASIC or some 65C02 assembly language. The
-*Programmer's Reference Guide* teaches both, and this book does not repeat
-them. It teaches the tools: how a project is laid out, what each asset is,
-what the build makes, and how to run, debug and test what it made.
+You can run the result in the emulator, debug it in VS Code, and copy it to
+a card for the real machine.
+
+You need to know some Clementina BASIC or 65C02 assembly language. The
+*Programmer's Reference Guide* teaches both. Here you will learn how to
+organize a project, make assets, build a program, and run, debug and test it.
 
 ## How the book is organized
 
@@ -24,6 +24,9 @@ what the build makes, and how to run, debug and test what it made.
   Clementina library, the SDK's 6502 routines for assembly programs.
 - **Part IV** covers running the result: the emulator, the debugger,
   automated checks and AI agents, performance, and testing on a real board.
+- **Part V** shows techniques in small, complete projects from the SDK's
+  examples: BASIC calling assembly, making room for it, graphics from
+  Studio in BASIC, assets and sound from assembly, and a faster CPU.
 - **The appendices** are reference: every CLI command, every field of every
   file format, the asset limits, the library routines on one page, the
   emulator automation protocol, and what to do when something goes wrong.
@@ -51,12 +54,12 @@ The book follows *Mapping Clementina*'s conventions:
 - A range includes both ends: `$8000-$BFFF` is 16,384 bytes.
 - KiB is 1,024 bytes.
 
-`clementina.yaml` is YAML, and YAML reads `0x14000` as a number, so the
-examples write addresses in hex there too. The SDK itself writes them back in
-decimal when it saves a manifest.
+In `clementina.yaml`, addresses can use `$14000` or `0x14000`. The examples
+use hex. When the SDK saves the manifest, it preserves the address spelling
+you used.
 
-Commands you type in a terminal on your computer start with `$`, and what
-they print follows without it:
+Terminal commands are shown without a shell prompt. Their output appears in
+a separate block:
 
 ```sh
 clementina project validate
@@ -70,8 +73,8 @@ Commands typed on Clementina itself, in BASIC, are shown without a prompt.
 
 ## What this book describes
 
-The book describes the released SDK, Studio, emulator and video client, at
-the versions recorded in the library's `manifest.json`.
+The book describes the released SDK, Studio, emulator and video client at
+the versions recorded in this repository's `manifest.json`.
 
 Every command, project and program in this book was run against those
 versions while it was written.

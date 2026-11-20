@@ -72,10 +72,10 @@ RTS           60         return to whoever called
 `RTS` returns to BASIC, so run it from BASIC: type `Q`, then
 
 ```basic
-SYS 640
+SYS $0280
 ```
 
-`SYS` calls machine code at an address (640 is `$0280` in decimal), and the
+`SYS` calls machine code at an address, and the
 program prints an `A` and comes back.
 
 WozMon can run code too: an address followed by `R` jumps there. Code run

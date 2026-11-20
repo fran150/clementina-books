@@ -1,11 +1,12 @@
 # Programming in assembly with the SDK
 
-A project's assembly is ca65 code. The SDK runs ca65 on each source and
-ld65 on the result, then checks the linked
-program against what the manifest says and writes the PRG and its load
-plan. This chapter covers the build settings, the linker configuration, the
-include files the SDK provides, the rules a program that owns the
-machine lives by, and the editor support.
+A project's assembly is ca65 code. The SDK assembles each source, links the
+result with ld65, and checks it against the manifest. It then writes a PRG
+and the commands that load it.
+
+This chapter covers the build settings, linker configuration and include
+files. It also covers programs that take over the machine, routines that
+return to BASIC, banked code and editor support.
 
 ## The build settings
 
@@ -19,7 +20,7 @@ build:
       - src/level.s
     linkerConfig: link.cfg
     outputName: temple
-    loadAddress: 0x1800
+    loadAddress: $1800
     entrySymbol: game_start
     includeDirectories:
       - src/include
@@ -33,24 +34,25 @@ build:
 | `sources` | The assembly files, at least one. |
 | `linkerConfig` | ld65's configuration file. It decides where everything goes. |
 | `outputName` | The output files' name: `temple` makes `build/temple.prg`. Letters, digits, `_` and `-`, starting with a letter. |
-| `loadAddress` | Where the program loads, 1 to `$BFFF`. Must be where the linker configuration puts the first byte. |
+| `loadAddress` | Where the program loads, 1 to `$BFFF`, in hex (`$1800` or `0x1800`) or as a number. Must be where the linker configuration puts the first byte. |
 | `bank` | Only for a program linked at `$8000-$BFFF`: the bank it loads into, 1-31. Required there, rejected elsewhere. |
+| `banks` | More code in banks 1-31, each in a memory area of the linker configuration: see [Code in several banks](#code-in-several-banks). |
 | `entrySymbol` | The exported label where the program starts. |
 | `includeDirectories` | Folders searched for `.include` files, before the SDK's own. |
 | `checks` | Whether [the Clementina library](runtime.md)'s routines check their arguments. Default `true`. |
 | `defines` | Symbols for every source, as if each began with `NAME = value`. A value is a number or a short text of letters, digits and `_.$+-`. |
 
-ca65 assembles each of `sources` in order, each into its own object file; ld65 links them in that order. Every source is assembled
-for the 65C02 (`--cpu 65C02`) with debug information and a listing.
+ca65 assembles each source into an object file. ld65 links those files in
+the order listed. The build targets the 65C02 and writes debug information
+and a listing for each source.
 
 ## The linker configuration
 
-The SDK doesn't choose addresses. The linker configuration does, and the
-SDK checks it: after linking, it reads ld65's debug file and verifies that
-every segment in the output starts where `loadAddress` says, that there is
-one output file, and that the entry symbol is inside it. A configuration
-that disagrees with the manifest is an error, so the PRG's header can never
-claim an address the code wasn't linked for.
+The linker configuration places the code and data in memory. After linking,
+the SDK checks that the output starts at `loadAddress`, that the entry symbol
+is inside it, and that the expected output files exist. A mismatch with the
+manifest stops the build. [Banked code](#code-in-several-banks) adds an output
+file for each bank.
 
 A configuration for a game, with zero page, code, read-only data,
 initialized data and uninitialized data:
@@ -82,6 +84,9 @@ SEGMENTS {
 - **`define=yes`** on `BSS` exports `__BSS_RUN__` and `__BSS_SIZE__`, which
   the program needs to clear it (below).
 
+The [ld65 Users Guide](https://cc65.github.io/doc/ld65.html) describes the
+configuration file in full, and the [ca65 Users
+Guide](https://cc65.github.io/doc/ca65.html) the assembler's directives.
 *Mapping Clementina* has the details behind each rule: [Zero
 page](../../../mapping/src/cpu/zero-page.md), [The resident
 image](../../../mapping/src/cpu/image.md) and [Extended
@@ -89,9 +94,8 @@ RAM](../../../mapping/src/cpu/extended-ram.md).
 
 ## The machine includes
 
-Every assembly build writes two include files to `build/include/` and puts
-that folder on ca65's include path, after your own `includeDirectories` (so a
-file of yours with the same name wins):
+Every assembly build writes two include files to `build/include/`. ca65
+searches your `includeDirectories` first, then that folder:
 
 ```asm
 .include "clementina.inc"       ; also includes mia.inc
@@ -123,10 +127,9 @@ reads like MIA's documentation:
 Multi-byte fields name each byte (`_L`, `_M`, `_H`, or `0`-`3`). MIA RAM
 addresses are 24-bit, so take their bytes with `<`, `>` and `^`.
 
-The SDK generates both files from the same specifications every book's
-tables come from, so the names here and the addresses in *Mapping
-Clementina* always agree. Programming MIA through these registers is the
-subject of the *Programmer's Reference Guide*, Part III.
+For the addresses behind these names, see *Mapping Clementina*. The
+*Programmer's Reference Guide*, Part III, covers programming MIA through
+its registers.
 
 ## What the build makes
 
@@ -235,25 +238,133 @@ build:
   outputDirectory: build
   basic:
     outputName: game
-    memoryTop: 0xA000
+    memoryTop: $A000
   assembly:
     sources:
       - src/routines.s
     linkerConfig: link.cfg
     outputName: routines
-    loadAddress: 0xA000
+    loadAddress: $A000
     entrySymbol: start
 ```
 
-`memoryTop` lowers BASIC's top of memory before the program loads (`POKE
-63,lo:POKE 64,hi:CLEAR`), so BASIC keeps its program, variables and strings
-below it, and `$A000-$BFFF` is free for the routine. `FRE` reports that much
-less. Lowering the top doesn't make room low in RAM: BASIC's program starts
-at the bottom of its area, so code at `$1800` still lands on it.
+`memoryTop` lowers BASIC's top of memory before the program loads. BASIC
+keeps its program, variables and strings below `$A000`, leaving
+`$A000-$BFFF` for the routine. `FRE` reports less free memory.
 
-The build checks none of this for you. It writes `memory-layout.json`, a
-map of every part, and warns when two overlap, but it never stops on an
-overlap: where each part goes is your decision.
+This setting only makes room above BASIC. Code at `$1800` would still
+overwrite the interpreter.
+
+Check the resulting `memory-layout.json` when placing code beside BASIC. It
+maps each part and reports overlaps as warnings. An overlap does not stop the
+build.
+
+## Code in several banks
+
+The `$8000-$BFFF` window shows one 16 KiB bank of extended RAM at a time.
+To put code in more than one bank, list each bank under `build.assembly.banks`.
+Each entry names a bank from 1 to 31 and its area in the linker
+configuration.
+
+```yaml
+build:
+  outputDirectory: build
+  assembly:
+    sources:
+      - src/common.s
+      - src/bank1.s
+      - src/bank2.s
+    linkerConfig: link.cfg
+    outputName: code
+    loadAddress: $7000
+    entrySymbol: show_room
+    banks:
+      - bank: 1
+        memory: BANK1
+      - bank: 2
+        memory: BANK2
+```
+
+In `link.cfg`, each of those areas starts at `$8000`, has an output file of
+its own and says its bank:
+
+```text
+MEMORY {
+  ZP:    start = $98,   size = $48,   type = rw;
+  MAIN:  start = $7000, size = $1000, type = rw, file = %O;
+  BANK1: start = $8000, size = $4000, type = ro, file = "%O.bank1", bank = 1;
+  BANK2: start = $8000, size = $4000, type = ro, file = "%O.bank2", bank = 2;
+}
+SEGMENTS {
+  ZEROPAGE: load = ZP,    type = zp;
+  CODE:     load = MAIN,  type = ro;
+  RODATA:   load = MAIN,  type = ro;
+  DATA:     load = MAIN,  type = rw;
+  BSS:      load = MAIN,  type = bss, define = yes;
+  BANK1:    load = BANK1, type = ro;
+  BANK2:    load = BANK2, type = ro;
+}
+```
+
+Use `.segment "BANK1"` in a source to place code there. The linker sees
+labels across all banks; `.bank(label)` gives the bank assigned to a label's
+area. The build writes `CODE.BANK1.PRG` and `CODE.BANK2.PRG` beside the main
+`CODE.PRG`, and the loader puts each file in its bank
+([Banks](loading.md#banks)).
+
+Each listed area needs its own output file and addresses within
+`$8000-$BFFF`. A bank number in the linker configuration must match the
+manifest. The build stops when these settings disagree. An area without a
+bank number produces a warning because `.bank()` cannot resolve its labels.
+An empty bank also produces a warning and no PRG.
+
+### Switching banks
+
+Writing a bank number to `VIA_ORA` maps that bank. Switch from code below
+`$8000`, which remains in place while the bank changes. If code in the
+window switches banks, its next instruction comes from the newly mapped
+bank.
+
+A *far call* handles the switch: a routine in the main image maps the target
+bank, calls a routine there, then restores the caller's bank.
+
+```text
+; far_call: map bank A, call (far_ptr), then map the caller's bank again.
+far_call:
+        ldx current_bank        ; remember the caller's bank
+        phx
+        sta current_bank
+        sta VIA_ORA             ; PA0-PA4 pick the bank at $8000-$BFFF
+        jsr @call
+        pla
+        sta current_bank
+        sta VIA_ORA
+        rts
+@call:  jmp (far_ptr)
+```
+
+A macro sets `far_ptr` and passes `.bank(routine)` in A, so a call names
+only the routine, from the main image or from any bank:
+
+```text
+.macro FarCall routine
+        lda #<routine
+        sta far_ptr
+        lda #>routine
+        sta far_ptr+1
+        lda #<.bank(routine)
+        jsr far_call
+.endmacro
+```
+
+A routine called from BASIC must return with bank 0 mapped; BASIC keeps the
+top of its memory there. BASIC can also map a bank for a call with
+`BANK 1:SYS $8000`.
+
+[Code in several banks](../examples/examples.md#code-in-several-banks) has a
+complete example. VS Code warns about a `VIA_ORA` store in banked code, and
+the debugger can stop before it ([Debugging in VS
+Code](../running/debugging.md)).
 
 ## Editing assembly in VS Code
 
@@ -264,10 +375,9 @@ the Clementina library included:
 
 - **Errors as you type.** The extension runs ca65 on the file you are
   editing, saved or not, with the include directories and defines from
-  `clementina.yaml`, and shows its errors and warnings on their lines. An
-  error in an included file shows in that file. A word that isn't an
-  instruction or a macro is named as such, where ca65 would only say `':'
-  expected`. The checks need cc65, which `clementina install` installs.
+  `clementina.yaml`, and shows errors and warnings on their lines. Errors
+  in included files appear there too. These checks need cc65, which
+  `clementina install` installs.
 - **Hover** on an instruction shows what it does, the flags it changes and
   each addressing mode with its opcode, size and cycles, with the mode your
   line uses in bold. On a directive it shows the syntax. On a symbol it shows
@@ -289,6 +399,11 @@ the Clementina library included:
   renamed.
 - **The outline** lists procedures, structures and macros with what they
   contain, and `.proc`, `.macro`, `.if` and long comments fold.
+- **Bank switches in banked code.** A store to `VIA_ORA`, or a macro that
+  does one, in a segment the linker configuration puts at `$8000-$BFFF` gets
+  a warning, because it maps another bank under the running code ([Switching
+  banks](#switching-banks)). A store right after `lda #n` of the code's own
+  bank maps the same bank again and is left alone.
 
 Two settings change the checks. **Clementina › Assembly: Diagnostics**
 (`clementina.assembly.diagnostics`) runs ca65 as you type (`onType`), on
@@ -296,10 +411,6 @@ save (`onSave`), or not at all (`off`). **Clementina › Assembly: Ca65 Path**
 (`clementina.assembly.ca65Path`) names another ca65; by default the
 extension uses the one `clementina install` installed, then the one on the
 `PATH`.
-
-Other editors can use the same server: it is `clementina-asm-lsp`, in the
-SDK's `packages/asm-lsp`, and it speaks the Language Server Protocol over
-standard input and output.
 
 [Debugging in VS Code](../running/debugging.md) covers breakpoints and
 stepping through assembly.

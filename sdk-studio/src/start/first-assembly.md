@@ -1,9 +1,10 @@
 # A program that is all assembly
 
-A program without BASIC is assembly code that takes over the machine: BASIC's
-`BRUN` loads it and jumps to it, and it never returns. This chapter starts
-from `clementina new` again, as [the previous chapter](first-basic.md) did,
-and turns the project into one that prints a line.
+A program made entirely of assembly takes over the machine. BASIC's `BRUN`
+loads it and jumps to it; the program does not return to BASIC. This chapter
+starts from `clementina new` again and turns the starter into a program that
+prints a line. If you made the project in [the previous
+chapter](first-basic.md), use a new folder for this one.
 
 ## Make the project
 
@@ -33,7 +34,7 @@ build:
       - src/main.s
     linkerConfig: link.cfg
     outputName: code
-    loadAddress: 28672 # $7000
+    loadAddress: $7000
     entrySymbol: game_start
   video:
     paletteConfigId: palette-config:main
@@ -44,12 +45,13 @@ of a BASIC program. `link.cfg` stays as it is.
 
 ## Where the code goes
 
-`BRUN` runs from the kernel, which ends below `$1600`, and the program may
-use anything above it. Clementina has no ROM: at power-on MIA copies the
-kernel, WozMon and BASIC into RAM from `$0400` up to about `$63A0`, and
-BASIC's own workspace follows. A program that takes over can load over all
-of that, so it can never return to BASIC. To give it more room, lower
-`RAM`'s start in `link.cfg` and `loadAddress` together, down to `$1800`.
+`BRUN` uses the kernel to load the program. Keep the program above `$1800`
+so the loader remains available while it runs. Once loaded, a program like
+this can replace BASIC in memory and cannot return to it.
+
+The starter still places the code at `$7000`. If you need more room, move
+`RAM`'s start in `link.cfg` and `loadAddress` in the manifest down to
+`$1800` together.
 *Mapping Clementina* has the details: [The resident
 image](../../../mapping/src/cpu/image.md) and [BASIC's
 workspace](../../../mapping/src/cpu/basic-workspace.md#where-machine-code-can-go).
@@ -80,11 +82,10 @@ message:
         .byte "HELLO FROM ASSEMBLY", 13, 0
 ```
 
-`clementina.inc` comes with the SDK. Every assembly build writes it, with
-`mia.inc`, to `build/include/` and adds that folder to ca65's include path.
-It names the kernel's jump table (`KERN_CHROUT` and the rest), the free zero
-page, the VIA, and every MIA register, command and memory layout
-([Programming in assembly with the SDK](../building/assembly.md)).
+`clementina.inc` comes with the SDK. The build writes it and `mia.inc` to
+`build/include/`, where ca65 can find them. They name the kernel's routines,
+free zero page, VIA and MIA registers. [Programming in assembly with the
+SDK](../building/assembly.md) covers them in detail.
 
 ## Build
 
@@ -96,16 +97,16 @@ clementina build
 Built the SD card in build/sd. Start it with RUN "BOOT.BAS".
 ```
 
-The output is the same as the previous chapter's, without `GAME.BAS`. The
-bootstrap, `build/boot.cbas`, now ends with `BRUN`:
+This card has no `GAME.BAS`. Its loader, shown in `build/boot.cbas`, ends with
+`BRUN`:
 
 ```basic
-10 MIALOAD "asset-palette.bin",256
+10 MIALOAD "asset-palette.bin",$00100
 20 BANK 0:BRUN "CODE.PRG"
 ```
 
-`BANK 0` makes sure a load into `$8000-$BFFF` would go to bank 0. `BRUN`
-loads the PRG at the address in its header and jumps to its first byte.
+`BANK 0` selects the bank for the load. `BRUN` loads `CODE.PRG` at the
+address in its header and jumps to its first byte.
 
 ## Run it
 
@@ -123,9 +124,9 @@ Then start it:
 RUN "BOOT.BAS"
 ```
 
-The program prints `HELLO FROM ASSEMBLY` and keeps the machine. To get BASIC
-back, reset: the emulator's Emulation menu (press `E` in its terminal) has
-Reset, and a reset makes MIA load the kernel and BASIC into RAM again.
+The program prints `HELLO FROM ASSEMBLY` and stays in its loop. To return to
+BASIC, reset the emulator: press `E` in its terminal to open the Emulation
+menu, then choose Reset.
 
 ## Check it
 

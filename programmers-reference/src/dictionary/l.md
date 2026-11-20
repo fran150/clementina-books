@@ -139,7 +139,7 @@ LIST
 A file that does not exist gives `?FILE I/O ERROR` and leaves the program in
 memory alone. A program too large for BASIC's memory also gives
 `?FILE I/O ERROR`. `LOAD` keeps the top of BASIC's memory, so a memory top
-lowered with `POKE 63`, `POKE 64` and `CLEAR` stays lowered. `LOAD` uses file
+lowered with `POKE $3F`, `POKE $40` and `CLEAR` stays lowered. `LOAD` uses file
 number 16 itself, so leave it closed.
 
 See also: [SAVE](s.md#save), [RUN](r.md#run), [BLOAD](b.md#bload),

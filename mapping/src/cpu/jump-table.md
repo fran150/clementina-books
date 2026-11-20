@@ -42,7 +42,7 @@ of the table. The routines behind them are part of BASIC, so they work only
 while BASIC is in memory, not in a program that has loaded over it.
 
 `SYS` leaves `TXTPTR` just past the address, so a routine can read arguments
-written after it on the same line. For `SYS 640,10,4660`:
+written after it on the same line. For `SYS $0280,10,4660`:
 
 ```asm
 BAS_CHKCOM = $0436
@@ -84,7 +84,7 @@ A program has four choices:
 - **Leave it.**
 - **Change its rate.** Timer 1 reloads from its latch (`$C006-$C007`) every
   period, so a new value takes effect from the next one.
-  `POKE 49158,212:POKE 49159,48` sets 12,500 cycles and halves the rate.
+  `POKE $C006,$D4:POKE $C007,$30` sets 12,500 (`$30D4`) cycles and halves the rate.
   `KJIFFY` and the cursor blink slow down with it; `TI` and key repeat come
   from MIA and don't.
 - **Stop it.** Write `$40` to the VIA's `IER` (`$C00E`) to turn off only

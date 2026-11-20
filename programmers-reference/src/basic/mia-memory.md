@@ -15,7 +15,7 @@ statements reach them directly:
 
 A MIA address runs from 0 to 262143 (`$3FFFF`), more than a 16-bit number
 holds, so hex addresses with five digits are common: `$14000`. MIA addresses
-and CPU addresses are different things: `PEEK(1024)` reads the 6502's memory,
+and CPU addresses are different things: `PEEK($0400)` reads the 6502's memory,
 `MPEEK(1024)` reads MIA's.
 
 ## What is where

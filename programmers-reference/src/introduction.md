@@ -51,9 +51,10 @@ This book explains how to *use* the machine. Its companions cover the rest:
 ## Conventions
 
 - Addresses and values are hexadecimal when they are written with `$`, and
-  decimal otherwise. BASIC takes decimal (and hexadecimal with `$`, see
-  [Numbers, strings and variables](basic/variables.md)), so an address you
-  are likely to `PEEK` or `POKE` also appears in decimal: `$C000` (49152).
+  decimal otherwise. BASIC takes hexadecimal with `$` as well as decimal
+  (see [Numbers, strings and variables](basic/variables.md)), so the
+  examples write addresses in hexadecimal, as the tools and listings do:
+  `PEEK($C000)`. Where it helps, the decimal follows: `$C000` (49152).
 - A 6502 address has four hexadecimal digits (`$FFE0`); a MIA RAM address
   has five (`$14000`).
 - A range includes both ends: `$8000-$BFFF` is 16,384 bytes.
