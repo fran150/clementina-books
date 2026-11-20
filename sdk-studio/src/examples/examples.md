@@ -428,12 +428,13 @@ target:
 
 ```basic
 10 REM COUNT LOOP PASSES FOR ONE SECOND
-20 PRINT "COUNTING FOR ONE SECOND..."
-30 N=0:T=TICKS(0)+1000
-40 N=N+1:IF TICKS(0)<T THEN 40
-50 PRINT N;"PASSES A SECOND"
-60 PRINT "PRESS A KEY TO COUNT AGAIN"
-70 GET A$:GOTO 20
+20 PRINT "PRESS A KEY TO COUNT"
+30 GET A$
+40 PRINT "COUNTING FOR ONE SECOND..."
+50 N=0:T=TICKS(0)+1000
+60 N=N+1:IF TICKS(0)<T THEN 60
+70 PRINT N;"PASSES A SECOND"
+80 GOTO 20
 ```
 
 The bootstrap starts with the speed:
@@ -455,7 +456,8 @@ each frame more room for work without changing the game's pace.
 
 The emulator runs at the project's speed when your computer can keep up
 with it. `clementina check` runs the program as fast as it can instead, so
-its count says nothing about the speed. [The project
+its count says nothing about the speed, and its check only tests that a key
+starts the count. [The project
 folder](../projects/project-folder.md#target) has the field, and
 [Performance](../running/performance.md) what each part of a program costs
 in cycles.
